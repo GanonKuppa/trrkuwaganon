@@ -5,13 +5,14 @@
 namespace module{
 
     class Suction : public BaseModule<Suction>{
-    public:    
+      public:    
         void update();
         float getDuty();
-        void setDuty();
-        void setDeltaT(float delta_t);
-    private:
+        void setDuty(float duty);        
+      private:
         float _duty;
+        float _on_time;
+        const float MAX_ON_TIME = 20.0;
 
         friend class BaseModule<Suction>;
         Suction();

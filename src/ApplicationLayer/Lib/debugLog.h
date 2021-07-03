@@ -1,13 +1,16 @@
 #pragma once 
-#include "communication.h"
-
-#define PRINTF_ASYNC(_text, ...) \
-    do { \
-        module::Communication::getInstance().printfAsync(_text,  ##__VA_ARGS__); \
-    } while(0);
-
+#include "hal_uart.h"
 
 #define PRINTF_SYNC(_text, ...) \
     do { \
-        module::Communication::getInstance().printfSync(_text,  ##__VA_ARGS__); \
+        hal::printfSync(_text,  ##__VA_ARGS__); \
     } while(0);
+
+
+#define PRINTF_ASYNC(_text, ...) \
+    do { \
+        hal::printfAsync(_text,  ##__VA_ARGS__); \
+    } while(0);
+
+
+

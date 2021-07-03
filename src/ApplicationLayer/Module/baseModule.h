@@ -5,7 +5,7 @@ namespace module {
     class BaseModule {
       public:
         virtual void update() = 0;
-        void setDeltaT(float delta_t) {_delta_t = delta_t;}
+        virtual void setDeltaT(float delta_t) {_delta_t = delta_t;}
 
         static T& getInstance() {
             static T _instance;

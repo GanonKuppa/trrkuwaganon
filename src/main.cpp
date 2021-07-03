@@ -32,6 +32,8 @@
 #include "ledController.h"
 #include "wallSensor.h"
 #include "batteryVoltageMonitor.h"
+#include "suction.h"
+#include "shell.h"
 
 // Activity
 #include "ActivityFactory.h"
@@ -40,6 +42,11 @@
 #include "wallSensorMsg.h"
 #include "batteryVoltageMsg.h"
 #include "msgBroker.h"
+
+
+
+
+
 
 
 // プロトタイプ宣言
@@ -59,6 +66,7 @@ void timerInterrupt0() {
 
     
     module::BatteryVoltageMonitor::getInstance().update();
+    module::Shell::getInstance().update();
 
     //スロット0
     if (int_tick_count % 4 == 0) {
@@ -89,17 +97,19 @@ int main(void) {
     halInit();
     startUpInit();
     module::LedController::getInstance().flashFcled(1,0,0,0.5,0.5);
-        
+/*        
+    module::Suction::getInstance().setDuty(0.0f);
+    hal::waitmsec(2000);
+    module::Suction::getInstance().setDuty(0.1f);
+    hal::waitmsec(2000);
+    module::Suction::getInstance().setDuty(0.2f);
+    hal::waitmsec(2000);
+    module::Suction::getInstance().setDuty(0.3f);
+    hal::waitmsec(2000);
     hal::setDutyPWM4(0.0f);
     hal::waitmsec(2000);
-    hal::setDutyPWM4(0.1f);
-    hal::waitmsec(2000);
-    hal::setDutyPWM4(0.2f);
-    hal::waitmsec(2000);
-    hal::setDutyPWM4(0.3f);
-    hal::waitmsec(2000);
-    hal::setDutyPWM4(0.0f);
-    hal::waitmsec(2000);
+*/
+
 
 
     while(1) {                
@@ -196,9 +206,11 @@ void startUpInit() {
 
 
 void object_init() {
-    module::LedController::getInstance().setDeltaT(0.001);
+    module::LedController::getInstance().setDeltaT(0.001f);
     module::WallSensor::getInstance();
-    module::BatteryVoltageMonitor::getInstance().setDeltaT(0.00025);
+    module::BatteryVoltageMonitor::getInstance().setDeltaT(0.00025f);
+    module::Suction::getInstance().setDeltaT(0.00025f);
+    module::Shell::getInstance();
 }
 
 

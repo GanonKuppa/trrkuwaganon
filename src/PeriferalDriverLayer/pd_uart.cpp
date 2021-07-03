@@ -90,32 +90,64 @@ namespace periferal_driver {
     /***********SCIFA9用送受信バッファ*******************/
     static std::deque<uint8_t> sendBuf; //送信用データバッファ
     static std::deque<uint8_t> recvBuf;//受信用データバッファ
-
-    std::deque<uint8_t>& getSendBufSCIFA9() {
-        return sendBuf;
-    }
-
-    std::deque<uint8_t>& getRecvBufSCIFA9() {
-        return recvBuf;
-    }
+    static bool send_lock = false;
+    static bool recv_lock = false;
+    static const int SEND_BUF_MAX = 512;
+    static const int RECV_BUF_MAX = 512;
 
     /***********nbyte送信関数*******************/
     void putnbyteSCIFA9(uint8_t* buf, uint16_t len) {
+        send_lock = true;
         for (uint16_t i = 0; i < len; i++) {
-            sendBuf.push_back(buf[i]);
+            if(sendBuf.size() < SEND_BUF_MAX){
+                sendBuf.push_back(buf[i]);
+            }
         }
+        send_lock = false;
     }
+
+    bool readnbyteSCIFA9(uint8_t* buf, uint16_t len) {
+        recv_lock = true;
+        if(recvBuf.size() < len){
+            recv_lock = false;
+            return false;
+        }
+        else{
+            recv_lock = true;
+            for(int i=0;i<len;i++){
+                buf[i] = recvBuf.front();
+                recvBuf.pop_front();
+            }
+            recv_lock = false;
+            return true;
+        }
+
+    }
+
+    bool isEmptyRecvBufSCIFA9() {
+        recv_lock = true;
+        bool empty = recvBuf.empty();
+        recv_lock = false;
+        return empty;
+    }
+
+
     /***********受信バッファの中身を取り出す関数******************/
     //この関数はタイマ割り込み関数内で周期的に呼び出すこと
     void recvDataSCIFA9() {
+        if(recv_lock) return;
+
         uint8_t count = 0;
         if(SCIFA9.FSR.BIT.BRK == 1)SCIFA9.FSR.BIT.BRK = 0;
         if(SCIFA9.LSR.BIT.ORER == 1)SCIFA9.LSR.BIT.ORER = 0;
         if(SCIFA9.FDR.BIT.R == 0) return;
+                
         while (SCIFA9.FDR.BIT.R != 0 && count < 16) {
-            recvBuf.push_back((uint8_t)(SCIFA9.FRDR));
+            if(recvBuf.size() < RECV_BUF_MAX){
+                recvBuf.push_back((uint8_t)(SCIFA9.FRDR));
+            }
             count++;
-        }
+        }        
     }
 
 
@@ -123,6 +155,8 @@ namespace periferal_driver {
     //この関数はタイマ割り込み関数内で周期的に呼び出すこと
     void sendDataSCIFA9() {
         //if (SCIFA9.FDR.BIT.T == 0x) return;
+        if(send_lock) return;
+
         uint8_t count = 0;
         while (SCIFA9.FDR.BIT.T < 0x10 && count < 16) {
             if (sendBuf.empty() == true) return;

@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdio.h>
 #include <deque>
 
 #include "hal_uart.h"
@@ -7,7 +8,6 @@
 #include "pd_uart.h"
 #endif
 
-using std::deque;
 
 namespace hal {
     void initUart0() {
@@ -52,25 +52,58 @@ namespace hal {
 #endif
     }
 
-
-    static std::deque<uint8_t> dummy_sendBuf; //送信用データバッファ
-    static std::deque<uint8_t> dummy_recvBuf;//受信用データバッファ
-
-
-    std::deque<uint8_t>& getSendBufUart1() {
+    bool readnbyteUart1(uint8_t* buf, uint16_t len){
 #ifndef SILS
-        return periferal_driver::getSendBufSCIFA9();
-#else
-        return dummy_sendBuf;
+        bool rtn = periferal_driver::readnbyteSCIFA9(buf, len);
+        return rtn;
 #endif
+        return false;
     }
 
-    std::deque<uint8_t>& getRecvBufUart1() {
+    bool isEmptyRecvBufUart1(){
 #ifndef SILS
-        return periferal_driver::getRecvBufSCIFA9();
-#else
-        return dummy_recvBuf;
+        periferal_driver::isEmptyRecvBufSCIFA9();
 #endif
+        return false;
     }
+    
+    int printfAsync(const char* fmt, ...){
+        int len = 0;
+
+        va_list ap;
+        va_start(ap, fmt);
+        static char buffer[512];
+        len = vsprintf(buffer, fmt, ap);
+
+#ifndef SILS
+        hal::putnbyteUart1((uint8_t*)buffer, len);
+#else
+        printf("%s", buffer);
+#endif
+        va_end(ap);
+        return len;
+    }    
+    
+
+    int printfSync(const char* fmt, ...){
+        int len = 0;
+
+        va_list ap;
+        va_start(ap, fmt);
+        static char buffer[1000];
+        len = vsprintf(buffer, fmt, ap);
+
+#ifndef SILS
+        hal::putnbyteUart0((uint8_t*)buffer, len);
+#else
+        len = printf("%s", buffer);
+#endif
+        va_end(ap);
+        return len;
+    }
+
+
+
+
 
 }
