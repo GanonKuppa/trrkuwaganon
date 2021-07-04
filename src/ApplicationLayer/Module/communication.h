@@ -7,7 +7,7 @@ namespace module {
 
     class Communication : public BaseModule<Communication> {
       public:
-        void update();
+        void update0();
       private:
         friend class BaseModule<Communication>;
         Communication();

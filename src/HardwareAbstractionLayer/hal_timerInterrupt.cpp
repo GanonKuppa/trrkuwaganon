@@ -6,6 +6,11 @@
 #include "pd_timerInterrupt.h"
 #endif
 
+static uint32_t slot0time = 0;
+static uint32_t slot1time = 0;
+static uint32_t slot2time = 0;
+static uint32_t slot3time = 0;
+
 namespace hal {
     void initTimerInterrupt0() {
 #ifndef SILS
@@ -48,6 +53,18 @@ namespace hal {
 
     }
 
+    void setSlot0Time(uint32_t usec){slot0time = usec;};
+    void setSlot1Time(uint32_t usec){slot1time = usec;};
+    void setSlot2Time(uint32_t usec){slot2time = usec;};
+    void setSlot3Time(uint32_t usec){slot3time = usec;};
+
+    uint32_t getSlot0Time(){return slot0time;};
+    uint32_t getSlot1Time(){return slot1time;};
+    uint32_t getSlot2Time(){return slot2time;};
+    uint32_t getSlot3Time(){return slot3time;};
+
+
+
     void initTimerInterrupt1() {
 #ifndef SILS
         periferal_driver::initCMT1();
@@ -88,4 +105,8 @@ namespace hal {
         return 0;
 #endif
     }
+
+        
+
+
 }

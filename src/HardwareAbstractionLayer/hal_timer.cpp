@@ -110,6 +110,18 @@ namespace hal {
 #endif
     }
 
+    uint32_t getElapsedUsec() {
+#ifndef SILS
+        return periferal_driver::getElapsedUsec();
+#else
+        std::chrono::system_clock::time_point end; // 型は auto で可
+        end = std::chrono::system_clock::now();  // 計測終了時間
+        double elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end-start).count();
+        return (uint32_t)elapsed;
+#endif
+    }
+
+
 
     uint32_t getElapsedMsec() {
 #ifndef SILS
@@ -117,7 +129,7 @@ namespace hal {
 #else
         std::chrono::system_clock::time_point end; // 型は auto で可
         end = std::chrono::system_clock::now();  // 計測終了時間
-        double elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end-start).count() * 1000.0;
+        double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
         return (uint32_t)elapsed;
 #endif
     }

@@ -32,7 +32,7 @@ namespace periferal_driver {
         SYSTEM.PRCR.WORD = 0xA500;
 
         CMTW0.CMWSTR.BIT.STR = 0; //カウント停止
-        CMTW0.CMWCR.BIT.CKS = 2; //0:PCLK/8  2:PCLK/128
+        CMTW0.CMWCR.BIT.CKS = 0; //0:PCLK/8  2:PCLK/128
         CMTW0.CMWCNT = 0;
         CMTW0.CMWCR.BIT.CCLR = 1;
         CMTW0.CMWCR.BIT.CMS = 0; // 32bitカウンタ
@@ -162,7 +162,18 @@ namespace periferal_driver {
     uint32_t getElapsedMsec() {
         //48MHz,128分周 -> 375カウントで1msec
         //190分くらいまでしか計れない
-        return CMTW0.CMWCNT / 375;
+
+        //48MHz,8分周 -> 6000カウントで1msec
+        //11分くらいまでしか計測できない
+
+        return CMTW0.CMWCNT / 6000;
+    }
+
+    uint32_t getElapsedUsec() {
+        //48MHz,128分周 -> 0.375カウントで1usec        
+
+        //48MHz,8分周 -> 6カウントで1usec        
+        return CMTW0.CMWCNT / 6;
     }
 
 

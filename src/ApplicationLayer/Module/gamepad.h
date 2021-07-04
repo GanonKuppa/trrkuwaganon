@@ -9,28 +9,28 @@ namespace module {
       public:
         
         void fetchCommand(uint8_t* command);
-        void update(); // 1msec毎に呼ぶこと
+        void update0(); // 1msec毎に呼ぶこと
         void debug();
         void debug_xinput();
 
       private: 
         bool _connected;
-        int8_t _cross_x;
-        int8_t _cross_y;
-        int8_t _L3D_x;
-        int8_t _L3D_y;
-        int8_t _R3D_x;
-        int8_t _R3D_y;
-        uint8_t _RT;
-        uint8_t _LT;
-        uint32_t _A;
-        uint32_t _B;
-        uint32_t _Y;
-        uint32_t _X;
-        uint32_t _RB;
-        uint32_t _LB;
-        uint32_t _BACK;
-        uint32_t _START;
+        int8_t _cross_x_bt;
+        int8_t _cross_y_bt;
+        int8_t _L3D_x_bt;
+        int8_t _L3D_y_bt;
+        int8_t _R3D_x_bt;
+        int8_t _R3D_y_bt;
+        uint8_t _RT_bt;
+        uint8_t _LT_bt;
+        uint32_t _A_bt;
+        uint32_t _B_bt;
+        uint32_t _Y_bt;
+        uint32_t _X_bt;
+        uint32_t _RB_bt;
+        uint32_t _LB_bt;
+        uint32_t _BACK_bt;
+        uint32_t _START_bt;
         
         uint64_t _preRecieveTime;
         uint8_t receiveCommand[16];

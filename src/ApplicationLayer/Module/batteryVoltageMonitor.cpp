@@ -9,7 +9,9 @@
 
 namespace module {
     BatteryVoltageMonitor::BatteryVoltageMonitor(){
-    	_count = 0;
+    	setModuleName("BatteryVoltageMonitor");
+        
+        _count = 0;
     	_voltage = 4.2f;
     	_voltage_ave = 4.2f;
 

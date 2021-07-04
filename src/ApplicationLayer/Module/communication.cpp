@@ -7,9 +7,11 @@
 
 namespace module {
 
-    Communication::Communication(){};
+    Communication::Communication(){
+        setModuleName("Communication");
+    };
 
-    void Communication::update(){ 
+    void Communication::update0(){ 
     }
 
 }

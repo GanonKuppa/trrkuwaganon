@@ -19,8 +19,8 @@ namespace hal {
     uint32_t getTimeuCount_sub();
     uint32_t endTimeuCount_sub();
 
+    uint32_t getElapsedUsec();
     uint32_t getElapsedMsec();
     uint32_t getElapsedSec();
-
 
 }

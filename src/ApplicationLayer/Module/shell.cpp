@@ -7,10 +7,21 @@
 #include "debugLog.h"
 #include "string.h"
 #include "hal_uart.h"
+#include "hal_timerInterrupt.h"
+
+// Module
+#include "baseModule.h"
+#include "ledController.h"
+#include "wallSensor.h"
+#include "batteryVoltageMonitor.h"
+#include "suction.h"
+#include "shell.h"
+
 
 
 static int usrcmd_help(int argc, char **argv);
 static int usrcmd_info(int argc, char **argv);
+static int usrcmd_top(int argc, char **argv);
 
 typedef int (*USRCMDFUNC)(int argc, char **argv);
 
@@ -23,18 +34,19 @@ typedef struct {
 
 
 static const cmd_table_t cmdlist[] = {
-    { "help", "help_command", usrcmd_help },
+    { "help", "help command.", usrcmd_help },
     { "info", "system info.", usrcmd_info },
-    { "batteryVoltageMonitor", "BatteryVoltageMonitor Module", usrcmd_info },
-    { "communication", "Communication Module", usrcmd_info },
-    { "gamepad", "Gamepad Module", usrcmd_info },
-    { "heater", "Heater Module", usrcmd_info },
-    { "ledController", "LedController Module", usrcmd_info },
-    { "suction", "Suction Module", usrcmd_info },
-    { "wallSensor", "WallSensor Module", usrcmd_info },
-    { "imuDriver", "ImuDriver Module", usrcmd_info },
-    { "paramManager", "ParamManager Module", usrcmd_info },
-    { "param", "alias of paramManager command", usrcmd_info }
+    { "batteryVoltageMonitor", "BatteryVoltageMonitor Module.", usrcmd_info },
+    { "communication", "Communication Module.", usrcmd_info },
+    { "gamepad", "Gamepad Module.", usrcmd_info },
+    { "heater", "Heater Module.", usrcmd_info },
+    { "ledController", "LedController Module.", usrcmd_info },
+    { "suction", "Suction Module.", usrcmd_info },
+    { "wallSensor", "WallSensor Module.", usrcmd_info },
+    { "imuDriver", "ImuDriver Module.", usrcmd_info },
+    { "paramManager", "ParamManager Module.", usrcmd_info },
+    { "param", "alias of paramManager command.", usrcmd_info },
+    { "top", "top command.", usrcmd_top }
 };
 
 int usrcmd_help(int argc, char **argv)
@@ -80,6 +92,29 @@ int usrcmd_info(int argc, char **argv)
     return -1;
 }
 
+int usrcmd_top(int argc, char **argv)
+{    
+    uint32_t slot0_time = hal::getSlot0Time();
+    uint32_t slot1_time = hal::getSlot1Time();
+    uint32_t slot2_time = hal::getSlot2Time();
+    uint32_t slot3_time = hal::getSlot3Time();
+    PRINTF_ASYNC("\n");
+    PRINTF_ASYNC("  --- timerInterrupt0 Slot Time 0, 1, 2, 3\n");
+    PRINTF_ASYNC("    %3d[us] %3d[us] %3d[us] %3d [us]\n",slot0_time, slot1_time, slot2_time, slot3_time);
+    PRINTF_ASYNC("\n");
+
+    PRINTF_ASYNC("  --- Modules Time update0, update1, update2, update3\n");
+    module::LedController::getInstance().printCycleTime();
+    module::WallSensor::getInstance().printCycleTime();
+    module::BatteryVoltageMonitor::getInstance().printCycleTime();
+    module::Suction::getInstance().printCycleTime();
+    module::Shell::getInstance().printCycleTime();
+
+
+
+    return 0;
+}
+
 
 
 
@@ -88,12 +123,13 @@ namespace module {
 
 
     Shell::Shell(){
+        setModuleName("Shell");
         void *extobj = 0;
         ntshell_init(&nts, serial_read_1byte, serial_write, user_callback, extobj);
         ntshell_set_prompt(&nts, "trrkuwaganon>");
     };
 
-    void Shell::update(){
+    void Shell::update0(){
         hal::recvDataUart1();
         hal::sendDataUart1();
 

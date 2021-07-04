@@ -23,6 +23,7 @@ namespace module{
     }
 
     Suction::Suction(){
+        setModuleName("Suction");
         hal::setDutyPWM4(0.0f);
         _duty = 0.0f;
         _on_time = 0.0f;

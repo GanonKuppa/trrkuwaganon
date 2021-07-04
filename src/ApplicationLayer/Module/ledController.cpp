@@ -6,6 +6,7 @@
 
 namespace module {
     LedController::LedController() {
+        setModuleName("LedController");
         _led_r = std::make_unique<Led>(_delta_t, false, hal::setDout2);
         _led_g = std::make_unique<Led>(_delta_t, false, hal::setDout1);
         _led_b = std::make_unique<Led>(_delta_t, false, hal::setDout0);
@@ -21,7 +22,7 @@ namespace module {
         _led_b->setDeltaT(delta_t);
     }
 
-    void LedController::update() {
+    void LedController::update0() {
         _led_r->update();
         _led_g->update();
         _led_b->update();

@@ -29,6 +29,7 @@
 
 
 // Module
+#include "parameterManager.h"
 #include "ledController.h"
 #include "wallSensor.h"
 #include "batteryVoltageMonitor.h"
@@ -62,30 +63,42 @@ void timerInterrupt0() {
     //__builtin_rx_setpsw('I'); 多重割り込み受付
 
     static uint64_t int_tick_count = 0;
-
+    uint32_t start_usec = hal::getElapsedUsec();
 
     
-    module::BatteryVoltageMonitor::getInstance().update();
-    module::Shell::getInstance().update();
+    module::BatteryVoltageMonitor::getInstance().cycle0();
+    module::Shell::getInstance().cycle0();
 
     //スロット0
     if (int_tick_count % 4 == 0) {
-        module::LedController::getInstance().update();
-        module::WallSensor::getInstance().update1();
-        
+        module::LedController::getInstance().cycle0();
+        module::WallSensor::getInstance().cycle0();
+
+        uint32_t end_usec = hal::getElapsedUsec();
+        hal::setSlot0Time(end_usec - start_usec);
     }
     //スロット1
     if (int_tick_count % 4 == 1) {
         
+        uint32_t end_usec = hal::getElapsedUsec();
+        hal::setSlot1Time(end_usec - start_usec);
     }
     //スロット2
     if (int_tick_count % 4 == 2) {
-        module::WallSensor::getInstance().update2();
+        module::WallSensor::getInstance().cycle1();
+
+        uint32_t end_usec = hal::getElapsedUsec();
+        hal::setSlot2Time(end_usec - start_usec);
+
     }
     //スロット3
     if (int_tick_count % 4 == 3) {        
+        
+        uint32_t end_usec = hal::getElapsedUsec();
+        hal::setSlot3Time(end_usec - start_usec);
     }
 
+    
     int_tick_count++;
 }
 
@@ -204,8 +217,8 @@ void startUpInit() {
     hal::startTimerInterrupt0();
 }
 
-
 void object_init() {
+    module::ParameterManager::getInstance();
     module::LedController::getInstance().setDeltaT(0.001f);
     module::WallSensor::getInstance();
     module::BatteryVoltageMonitor::getInstance().setDeltaT(0.00025f);

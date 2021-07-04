@@ -11,7 +11,7 @@
 namespace module {
     
     WallSensor::WallSensor() {
-
+        setModuleName("WallSensor");
         _enable = true;
         _ahead_l_on = 0;
         _ahead_r_on = 0;
@@ -39,7 +39,7 @@ namespace module {
 
     
     
-    void WallSensor::update1(){
+    void WallSensor::update0(){
         if(!_enable){
             _turnLed(0, 0, 0, 0);
             return;
@@ -57,7 +57,7 @@ namespace module {
         _turnLed(0, 0, 0, 0);
     }
 
-    void WallSensor::update2(){
+    void WallSensor::update1(){
         if(!_enable){
             _turnLed(0, 0, 0, 0);
             return;

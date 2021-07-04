@@ -5,7 +5,7 @@
 namespace module{
     class Heater : public BaseModule<Heater>{
       public:
-        void update();
+        void update0();
         void getDuty();
         void setTargetTemp(float temp);
 

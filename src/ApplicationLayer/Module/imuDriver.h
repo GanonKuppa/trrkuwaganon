@@ -6,7 +6,7 @@
 namespace module {
     class ImuDriver : public BaseModule<ImuDriver> {
       public:
-        void update();
+        void update0();
         void debug();
         void calibrateGyro(uint16_t num);
         void calibrateAcc(uint16_t num);
