@@ -55,9 +55,9 @@ namespace module {
         registration<float>(179, acc1_z_scaler, "acc1_z_scaler"); //179
 
         registration<float>(180, heater_p, "heater_p"); //180
-        registration<float>(181, heater_p, "heater_i"); //181
-        registration<float>(182, heater_i, "heager_i_limit"); //182
-        registration<float>(183, heater_i, "heager_limit"); //183
+        registration<float>(181, heater_i, "heater_i"); //181
+        registration<float>(182, heater_i_limit, "heater_i_limit"); //182
+        registration<float>(183, heater_limit, "heater_limit"); //183
         registration<float>(184, heater_target_temp, "heater_target_temp"); //184
 
     }

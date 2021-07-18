@@ -21,6 +21,7 @@
 #include "shell.h"
 #include "parameterManager.h"
 #include "imuDriver.h"
+#include "heater.h"
 
 static int usrcmd_help(int argc, char **argv);
 static int usrcmd_info(int argc, char **argv);
@@ -42,7 +43,7 @@ static const cmd_table_t cmdlist[] = {
     { "batteryVoltageMonitor", "BatteryVoltageMonitor Module.", usrcmd_info },
     { "communication", "Communication Module.", usrcmd_info },
     { "gamepad", "Gamepad Module.", usrcmd_info },
-    { "heater", "Heater Module.", usrcmd_info },
+    { "heater", "Heater Module.", module::usrcmd_heater },
     { "ledController", "LedController Module.", usrcmd_info },
     { "suction", "Suction Module.", usrcmd_info },
     { "wallSensor", "WallSensor Module.", usrcmd_info },

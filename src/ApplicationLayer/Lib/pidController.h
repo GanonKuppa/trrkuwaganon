@@ -4,7 +4,7 @@
 #include <cmath>
 
 class PidfController {
-    public:
+  public:
     PidfController() {
         Kp = 0.0;
         Ki = 0.0;
@@ -25,7 +25,7 @@ class PidfController {
         
         e_p0 = target - observed_val;
         if(integral_saturation_enable && integral_saturation > 0.0f){
-            e_i0 = std::clamp(e_p0 + e_i1, -std::fabs(integral_saturation), std::fabs(integral_saturation));
+            e_i0 = std::clamp<float>(e_p0 + e_i1, -std::fabs(integral_saturation), std::fabs(integral_saturation));
         }
         else {
             e_i0 = e_p0 + e_i1;
@@ -34,7 +34,7 @@ class PidfController {
         e_d0 = F * e_d1 + (1.0f - F) * (e_p0 - e_p1);
 
         if(saturation_enable && saturation > 0.0f){
-            u_k0 = std::clamp(Kp * e_p0 + Ki * e_i0 + Kd * e_d0, -std::fabs(saturation), std::fabs(saturation));
+            u_k0 = std::clamp<float>(Kp * e_p0 + Ki * e_i0 + Kd * e_d0, -std::fabs(saturation), std::fabs(saturation));
         }
         else{
             u_k0 = Kp * e_p0 + Ki * e_i0 + Kd * e_d0;
@@ -51,6 +51,18 @@ class PidfController {
         else return 0.0f;
     }
 
+    float getPVal(){
+        return Kp * e_p0;
+    }
+
+    float getIVal(){
+        return Ki * e_i0;
+    }
+
+    float getDVal(){
+        return Kd * e_d0;
+    }
+
     void set(float Kp_, float Ki_, float Kd_, float F_) {
         Kp = Kp_;
         Ki = Ki_;
@@ -60,8 +72,10 @@ class PidfController {
 
     void setIntegralSaturation(float int_saturation) {
         integral_saturation = int_saturation;
-        e_i0 = std::clamp(e_i0, -std::fabs(int_saturation), std::fabs(int_saturation));
-        e_i1 = std::clamp(e_i0, -std::fabs(int_saturation), std::fabs(int_saturation));
+        if(integral_saturation > 0.0f){
+            e_i0 = std::clamp<float>(e_i0, -std::fabs(int_saturation), std::fabs(int_saturation));
+            e_i1 = std::clamp<float>(e_i0, -std::fabs(int_saturation), std::fabs(int_saturation));
+        }
     }
 
     void setEnable(bool enable_) {
@@ -74,17 +88,10 @@ class PidfController {
 
     void setSaturation(float saturation_){
         saturation = saturation_;
-        e_p0 = std::clamp(e_p0, -std::fabs(saturation), std::fabs(saturation));
-        e_p1 = std::clamp(e_p1, -std::fabs(saturation), std::fabs(saturation));
-
-        e_i0 = std::clamp(e_i0, -std::fabs(saturation), std::fabs(saturation));
-        e_i1 = std::clamp(e_i1, -std::fabs(saturation), std::fabs(saturation));
-
-        e_d0 = std::clamp(e_d0, -std::fabs(saturation), std::fabs(saturation));
-        e_d1 = std::clamp(e_d1, -std::fabs(saturation), std::fabs(saturation));
-
-        u_k0 = std::clamp(u_k0, -std::fabs(saturation), std::fabs(saturation));
-        u_k1 = std::clamp(u_k1, -std::fabs(saturation), std::fabs(saturation));
+        if(saturation > 0.0f){
+            u_k0 = std::clamp<float>(u_k0, -std::fabs(saturation), std::fabs(saturation));
+            u_k1 = std::clamp<float>(u_k1, -std::fabs(saturation), std::fabs(saturation));
+        }
     }
 
     void setIntegralSaturationEnable(bool enable_){
@@ -106,7 +113,7 @@ class PidfController {
         u_k1 = 0.0f;
     }
 
-    protected:
+  protected:
     float Kp;
     float Ki;
     float Kd;
@@ -144,7 +151,7 @@ class AngPidfController : public PidfController {
 
         
         if(integral_saturation_enable){
-            e_i0 = std::clamp(e_p0 + e_i1, -std::fabs(integral_saturation), std::fabs(integral_saturation));
+            e_i0 = std::clamp<float>(e_p0 + e_i1, -std::fabs(integral_saturation), std::fabs(integral_saturation));
         }
         else {
             e_i0 = e_p0 + e_i1;
@@ -152,7 +159,7 @@ class AngPidfController : public PidfController {
 
         e_d0 = F * e_d1 + (1.0f - F) * (e_p0 - e_p1);
     
-        u_k0 = std::clamp(Kp * e_p0 + Ki * e_i0 + Kd * e_d0, -std::fabs(saturation), std::fabs(saturation));
+        u_k0 = std::clamp<float>(Kp * e_p0 + Ki * e_i0 + Kd * e_d0, -std::fabs(saturation), std::fabs(saturation));
 
         e_p1 = e_p0;
         e_i1 = e_i0;

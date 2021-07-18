@@ -34,6 +34,7 @@
 #include "suction.h"
 #include "shell.h"
 #include "imuDriver.h"
+#include "heater.h"
 
 // Activity
 #include "ActivityFactory.h"
@@ -64,6 +65,7 @@ void timerInterrupt0() {
     {
         module::BatteryVoltageMonitor::getInstance().cycle0();
         module::Shell::getInstance().cycle0();
+        module::Heater::getInstance().cycle0();
     }
     // スロット0
     if (int_tick_count % 4 == 0) {
@@ -227,6 +229,7 @@ void object_init() {
     module::Suction::getInstance().setDeltaT(0.00025f);
     module::ImuDriver::getInstance().setDeltaT(0.001f);
     module::Shell::getInstance();
+    module::Heater::getInstance().setDeltaT(0.00025f);
 }
 
 

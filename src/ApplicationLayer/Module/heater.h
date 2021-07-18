@@ -9,6 +9,8 @@ namespace module{
         void update0();
         float getDuty();
         void setTargetTemp(float temp);
+        void debug();
+        void eval(uint32_t num);
 
       private:
         PidfController _pidf;
@@ -19,7 +21,16 @@ namespace module{
         float _target_temp;
         float _duty;      
         float _temp;
+        const float _pid_cycle_time = 0.02f;
+        const float _resistor_ohm = 6.8f * 2.0f;
+        float _heater_time;
+        float _current_ave;
+        float _current_1sec_sum;
+        float _current_time;
+        float _voltage;
         friend class BaseModule<Heater>;
         Heater();
     };
+
+    int usrcmd_heater(int argc, char **argv);
 }
