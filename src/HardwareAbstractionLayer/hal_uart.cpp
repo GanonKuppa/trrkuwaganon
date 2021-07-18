@@ -62,11 +62,20 @@ namespace hal {
 
     bool isEmptyRecvBufUart1(){
 #ifndef SILS
-        periferal_driver::isEmptyRecvBufSCIFA9();
+        return periferal_driver::isEmptyRecvBufSCIFA9();
 #endif
         return false;
     }
     
+    uint16_t getRecvBufUart1size(){
+#ifndef SILS
+        uint16_t size = periferal_driver::getSCIFA9Bufsize();
+        return size;
+#endif
+        return 0;
+    };
+
+
     int printfAsync(const char* fmt, ...){
         int len = 0;
 

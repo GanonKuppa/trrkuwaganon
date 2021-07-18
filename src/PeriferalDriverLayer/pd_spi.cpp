@@ -54,7 +54,7 @@ namespace periferal_driver {
         //mpu9250は1MHzまでOK
         //icm20608gは8MHzまでOK
         //asm330lhhは10MHzまでOK
-        RSPI0.SPBR = 5; //8MHz
+        RSPI0.SPBR = 4; //10MHz
         //RSPI0.SPBR = 20; //2MHz
 
         //RSPI制御レジスタ(SPCR)

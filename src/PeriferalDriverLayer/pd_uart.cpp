@@ -97,6 +97,7 @@ namespace periferal_driver {
 
     /***********nbyte送信関数*******************/
     void putnbyteSCIFA9(uint8_t* buf, uint16_t len) {
+        if(send_lock) return;
         send_lock = true;
         for (uint16_t i = 0; i < len; i++) {
             if(sendBuf.size() < SEND_BUF_MAX){
@@ -107,6 +108,8 @@ namespace periferal_driver {
     }
 
     bool readnbyteSCIFA9(uint8_t* buf, uint16_t len) {
+        if(recv_lock) return true;
+        
         recv_lock = true;
         if(recvBuf.size() < len){
             recv_lock = false;
@@ -125,10 +128,20 @@ namespace periferal_driver {
     }
 
     bool isEmptyRecvBufSCIFA9() {
+        if(recv_lock) return true;
         recv_lock = true;
         bool empty = recvBuf.empty();
         recv_lock = false;
         return empty;
+    }
+
+    uint16_t getSCIFA9Bufsize(){
+        if(recv_lock) return 0;
+        
+        recv_lock = true;
+        uint16_t size = recvBuf.size();
+        recv_lock = false;
+        return size;
     }
 
 
@@ -141,13 +154,15 @@ namespace periferal_driver {
         if(SCIFA9.FSR.BIT.BRK == 1)SCIFA9.FSR.BIT.BRK = 0;
         if(SCIFA9.LSR.BIT.ORER == 1)SCIFA9.LSR.BIT.ORER = 0;
         if(SCIFA9.FDR.BIT.R == 0) return;
-                
+        
+        recv_lock = true;
         while (SCIFA9.FDR.BIT.R != 0 && count < 16) {
             if(recvBuf.size() < RECV_BUF_MAX){
                 recvBuf.push_back((uint8_t)(SCIFA9.FRDR));
             }
             count++;
-        }        
+        }
+        recv_lock = false;
     }
 
 
@@ -157,13 +172,18 @@ namespace periferal_driver {
         //if (SCIFA9.FDR.BIT.T == 0x) return;
         if(send_lock) return;
 
+        send_lock = true;
         uint8_t count = 0;
         while (SCIFA9.FDR.BIT.T < 0x10 && count < 16) {
-            if (sendBuf.empty() == true) return;
+            if (sendBuf.empty() == true){
+                send_lock = false;
+                return;
+            }
             SCIFA9.FTDR = sendBuf.front();
             sendBuf.pop_front();
             count++;
         }
+        send_lock = false;
     }
 
 }

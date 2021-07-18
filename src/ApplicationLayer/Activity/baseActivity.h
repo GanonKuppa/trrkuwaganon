@@ -7,7 +7,8 @@
 #include <string>
 
 #include "debugLog.h"
-
+#include "oneshotTask.h"
+#include "shell.h"
 
 namespace activity {
 
@@ -25,6 +26,8 @@ namespace activity {
             while(1) {
                 hal::startTimeuCount_sub();
                 uint32_t start_msec = hal::getElapsedMsec();
+                module::Shell::getInstance().cycle2();
+                scheduler::doTask();
                 if(loop() == ELoopStatus::FINISH) break;
                 uint32_t end_msec = hal::getElapsedMsec();
                 uint32_t elapsed_msec = end_msec - start_msec;

@@ -4,8 +4,11 @@
 #include "ntopt.h"
 #include "ntlibc.h"
 #include "ntshell.h"
+
+
 #include "debugLog.h"
 #include "string.h"
+
 #include "hal_uart.h"
 #include "hal_timerInterrupt.h"
 
@@ -16,8 +19,8 @@
 #include "batteryVoltageMonitor.h"
 #include "suction.h"
 #include "shell.h"
-
-
+#include "parameterManager.h"
+#include "imuDriver.h"
 
 static int usrcmd_help(int argc, char **argv);
 static int usrcmd_info(int argc, char **argv);
@@ -43,9 +46,9 @@ static const cmd_table_t cmdlist[] = {
     { "ledController", "LedController Module.", usrcmd_info },
     { "suction", "Suction Module.", usrcmd_info },
     { "wallSensor", "WallSensor Module.", usrcmd_info },
-    { "imuDriver", "ImuDriver Module.", usrcmd_info },
-    { "paramManager", "ParamManager Module.", usrcmd_info },
-    { "param", "alias of paramManager command.", usrcmd_info },
+    { "imuDriver", "ImuDriver Module.", module::usrcmd_imuDriver },
+    { "paramManager", "ParamManager Module.", module::usrcmd_parameterManager },
+    { "param", "alias of paramManager command.", module::usrcmd_parameterManager },    
     { "top", "top command.", usrcmd_top }
 };
 
@@ -109,8 +112,7 @@ int usrcmd_top(int argc, char **argv)
     module::BatteryVoltageMonitor::getInstance().printCycleTime();
     module::Suction::getInstance().printCycleTime();
     module::Shell::getInstance().printCycleTime();
-
-
+    module::ImuDriver::getInstance().printCycleTime();
 
     return 0;
 }
@@ -125,14 +127,21 @@ namespace module {
     Shell::Shell(){
         setModuleName("Shell");
         void *extobj = 0;
-        ntshell_init(&nts, serial_read_1byte, serial_write, user_callback, extobj);
+        ntshell_init(&nts, serial_read, serial_write, user_callback, extobj);
         ntshell_set_prompt(&nts, "trrkuwaganon>");
     };
 
     void Shell::update0(){
         hal::recvDataUart1();
         hal::sendDataUart1();
+    }
 
+    void Shell::update1(){
+        hal::recvDataUart1();
+        hal::sendDataUart1();
+    }
+
+    void Shell::update2(){
         ntshell_execute(&nts);
     }
 
@@ -160,11 +169,23 @@ namespace module {
     }
 
 
-    int Shell::serial_read_1byte(char *buf, int cnt, void *extobj)
+    int Shell::serial_read(char *buf, int cnt, void *extobj)
     {    
 
-        if(!hal::isEmptyRecvBufUart1() && hal::readnbyteUart1((uint8_t*)buf, 1)){
-            return 1;
+        if(!hal::isEmptyRecvBufUart1()){
+            uint16_t recvBufsize = hal::getRecvBufUart1size();
+            uint16_t read_size = cnt;
+            if(cnt > recvBufsize){
+                read_size = recvBufsize;
+            }
+            bool rtn = hal::readnbyteUart1((uint8_t*)buf, read_size);
+            
+            if(rtn == false){
+                return 0;
+            } 
+            else{
+                return read_size;
+            }
         }
         else{
             return 0;

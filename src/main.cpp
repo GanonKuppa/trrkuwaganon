@@ -26,8 +26,6 @@
 #include "hal_timerInterrupt.h"
 #include "hal_wdt.h"
 
-
-
 // Module
 #include "parameterManager.h"
 #include "ledController.h"
@@ -35,6 +33,7 @@
 #include "batteryVoltageMonitor.h"
 #include "suction.h"
 #include "shell.h"
+#include "imuDriver.h"
 
 // Activity
 #include "ActivityFactory.h"
@@ -43,10 +42,6 @@
 #include "wallSensorMsg.h"
 #include "batteryVoltageMsg.h"
 #include "msgBroker.h"
-
-
-
-
 
 
 
@@ -65,35 +60,41 @@ void timerInterrupt0() {
     static uint64_t int_tick_count = 0;
     uint32_t start_usec = hal::getElapsedUsec();
 
-    
-    module::BatteryVoltageMonitor::getInstance().cycle0();
-    module::Shell::getInstance().cycle0();
-
-    //スロット0
+    // 毎回行う処理
+    {
+        module::BatteryVoltageMonitor::getInstance().cycle0();
+        module::Shell::getInstance().cycle0();
+    }
+    // スロット0
     if (int_tick_count % 4 == 0) {
         module::LedController::getInstance().cycle0();
         module::WallSensor::getInstance().cycle0();
+        module::Shell::getInstance().cycle1();
 
-        uint32_t end_usec = hal::getElapsedUsec();
+        uint32_t end_usec = hal::getElapsedUsec();        
         hal::setSlot0Time(end_usec - start_usec);
     }
-    //スロット1
+    // スロット1
     if (int_tick_count % 4 == 1) {
-        
+        module::Shell::getInstance().cycle1();
+
         uint32_t end_usec = hal::getElapsedUsec();
         hal::setSlot1Time(end_usec - start_usec);
+        
     }
-    //スロット2
+    // スロット2
     if (int_tick_count % 4 == 2) {
         module::WallSensor::getInstance().cycle1();
+        module::Shell::getInstance().cycle1();
 
         uint32_t end_usec = hal::getElapsedUsec();
         hal::setSlot2Time(end_usec - start_usec);
-
     }
-    //スロット3
+    // スロット3
     if (int_tick_count % 4 == 3) {        
-        
+        module::Shell::getInstance().cycle1();
+        module::ImuDriver::getInstance().cycle0();
+
         uint32_t end_usec = hal::getElapsedUsec();
         hal::setSlot3Time(end_usec - start_usec);
     }
@@ -126,6 +127,7 @@ int main(void) {
 
 
     while(1) {                
+/*
         WallSensorMsg _ws_msg;
         BatteryVoltageMsg _vol_msg;
         copyMsg(msg_id::WALL_SENSOR, &_ws_msg);
@@ -175,10 +177,10 @@ int main(void) {
 
 
         hal::waitmsec(500);
-
-        //module::LedController::getInstance().turnFcled(0,0,0);
-        //auto activity = activity::ActivityFactory::cteateModeSelect();
-        //activity->start();
+*/
+        module::LedController::getInstance().turnFcled(0,0,0);
+        auto activity = activity::ActivityFactory::cteateModeSelect();
+        activity->start();
     }
     return 0;
 }
@@ -194,7 +196,7 @@ void halInit() {
     hal::initUart1();
     hal::initAD();
     //hal::initDA();
-    //hal::initFlashRom();
+    hal::initFlashRom();
     //hal::initPhaseCounting0();
     //hal::initPhaseCounting1();
     //hal::initPWM0();
@@ -223,6 +225,7 @@ void object_init() {
     module::WallSensor::getInstance();
     module::BatteryVoltageMonitor::getInstance().setDeltaT(0.00025f);
     module::Suction::getInstance().setDeltaT(0.00025f);
+    module::ImuDriver::getInstance().setDeltaT(0.001f);
     module::Shell::getInstance();
 }
 

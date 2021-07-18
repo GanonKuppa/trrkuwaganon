@@ -14,8 +14,9 @@ namespace hal {
     void putnbyteUart1(uint8_t* buf, uint16_t len);
     void recvDataUart1();
     void sendDataUart1();
-    bool readnbyteUart1(uint8_t* buf, uint16_t len);
+    bool readnbyteUart1(uint8_t* buf, uint16_t len);    
     bool isEmptyRecvBufUart1();
+    uint16_t getRecvBufUart1size();
 
     int printfSync(const char* fmt, ...); //use Uart0
     int printfAsync(const char* fmt, ...); //use Uart1

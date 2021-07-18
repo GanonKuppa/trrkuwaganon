@@ -2,6 +2,7 @@
 
 #include "baseModule.h"
 #include <stdint.h>
+#include <string>
 
 namespace module {
     class ImuDriver : public BaseModule<ImuDriver> {
@@ -9,26 +10,38 @@ namespace module {
         void update0();
         void debug();
         void calibrateGyro(uint16_t num);
+        void evalGyro(uint32_t num);
         void calibrateAcc(uint16_t num);
+        void whoAmI();
 
       private:
+        friend class BaseModule<ImuDriver>;
         
-        uint16_t ang_v_raw[3];
-        uint16_t acc_raw[3];
+        int16_t _ang_v_raw[3];
+        int16_t _acc_raw[3];
         
-        uint16_t ang_v_c[3];
-        uint16_t acc_c[3];
+        float _ang_v_c[3];
+        float _acc_c[3];
 
-        float ang_v_f[3];
-        float acc_f[3];
+        float _ang_v_f[3];
+        float _acc_f[3];
+        float _acc_norm;
 
-        uint16_t ang_v_offset[3];
-        uint16_t acc_offset[3];
+        float _ang_v_offset[3];
+        float _acc_offset[3];        
 
+        float _ang_v_f_int[3];
 
+        int16_t _temp_raw;
         float _temp;
 
-        float gyro[3];
-        float acc[3];
-    }
+        std::string _imu_name;
+        
+        ImuDriver();
+        void _writeReg(uint8_t adress, uint8_t data);
+        uint8_t _readReg(uint8_t adress);
+        void _publish();
+    };
+
+    int usrcmd_imuDriver(int argc, char **argv);
 }

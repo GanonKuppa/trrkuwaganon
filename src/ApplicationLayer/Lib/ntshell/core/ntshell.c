@@ -635,11 +635,11 @@ void ntshell_execute(ntshell_t *p)
         vtrecv_execute(&(p->vtrecv), &ch, sizeof(ch));
     }
 #else
-    unsigned char ch;
+    unsigned char ch[100];
     unsigned char read_len = 0;
-    read_len = SERIAL_READ(p, (char *)&ch, sizeof(ch));
+    read_len = SERIAL_READ(p, (char *)&ch, 100);
     if(read_len > 0){
-        vtrecv_execute(&(p->vtrecv), &ch, sizeof(ch));
+        vtrecv_execute(&(p->vtrecv), &ch, read_len);
     }
 #endif
 
