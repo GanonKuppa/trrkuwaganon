@@ -116,6 +116,7 @@ int usrcmd_top(int argc, char **argv)
     module::Suction::getInstance().printCycleTime();
     module::Shell::getInstance().printCycleTime();
     module::ImuDriver::getInstance().printCycleTime();
+    module::Heater::getInstance().printCycleTime();
 
     return 0;
 }
