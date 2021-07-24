@@ -22,6 +22,7 @@
 #include "parameterManager.h"
 #include "imuDriver.h"
 #include "heater.h"
+#include "wheelOdometry.h"
 
 static int usrcmd_help(int argc, char **argv);
 static int usrcmd_info(int argc, char **argv);
@@ -50,6 +51,8 @@ static const cmd_table_t cmdlist[] = {
     { "wallSensor", "WallSensor Module.", module::usrcmd_wallSensor },
     { "imuDriver", "ImuDriver Module.", module::usrcmd_imuDriver },
     { "imu", "ImuDriver Module.", module::usrcmd_imuDriver },
+    { "wheelOdometry", "WheelOdometry Module.", module::usrcmd_wheelOdometry },
+    { "wheel", "WheelOdometry Module.", module::usrcmd_wheelOdometry },
     { "paramManager", "ParamManager Module.", module::usrcmd_parameterManager },
     { "param", "alias of paramManager command.", module::usrcmd_parameterManager },    
     { "top", "top command.", usrcmd_top }

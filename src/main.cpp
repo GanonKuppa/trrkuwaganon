@@ -35,6 +35,7 @@
 #include "shell.h"
 #include "imuDriver.h"
 #include "heater.h"
+#include "wheelOdometry.h"
 
 // Activity
 #include "ActivityFactory.h"
@@ -96,6 +97,7 @@ void timerInterrupt0() {
     if (int_tick_count % 4 == 3) {        
         module::Shell::getInstance().cycle1();
         module::ImuDriver::getInstance().cycle0();
+        module::WheelOdometry::getInstance().cycle0();
 
         uint32_t end_usec = hal::getElapsedUsec();
         hal::setSlot3Time(end_usec - start_usec);
@@ -218,6 +220,7 @@ void object_init() {
     module::ImuDriver::getInstance().setDeltaT(0.001f);
     module::Shell::getInstance();
     module::Heater::getInstance().setDeltaT(0.00025f);
+    module::WheelOdometry::getInstance().setDeltaT(0.001f);
 }
 
 
