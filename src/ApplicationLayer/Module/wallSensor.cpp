@@ -7,6 +7,7 @@
 #include "wallSensorMsg.h"
 #include "msgBroker.h"
 
+#include "ntlibc.h"
 
 namespace module {
     
@@ -181,11 +182,21 @@ namespace module {
     };
 
     void WallSensor::debug() {        
-        PRINTF_SYNC("=============================\n");
-        PRINTF_SYNC("ON : al, l, r, ar: %d, %d, %d, %d\n", _ahead_l_on, _left_on,_right_on, _ahead_r_on);
-        PRINTF_SYNC("OFF: al, l, r, ar: %d, %d, %d, %d\n", _ahead_l_off, _left_off, _right_off, _ahead_r_off);
-        PRINTF_SYNC("MOD: al, l, r, ar: %d, %d, %d, %d\n", _ahead_l_q.at(0), _left_q.at(0), _right_q.at(0), _ahead_r_q.at(0));
-        PRINTF_SYNC("=============================\n");
+        PRINTF_ASYNC("  =============================\n");
+        PRINTF_ASYNC("  ON : al, l, r, ar: %d, %d, %d, %d\n", _ahead_l_on, _left_on,_right_on, _ahead_r_on);
+        PRINTF_ASYNC("  OFF: al, l, r, ar: %d, %d, %d, %d\n", _ahead_l_off, _left_off, _right_off, _ahead_r_off);
+        PRINTF_ASYNC("  MOD: al, l, r, ar: %d, %d, %d, %d\n", _ahead_l_q.at(0), _left_q.at(0), _right_q.at(0), _ahead_r_q.at(0));
+        PRINTF_ASYNC("  =============================\n");
+    };
+
+    int usrcmd_wallSensor(int argc, char **argv){
+        if (ntlibc_strcmp(argv[1], "status") == 0) {
+            WallSensor::getInstance().debug();
+            return 0;
+        }
+
+        PRINTF_ASYNC("  Unknown sub command found\r\n");
+        return -1;        
     };
 }
 

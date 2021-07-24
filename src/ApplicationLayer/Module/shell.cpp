@@ -47,7 +47,7 @@ static const cmd_table_t cmdlist[] = {
     { "heater", "Heater Module.", module::usrcmd_heater },
     { "ledController", "LedController Module.", usrcmd_info },
     { "suction", "Suction Module.", usrcmd_info },
-    { "wallSensor", "WallSensor Module.", usrcmd_info },
+    { "wallSensor", "WallSensor Module.", module::usrcmd_wallSensor },
     { "imuDriver", "ImuDriver Module.", module::usrcmd_imuDriver },
     { "imu", "ImuDriver Module.", module::usrcmd_imuDriver },
     { "paramManager", "ParamManager Module.", module::usrcmd_parameterManager },

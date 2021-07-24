@@ -130,18 +130,6 @@ int main(void) {
 
     while(1) {                
 /*
-        WallSensorMsg _ws_msg;
-        BatteryVoltageMsg _vol_msg;
-        copyMsg(msg_id::WALL_SENSOR, &_ws_msg);
-        copyMsg(msg_id::BATTERY_VOLTAGE, &_vol_msg);
-        
-        int16_t a = _ws_msg.ahead_l;
-        int16_t b = _ws_msg.left;
-        int16_t c = _ws_msg.right;
-        int16_t d = _ws_msg.ahead_r;        
-        PRINTF_SYNC("%d, %d, %d, %d, %f, %f\n",a,b,c,d,_vol_msg.voltage, _vol_msg.voltage_ave);
-        module::WallSensor::getInstance().debug();
-
         
         hal::useCS0SPI0();
         hal::setEnableSPI0(1);

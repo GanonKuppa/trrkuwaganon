@@ -19,6 +19,7 @@ namespace activity {
             _intent = std::move(intent);
             //std::string mode_name("ModeSelectActivity");
             
+            PRINTF_ASYNC("\n");
             PRINTF_ASYNC("--- %s start ---\n", getModeName().c_str());
 
             onStart();

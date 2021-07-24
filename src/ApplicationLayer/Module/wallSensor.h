@@ -43,4 +43,6 @@ namespace module {
 
         friend class BaseModule<WallSensor>;
     };
+
+    int usrcmd_wallSensor(int argc, char **argv);
 }
