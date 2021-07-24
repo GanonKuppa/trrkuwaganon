@@ -20,10 +20,8 @@ namespace module{
         float _limit;
         float _target_temp;
         float _duty;      
-        float _temp;
-        const float _pid_cycle_time = 0.02f;
+        float _temp;        
         const float _resistor_ohm = 6.8f * 2.0f;
-        float _heater_time;
         float _current_ave;
         float _current_1sec_sum;
         float _current_time;

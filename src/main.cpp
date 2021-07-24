@@ -201,7 +201,7 @@ void halInit() {
     hal::initFlashRom();
     //hal::initPhaseCounting0();
     //hal::initPhaseCounting1();
-    //hal::initPWM0();
+    hal::initPWM0();
     //hal::initPWM1();
     //hal::initPWM2();
     //hal::initPWM3();

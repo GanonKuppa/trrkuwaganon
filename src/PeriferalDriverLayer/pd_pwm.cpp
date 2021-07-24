@@ -1,18 +1,26 @@
 #include <stdint.h>
+#include <cmath>
+#include <cfloat>
+#include <algorithm>
 #include "iodefine.h"
 
 #include "pd_clock.h"
 #include "pd_pwm.h"
 
+//49ピン PC3 MOTOR_L_PWM2 MTIOC4B
+//50ピン PC2 MOTOR_L_PWM1 MTIOC4D
+//51ピン PC1 MOTOR_R_PWM1 MTIOC3A
+//52ピン PC0 MOTRO_R_PWM2 MTIOC3C
 
-namespace periferal_driver {
-    static float constrain(float amt, float low, float high);
+//68ピン PA2 SUC_MOTOR_PWM MTIOC7A
+//69ピン PA1 HEATER_PWM MTIOC7B/MTIOC0B/GTIOC2A-C/TIOCB0
 
-    static float dutyMTU0;
-    static float dutyMTU3;
-    static float dutyMTU4;
-    static float dutyTPU3;
-    static float dutyMTU7;
+namespace periferal_driver {    
+    static float dutyMTU0; //P13
+    static float dutyMTU3; //P14
+    static float dutyMTU4; //P21
+    static float dutyTPU3; //P20
+    static float dutyMTU7; //PA2
 
     static constexpr uint16_t FREQ_COUNT = 400;
 
@@ -23,15 +31,16 @@ namespace periferal_driver {
 
         MPC.PWPR.BIT.B0WI = 0;
         MPC.PWPR.BIT.PFSWE = 1;
-        MPC.P13PFS.BIT.PSEL = 1; //MTIOC0B
+        MPC.PA1PFS.BIT.PSEL = 1; //MTIOC0B
         MPC.PWPR.BYTE = 0x80;
 
-        PORT1.PMR.BIT.B3 = 1;
+        PORTA.PMR.BIT.B1 = 1;
 
         MTU.TSTRA.BIT.CST0 = 0;
         MTU0.TCR.BIT.TPSC = 0; //PCLKA/1
         MTU0.TCR.BIT.CCLR = 1; //PWM TGRAのコンペアマッチでTCNTクリア
-        MTU0.TIORH.BIT.IOA = 6; //初期出力1 コンペアマッチ1出力
+        
+
         MTU0.TIORH.BIT.IOB = 5; //初期出力1 コンペアマッチ0出力
         MTU0.TGRA = FREQ_COUNT; //500
         MTU0.TGRB = 1;
@@ -40,6 +49,9 @@ namespace periferal_driver {
         MTU0.TMDR1.BIT.MD = 3; //PWM2
         MTU0.TMDR1.BIT.BFA = 1;   //バッファーモードに設定
         MTU0.TMDR1.BIT.BFB = 1;
+        
+        setDutyMTU0(0.0f);
+        
     }
     /////////////////////////////////////////////////////////////
     void initMTU3() {
@@ -158,18 +170,18 @@ namespace periferal_driver {
 
 
     void setDutyMTU0(float duty) {
-        duty = constrain(duty, 0.0f, 1.0f);
+        duty = std::clamp<float>(duty, 0.0f, 1.0f);
         dutyMTU0 = duty;
-        if (duty == 0.0f) {
-            PORT1.PMR.BIT.B3 = 0;
-            PORT1.PODR.BIT.B3 = 0;
+        if (fabs(duty) < FLT_EPSILON) {
+            PORTA.PMR.BIT.B1 = 0;
+            PORTA.PODR.BIT.B1 = 0;
             //MTU0.TGRD = 1;
-        } else if(duty == 1.0f) {
-            PORT1.PMR.BIT.B3 = 0;
-            PORT1.PODR.BIT.B3 = 1;
+        } else if(duty >= 1.0f) {
+            PORTA.PMR.BIT.B1 = 0;
+            PORTA.PODR.BIT.B1 = 1;
             //MTU0.TGRD = MTU0.TGRC-1;
         } else {
-            PORT1.PMR.BIT.B3 = 1;
+            PORTA.PMR.BIT.B1= 1;
             MTU0.TGRD = (uint16_t) (MTU0.TGRC * duty);
         }
         MTU.TSTRA.BIT.CST0 = 1;
@@ -178,13 +190,13 @@ namespace periferal_driver {
 
 
     void setDutyMTU3(float duty) {
-        duty = constrain(duty, 0.0f, 1.0f);
+        duty = std::clamp<float>(duty, 0.0f, 1.0f);
         dutyMTU3 = duty;
-        if (duty == 0.0f) {
+        if (fabs(duty) < FLT_EPSILON) {
             PORT1.PMR.BIT.B4 = 0;
             PORT1.PODR.BIT.B4 = 0;
             //MTU3.TGRD = 1;
-        } else if(duty == 1.0f) {
+        } else if(duty >= 1.0f) {
             PORT1.PMR.BIT.B4 = 0;
             PORT1.PODR.BIT.B4 = 1;
             //MTU3.TGRD = MTU3.TGRC -1;
@@ -197,13 +209,13 @@ namespace periferal_driver {
     }
 
     void setDutyMTU4(float duty) {
-        duty = constrain(duty, 0.0f, 1.0f);
+        duty = std::clamp<float>(duty, 0.0f, 1.0f);
         dutyMTU4 = duty;
-        if (duty == 0.0f) {
+        if (fabs(duty) < FLT_EPSILON) {
             PORT2.PMR.BIT.B1 = 0; //左PWM
             PORT2.PODR.BIT.B1 = 0; //左PWM
             //MTU4.TGRD = 1;
-        } else if(duty == 1.0f) {
+        } else if(duty >= 1.0f) {
             PORT2.PMR.BIT.B1 = 0; //左PWM
             PORT2.PODR.BIT.B1 = 1; //左PWM
             //MTU4.TGRD = MTU4.TGRC-1;
@@ -216,13 +228,13 @@ namespace periferal_driver {
     }
 
     void setDutyMTU7(float duty) {
-        duty = constrain(duty, 0.0f, 1.0f);
+        duty = std::clamp<float>(duty, 0.0f, 1.0f);
         dutyMTU7 = duty;
-        if (duty == 0.0f) {
+        if (fabs(duty) < FLT_EPSILON) {
             PORTA.PMR.BIT.B2 = 0; 
             PORTA.PODR.BIT.B2 = 0; 
             //MTU4.TGRD = 1;
-        } else if(duty == 1.0f) {
+        } else if(duty >= 1.0f) {
             PORTA.PMR.BIT.B2 = 0; 
             PORTA.PODR.BIT.B2 = 1; 
             //MTU4.TGRD = MTU4.TGRC-1;
@@ -236,14 +248,14 @@ namespace periferal_driver {
 
 
     void setDutyTPU3(float duty) {
-        duty = constrain(duty, 0.0f, 1.0f);
+        duty = std::clamp<float>(duty, 0.0f, 1.0f);
         dutyMTU4 = duty;
-        if (duty == 0.0f) {
+        if (fabs(duty) < FLT_EPSILON) {
             PORT2.PMR.BIT.B0 = 0;
             PORT2.PODR.BIT.B0 = 0;
 
             //TPU3.TGRD = 1;
-        } else if(duty == 1.0f) {
+        } else if(duty >= 1.0f) {
             PORT2.PMR.BIT.B0 = 0;
             PORT2.PODR.BIT.B0 = 1;
             //TPU3.TGRD = TPU3.TGRC -1;
@@ -276,13 +288,5 @@ namespace periferal_driver {
     float getDutyMTU7() {
         return dutyMTU7;
     }
-
-
-    static float constrain(float amt, float low, float high) {
-        if(amt > high) return high;
-        else if(amt < low) return low;
-        else return amt;
-    }
-
 
 }

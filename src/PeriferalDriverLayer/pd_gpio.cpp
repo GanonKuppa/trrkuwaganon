@@ -27,7 +27,7 @@ namespace periferal_driver {
         PORTE.PDR.BIT.B2 = 1; // SEN_OUT
 
         //ヒーター
-        PORTA.PDR.BIT.B1 = 1; //HEATER_PWM        
+        //PORTA.PDR.BIT.B1 = 1; //HEATER_PWM        
     }
 
     void setDoutP22(bool out) {
@@ -55,7 +55,7 @@ namespace periferal_driver {
     }
 
     void setDoutPA1(bool out) {
-        PORTA.PODR.BIT.B1 = out;
+        //PORTA.PODR.BIT.B1 = out;
     }
 
     void setDoutPA2(bool out) {

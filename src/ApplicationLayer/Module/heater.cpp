@@ -7,14 +7,13 @@
 #include "batteryVoltageMsg.h"
 #include "msgBroker.h"
 
-#include "hal_gpio.h"
+#include "hal_pwm.h"
 #include "ntlibc.h"
 
 
 namespace module{
     Heater::Heater() :
     _duty(0.0f),
-    _heater_time(0.0f),
     _temp(25.0f),
     _current_ave(0.0f),
     _current_1sec_sum(0.0f),
@@ -30,6 +29,8 @@ namespace module{
         _target_temp = pm.heater_target_temp;             
         _pidf.set(0.0f, 0.0f, 0.0f, 0.0f);
         _pidf.setEnable(true);
+        hal::setDutyPWM0(0.0f);
+
     }
 
     float Heater::getDuty(){
@@ -69,17 +70,7 @@ namespace module{
             _duty = 0.0f;
             _pidf.reset();
         }
-        _heater_time += _delta_t;
-        
-        if(_pid_cycle_time * _duty > _heater_time){
-            hal::setDout6(1);
-        }else{
-            hal::setDout6(0);
-        }
-
-        if(_heater_time > _pid_cycle_time){
-            _heater_time = 0.0f;
-        }
+        hal::setDutyPWM0(_duty);
         
         _current_1sec_sum += _duty * (_voltage / _resistor_ohm) * _delta_t;
         if(_current_time > 1.0f){
@@ -125,8 +116,6 @@ namespace module{
         PRINTF_ASYNC("  duty_p         : %f\n", _pidf.getPVal());
         PRINTF_ASYNC("  duty_i         : %f\n", _pidf.getIVal());
         PRINTF_ASYNC("  ------------------------\n");
-        PRINTF_ASYNC("  pid_cycle_time : %f\n", _pid_cycle_time);
-        PRINTF_ASYNC("  heater_time    : %f\n", _heater_time);
         PRINTF_ASYNC("  current_ave    : %f\n", _current_ave);
     }
 
