@@ -6,6 +6,8 @@
 #include "batteryVoltageMsg.h"
 #include "msgBroker.h"
 
+#include "ntlibc.h"
+
 
 namespace module {
     BatteryVoltageMonitor::BatteryVoltageMonitor(){
@@ -21,7 +23,7 @@ namespace module {
 
     }
 
-    void BatteryVoltageMonitor::update(){
+    void BatteryVoltageMonitor::update0(){
         int16_t ad = hal::startAD0();
         ad = hal::startAD0(); // 電荷を抜くために複数回AD変換
         _voltage = _ad2Voltage(ad);
@@ -60,9 +62,9 @@ namespace module {
     }
 
     void BatteryVoltageMonitor::debug() {
-        PRINTF_SYNC("================\n");
-        PRINTF_SYNC("now:%f \n", _voltage);
-        PRINTF_SYNC("ave %f \n", _voltage_ave);
+        PRINTF_ASYNC("  ================\n");
+        PRINTF_ASYNC("  now:%f \n", _voltage);
+        PRINTF_ASYNC("  ave %f \n", _voltage_ave);
 
     }
 
@@ -73,6 +75,16 @@ namespace module {
         msg.is_low_voltage = _is_low_voltage;
         publishMsg(msg_id::BATTERY_VOLTAGE, &msg);
     }
+
+    int usrcmd_batteryVoltageMonitor(int argc, char **argv){
+        if (ntlibc_strcmp(argv[1], "status") == 0) {
+            BatteryVoltageMonitor::getInstance().debug();
+            return 0;
+        }
+
+        PRINTF_ASYNC("  Unknown sub command found\r\n");
+        return -1;
+    };
 
 
 }

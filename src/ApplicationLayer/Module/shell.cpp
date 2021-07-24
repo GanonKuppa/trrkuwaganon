@@ -40,7 +40,8 @@ typedef struct {
 static const cmd_table_t cmdlist[] = {
     { "help", "help command.", usrcmd_help },
     { "info", "system info.", usrcmd_info },
-    { "batteryVoltageMonitor", "BatteryVoltageMonitor Module.", usrcmd_info },
+    { "batteryVoltageMonitor", "BatteryVoltageMonitor Module.", module::usrcmd_batteryVoltageMonitor },
+    { "battery", "BatteryVoltageMonitor Module.", module::usrcmd_batteryVoltageMonitor },
     { "communication", "Communication Module.", usrcmd_info },
     { "gamepad", "Gamepad Module.", usrcmd_info },
     { "heater", "Heater Module.", module::usrcmd_heater },
@@ -48,6 +49,7 @@ static const cmd_table_t cmdlist[] = {
     { "suction", "Suction Module.", usrcmd_info },
     { "wallSensor", "WallSensor Module.", usrcmd_info },
     { "imuDriver", "ImuDriver Module.", module::usrcmd_imuDriver },
+    { "imu", "ImuDriver Module.", module::usrcmd_imuDriver },
     { "paramManager", "ParamManager Module.", module::usrcmd_parameterManager },
     { "param", "alias of paramManager command.", module::usrcmd_parameterManager },    
     { "top", "top command.", usrcmd_top }

@@ -6,7 +6,7 @@
 namespace module {
     class BatteryVoltageMonitor : public BaseModule<BatteryVoltageMonitor> {
       public:
-        void update();
+        void update0();
         void debug();
       private:
         friend class BaseModule<BatteryVoltageMonitor>;
@@ -25,5 +25,7 @@ namespace module {
         const float V_COEF = 30.0f/20.0f;
         const float ALERT_VOL = 3.3f;
     };
+
+    int usrcmd_batteryVoltageMonitor(int argc, char **argv);
 
 }
