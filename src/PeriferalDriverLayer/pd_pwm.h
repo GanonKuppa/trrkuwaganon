@@ -4,18 +4,24 @@ namespace periferal_driver {
 
     void initMTU0();
     void initMTU3();
-    void initMTU4();
+    void initGPTA1();
+    void initGPTA2();
     void initMTU7();
-    void initTPU3();
+    
     void setDutyMTU0(float duty);
-    void setDutyMTU3(float duty);
-    void setDutyMTU4(float duty);
-    void setDutyMTU7(float duty);
-    void setDutyTPU3(float duty);
+    void setDutyMTU3A(float duty);
+    void setDutyMTU3C(float duty);
+
+    void setDutyGPTA1(float duty);
+    void setDutyGPTA2(float duty);
+
+    void setDutyMTU7(float duty);    
 
     float getDutyMTU0();
-    float getDutyMTU3();
-    float getDutyMTU4();
+    float getDutyMTU3A();
+    float getDutyMTU3C();
+    float getDutyGPTA1();
+    float getDutyGPTA2();
     float getDutyMTU7();
-    float getDutyTPU3();
+    
 }

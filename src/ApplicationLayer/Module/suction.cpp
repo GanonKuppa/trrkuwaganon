@@ -10,11 +10,11 @@ namespace module{
 
     void Suction::setDuty(float duty){
         _duty = duty;
-        hal::setDutyPWM4(duty);
+        hal::setDutyPWM5(duty);
                 
         if(_on_time > MAX_ON_TIME){
             _duty = 0.0f;
-            hal::setDutyPWM4(0.0f);
+            hal::setDutyPWM5(0.0f);
         }
     }
 
@@ -24,7 +24,7 @@ namespace module{
 
     Suction::Suction(){
         setModuleName("Suction");
-        hal::setDutyPWM4(0.0f);
+        hal::setDutyPWM5(0.0f);
         _duty = 0.0f;
         _on_time = 0.0f;
     }

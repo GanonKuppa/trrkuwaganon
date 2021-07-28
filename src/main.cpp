@@ -36,6 +36,7 @@
 #include "imuDriver.h"
 #include "heater.h"
 #include "wheelOdometry.h"
+#include "powerTransmission.h"
 
 // Activity
 #include "ActivityFactory.h"
@@ -115,61 +116,8 @@ int main(void) {
     halInit();
     startUpInit();
     module::LedController::getInstance().flashFcled(1,0,0,0.5,0.5);
-/*        
-    module::Suction::getInstance().setDuty(0.0f);
-    hal::waitmsec(2000);
-    module::Suction::getInstance().setDuty(0.1f);
-    hal::waitmsec(2000);
-    module::Suction::getInstance().setDuty(0.2f);
-    hal::waitmsec(2000);
-    module::Suction::getInstance().setDuty(0.3f);
-    hal::waitmsec(2000);
-    hal::setDutyPWM4(0.0f);
-    hal::waitmsec(2000);
-*/
-
-
 
     while(1) {                
-/*
-        
-        hal::useCS0SPI0();
-        hal::setEnableSPI0(1);
-        uint8_t sendBuf[4];
-        uint8_t recvBuf[4];
-
-        const uint16_t READ_FLAG = 0x80;
-        uint16_t adress = 0x0F;
-        sendBuf[0] = READ_FLAG | adress;
-        sendBuf[1] = 0x00;
-        hal::communicateNbyteSPI0(sendBuf, recvBuf, 2);
-        PRINTF_SYNC("who am i : %x %x \n", recvBuf[0],recvBuf[1]);
-        hal::waitmsec(10);
-
-
-        hal::useCS0SPI1();
-        PRINTF_SYNC("ang : %x\n", hal::communicate16bitSPI1(0b00000000));
-        hal::useCS0SPI1();
-        PRINTF_SYNC("ang : %x\n", hal::communicate16bitSPI1(0b00000000));
-        hal::useCS0SPI1();
-        PRINTF_SYNC("ang : %x\n", hal::communicate16bitSPI1(0b01011011));
-        hal::useCS0SPI1();
-        PRINTF_SYNC("ang : %x\n", hal::communicate16bitSPI1(0b00000000));
-
-        hal::waitmsec(10);
-
-        hal::useCS1SPI1();                
-        PRINTF_SYNC("ang : %x\n", hal::communicate16bitSPI1(0b00000001));
-        hal::useCS1SPI1();
-        PRINTF_SYNC("ang : %x\n", hal::communicate16bitSPI1(0b00000011));
-        hal::useCS1SPI1();
-        PRINTF_SYNC("ang : %x\n", hal::communicate16bitSPI1(0b01011011));
-        hal::useCS1SPI1();
-        PRINTF_SYNC("ang : %x\n", hal::communicate16bitSPI1(0b00000000));
-
-
-        hal::waitmsec(500);
-*/
         module::LedController::getInstance().turnFcled(0,0,0);
         auto activity = activity::ActivityFactory::cteateModeSelect();
         activity->start();
@@ -187,15 +135,14 @@ void halInit() {
     hal::initUart0();
     hal::initUart1();
     hal::initAD();
-    //hal::initDA();
     hal::initFlashRom();
-    //hal::initPhaseCounting0();
-    //hal::initPhaseCounting1();
     hal::initPWM0();
-    //hal::initPWM1();
-    //hal::initPWM2();
-    //hal::initPWM3();
+    hal::initPWM1();
+    hal::initPWM2();
+    hal::initPWM3();
     hal::initPWM4();
+    hal::initPWM5();
+
     hal::initSPI0();
     hal::initSPI1();
     hal::initTimerInterrupt0();
@@ -221,6 +168,7 @@ void object_init() {
     module::Shell::getInstance();
     module::Heater::getInstance().setDeltaT(0.00025f);
     module::WheelOdometry::getInstance().setDeltaT(0.001f);
+    module::PowerTransmission::getInstance();
 }
 
 

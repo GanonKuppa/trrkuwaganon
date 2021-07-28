@@ -11,6 +11,7 @@
 
 #include "hal_uart.h"
 #include "hal_timerInterrupt.h"
+#include "hal_timer.h"
 
 // Module
 #include "baseModule.h"
@@ -23,6 +24,7 @@
 #include "imuDriver.h"
 #include "heater.h"
 #include "wheelOdometry.h"
+#include "powerTransmission.h"
 
 static int usrcmd_help(int argc, char **argv);
 static int usrcmd_info(int argc, char **argv);
@@ -55,6 +57,8 @@ static const cmd_table_t cmdlist[] = {
     { "wheel", "WheelOdometry Module.", module::usrcmd_wheelOdometry },
     { "paramManager", "ParamManager Module.", module::usrcmd_parameterManager },
     { "param", "alias of paramManager command.", module::usrcmd_parameterManager },    
+    { "powerTransmission", "PowerTransmission Module.", module::usrcmd_powerTransmission },
+    { "power", "PowerTransmission Module.", module::usrcmd_powerTransmission },
     { "top", "top command.", usrcmd_top }
 };
 
@@ -75,6 +79,7 @@ int usrcmd_help(int argc, char **argv)
         PRINTF_ASYNC(p->desc);
         PRINTF_ASYNC("\r\n");
         p++;
+        hal::waitmsec(10);
     }
     return 0;
 }
@@ -114,11 +119,17 @@ int usrcmd_top(int argc, char **argv)
 
     PRINTF_ASYNC("  --- Modules Time update0, update1, update2, update3\n");
     module::LedController::getInstance().printCycleTime();
+    hal::waitmsec(10);
     module::WallSensor::getInstance().printCycleTime();
+    hal::waitmsec(10);
     module::BatteryVoltageMonitor::getInstance().printCycleTime();
+    hal::waitmsec(10);
     module::Suction::getInstance().printCycleTime();
+    hal::waitmsec(10);
     module::Shell::getInstance().printCycleTime();
+    hal::waitmsec(10);
     module::ImuDriver::getInstance().printCycleTime();
+    hal::waitmsec(10);
     module::Heater::getInstance().printCycleTime();
 
     return 0;

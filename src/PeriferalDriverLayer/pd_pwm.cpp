@@ -7,8 +7,8 @@
 #include "pd_clock.h"
 #include "pd_pwm.h"
 
-//49ピン PC3 MOTOR_L_PWM2 MTIOC4B
-//50ピン PC2 MOTOR_L_PWM1 MTIOC4D
+//49ピン PC3 MOTOR_L_PWM2 MTIOC4B //GTIOC1B-D
+//50ピン PC2 MOTOR_L_PWM1 MTIOC4D //GTIOC2B-D
 //51ピン PC1 MOTOR_R_PWM1 MTIOC3A
 //52ピン PC0 MOTRO_R_PWM2 MTIOC3C
 
@@ -16,11 +16,15 @@
 //69ピン PA1 HEATER_PWM MTIOC7B/MTIOC0B/GTIOC2A-C/TIOCB0
 
 namespace periferal_driver {    
-    static float dutyMTU0; //P13
-    static float dutyMTU3; //P14
-    static float dutyMTU4; //P21
-    static float dutyTPU3; //P20
-    static float dutyMTU7; //PA2
+    static float dutyMTU0; //69ピン PA1 HEATER_PWM MTIOC0B
+    
+    static float dutyMTU3A; //51ピン PC1 MOTOR_R_PWM1 MTIOC3A
+    static float dutyMTU3C; //52ピン PC0 MOTRO_R_PWM2 MTIOC3C
+    
+    static float dutyGPTA1; //49ピン PC3 MOTOR_L_PWM2 GTIOC1B-D
+    static float dutyGPTA2; //50ピン PC2 MOTOR_L_PWM1 GTIOC2B-D
+    
+    static float dutyMTU7; //68ピン PA2 SUC_MOTOR_PWM MTIOC7A
 
     static constexpr uint16_t FREQ_COUNT = 400;
 
@@ -55,29 +59,42 @@ namespace periferal_driver {
     }
     /////////////////////////////////////////////////////////////
     void initMTU3() {
+        
         SYSTEM.PRCR.WORD = 0xA502;
         SYSTEM.MSTPCRA.BIT.MSTPA9 = 0; //MTUモジュールON
         SYSTEM.PRCR.WORD = 0xA500;
 
+        PORTC.PMR.BIT.B0 = 0;
+        PORTC.PMR.BIT.B1 = 0;
+
         MPC.PWPR.BIT.B0WI = 0;
         MPC.PWPR.BIT.PFSWE = 1;
-        MPC.P14PFS.BIT.PSEL = 1; //MTIOC3A
-        MPC.PWPR.BYTE = 0x80;
+        MPC.PC1PFS.BIT.PSEL = 1; //MTIOC3A
+        MPC.PWPR.BYTE = 0x80;        
 
-        PORT1.PMR.BIT.B4 = 1;
+        MPC.PWPR.BIT.B0WI = 0;
+        MPC.PWPR.BIT.PFSWE = 1;
+        MPC.PC0PFS.BIT.PSEL = 1; //MTIOC3C
+        MPC.PWPR.BYTE = 0x80;        
+
 
         MTU.TSTRA.BIT.CST3 = 0;
         MTU3.TCR.BIT.TPSC = 0; //PCLKA/1
         MTU3.TCR.BIT.CCLR = 1; //PWM TGRAのコンペアマッチでTCNTクリア
-        MTU3.TIORH.BIT.IOA = 6; //初期出力1 コンペアマッチ1出力
+        MTU3.TIORH.BIT.IOA = 6; //初期出力1 コンペアマッチ0出力
         MTU3.TIORH.BIT.IOB = 5; //初期出力1 コンペアマッチ0出力
-        MTU3.TGRA = FREQ_COUNT; //500
-        MTU3.TGRB = 1;
+        MTU3.TIORL.BIT.IOC = 6; //初期出力1 コンペアマッチ0出力
+        MTU3.TIORL.BIT.IOD = 5; //初期出力1 コンペアマッチ0出力
+
+
+        MTU3.TGRA = FREQ_COUNT;
+        MTU3.TGRB = 0;
         MTU3.TGRC = FREQ_COUNT;
-        MTU3.TGRD = 1;
-        MTU3.TMDR1.BIT.MD = 2; //PWM1
-        MTU3.TMDR1.BIT.BFA = 1;   //バッファーモードに設定
-        MTU3.TMDR1.BIT.BFB = 1;
+        MTU3.TGRD = 0;
+        MTU3.TMDR1.BIT.MD = 2; //PWMモード1
+        
+        setDutyMTU3A(0.0f);
+        setDutyMTU3C(0.0f);
     }
 
     /////////////////////////////////////////////////////////////
@@ -88,7 +105,8 @@ namespace periferal_driver {
 
         MPC.PWPR.BIT.B0WI = 0;
         MPC.PWPR.BIT.PFSWE = 1;
-        MPC.P21PFS.BIT.PSEL = 0b001000; //MTIOC4A
+        MPC.PC3PFS.BIT.PSEL = 1; //MTIOC4B
+        MPC.PC2PFS.BIT.PSEL = 1; //MTIOC4D
         MPC.PWPR.BYTE = 0x80;
 
         PORT2.PMR.BIT.B1 = 1; //左PWM
@@ -98,16 +116,61 @@ namespace periferal_driver {
 
         MTU4.TCR.BIT.TPSC = 0; //PCLKA/1
         MTU4.TCR.BIT.CCLR = 1; //PWM TGRAのコンペアマッチでTCNTクリア TGRDは6
-        MTU4.TIORH.BIT.IOA = 6; //初期出力1 コンペアマッチ1出力
         MTU4.TIORH.BIT.IOB = 5; //初期出力1 コンペアマッチ0出力
+        MTU4.TIORL.BIT.IOD = 5; //初期出力1 コンペアマッチ0出力
+
+        MTU.TOERA.BIT.OE4B = 1; //MTU出力端子を出力許可する
+        MTU.TOERA.BIT.OE4D = 1; //MTU出力端子を出力許可する
+        
         MTU4.TGRA = FREQ_COUNT;
-        MTU4.TGRB = 1;
+        MTU4.TGRB = 0;
         MTU4.TGRC = FREQ_COUNT;
-        MTU4.TGRD = 1;
-        MTU4.TMDR1.BIT.MD = 2; //PWM1
+        MTU4.TGRD = 0;
+        MTU4.TMDR1.BIT.MD = 2; //PWMモード1
         MTU4.TMDR1.BIT.BFA = 1;   //バッファーモードに設定
         MTU4.TMDR1.BIT.BFB = 1; //バッファーモードに設定
     }
+
+    void initGPTA1(){
+        SYSTEM.PRCR.WORD = 0xA502;
+        SYSTEM.MSTPCRA.BIT.MSTPA7 = 0; //GPTAモジュールON
+        SYSTEM.PRCR.WORD = 0xA500;
+
+        PORTC.PMR.BIT.B3 = 0;
+
+        MPC.PWPR.BIT.B0WI = 0;
+        MPC.PWPR.BIT.PFSWE = 1;
+        MPC.PC3PFS.BIT.PSEL = 0b011110; //GTIOC1B
+        MPC.PWPR.BYTE = 0x80;
+    
+        GPT.GTSTR.BIT.CST1 = 0;
+        GPT1.GTIOR.BIT.GTIOB = 0b011001; // 初期出力H 周期の終わりでH出力 コンペアマッチでL
+        GPT1.GTONCR.BIT.OBE = 1;
+        GPT1.GTPR = FREQ_COUNT;
+        GPT1.GTCCRB = 1;
+    }
+
+    void initGPTA2(){
+        SYSTEM.PRCR.WORD = 0xA502;
+        SYSTEM.MSTPCRA.BIT.MSTPA7 = 0; //GPTAモジュールON
+        SYSTEM.PRCR.WORD = 0xA500;
+
+        PORTC.PMR.BIT.B2 = 0;
+
+        MPC.PWPR.BIT.B0WI = 0;
+        MPC.PWPR.BIT.PFSWE = 1;
+        MPC.PC2PFS.BIT.PSEL = 0b011110; //GTIOC2B
+        MPC.PWPR.BYTE = 0x80;
+    
+        GPT.GTSTR.BIT.CST2 = 0;
+        GPT2.GTIOR.BIT.GTIOB = 0b011001; // 初期出力H 周期の終わりでH出力 コンペアマッチでL
+        GPT2.GTONCR.BIT.OBE = 1;
+        GPT2.GTPR = FREQ_COUNT;
+        GPT2.GTCCRB = 1;
+
+    }
+
+
 
     void initMTU7() {
         SYSTEM.PRCR.WORD = 0xA502;
@@ -139,45 +202,17 @@ namespace periferal_driver {
 
 
 
-    void initTPU3() {
-        SYSTEM.PRCR.WORD = 0xA502;
-        SYSTEM.MSTPCRA.BIT.MSTPA13 = 0; //TPUモジュールON
-        SYSTEM.PRCR.WORD = 0xA500;
-
-        PORT2.PMR.BIT.B0 = 0;
-        MPC.PWPR.BIT.B0WI = 0;
-        MPC.PWPR.BIT.PFSWE = 1;
-        MPC.P20PFS.BIT.PSEL = 3;
-        MPC.PWPR.BYTE = 0x80;
-
-        PORT2.PMR.BIT.B0 = 1;
-
-        TPUA.TSTR.BIT.CST3 = 0;
-
-        TPU3.TCR.BIT.TPSC = 0; //PCLKA/1
-        TPU3.TCR.BIT.CCLR = 1; //PWM TGRAのコンペアマッチでTCNTクリア TGRDは6
-        TPU3.TIORH.BIT.IOA = 6; //初期出力1 コンペアマッチ1出力
-        TPU3.TIORH.BIT.IOB = 5; //初期出力1 コンペアマッチ0出力
-
-        TPU3.TGRA = FREQ_COUNT; //500
-        TPU3.TGRB = 1;
-        TPU3.TGRC = FREQ_COUNT;
-        TPU3.TGRD = 1;
-        TPU3.TMDR.BIT.MD = 3; //PWM2
-        TPU3.TMDR.BIT.BFA = 1;
-        TPU3.TMDR.BIT.BFB = 1;
-    }
-
-
     void setDutyMTU0(float duty) {
         duty = std::clamp<float>(duty, 0.0f, 1.0f);
         dutyMTU0 = duty;
         if (fabs(duty) < FLT_EPSILON) {
             PORTA.PMR.BIT.B1 = 0;
+            PORTA.PDR.BIT.B1 = 1;
             PORTA.PODR.BIT.B1 = 0;
             //MTU0.TGRD = 1;
         } else if(duty >= 1.0f) {
             PORTA.PMR.BIT.B1 = 0;
+            PORTA.PDR.BIT.B1 = 1;
             PORTA.PODR.BIT.B1 = 1;
             //MTU0.TGRD = MTU0.TGRC-1;
         } else {
@@ -188,54 +223,101 @@ namespace periferal_driver {
 
     }
 
-
-    void setDutyMTU3(float duty) {
+    void setDutyMTU3A(float duty) {
         duty = std::clamp<float>(duty, 0.0f, 1.0f);
-        dutyMTU3 = duty;
-        if (fabs(duty) < FLT_EPSILON) {
-            PORT1.PMR.BIT.B4 = 0;
-            PORT1.PODR.BIT.B4 = 0;
-            //MTU3.TGRD = 1;
-        } else if(duty >= 1.0f) {
-            PORT1.PMR.BIT.B4 = 0;
-            PORT1.PODR.BIT.B4 = 1;
-            //MTU3.TGRD = MTU3.TGRC -1;
+        dutyMTU3A = duty;
+        if (std::fabs(duty) < FLT_EPSILON) {
+            MTU.TSTRA.BIT.CST3 = 0;
+            PORTC.PMR.BIT.B1 = 0;
+            PORTC.PDR.BIT.B1 = 1;
+            PORTC.PODR.BIT.B1 = 0;            
+        } else if(duty >= 0.9999f) {
+            MTU.TSTRA.BIT.CST3 = 0;
+            PORTC.PMR.BIT.B1 = 0;
+            PORTC.PDR.BIT.B1 = 1;
+            PORTC.PODR.BIT.B1 = 1;            
         } else {
-            PORT1.PMR.BIT.B4 = 1;
-            MTU3.TGRD = (uint16_t) (MTU3.TGRC * duty);
-        }
+            PORTC.PMR.BIT.B1 = 1;
+            MTU3.TGRB = (uint16_t) (MTU3.TGRA * duty);
+        }        
         MTU.TSTRA.BIT.CST3 = 1;
-
     }
 
-    void setDutyMTU4(float duty) {
+    void setDutyMTU3C(float duty) {
         duty = std::clamp<float>(duty, 0.0f, 1.0f);
-        dutyMTU4 = duty;
-        if (fabs(duty) < FLT_EPSILON) {
-            PORT2.PMR.BIT.B1 = 0; //左PWM
-            PORT2.PODR.BIT.B1 = 0; //左PWM
-            //MTU4.TGRD = 1;
-        } else if(duty >= 1.0f) {
-            PORT2.PMR.BIT.B1 = 0; //左PWM
-            PORT2.PODR.BIT.B1 = 1; //左PWM
-            //MTU4.TGRD = MTU4.TGRC-1;
+        dutyMTU3C = duty;
+        if (std::fabs(duty) < FLT_EPSILON) {
+            MTU.TSTRA.BIT.CST3 = 0;
+            PORTC.PMR.BIT.B0 = 0;
+            PORTC.PDR.BIT.B0 = 1;
+            PORTC.PODR.BIT.B0 = 0;
+        } else if(duty >= 0.9999f) {
+            MTU.TSTRA.BIT.CST3 = 0;
+            PORTC.PMR.BIT.B0 = 0;
+            PORTC.PDR.BIT.B0 = 1;
+            PORTC.PODR.BIT.B0 = 1;
         } else {
-            PORT2.PMR.BIT.B1 = 1; //左PWM
-            MTU4.TGRD = (uint16_t) (MTU4.TGRC * duty);
-        }
-        MTU.TSTRA.BIT.CST4 = 1;
-
+            PORTC.PMR.BIT.B0 = 1;
+            MTU3.TGRD = (uint16_t) (MTU3.TGRC * duty);
+        }        
+        MTU.TSTRA.BIT.CST3 = 1;
     }
+
+
+
+    void setDutyGPTA1(float duty) {
+        duty = std::clamp<float>(duty, 0.0f, 1.0f);
+        dutyGPTA1 = duty;
+        if (std::fabs(duty) < FLT_EPSILON) {
+        	GPT.GTSTR.BIT.CST1 = 0;
+            PORTC.PMR.BIT.B3 = 0;
+            PORTC.PDR.BIT.B3 = 1;
+            PORTC.PODR.BIT.B3 = 0;            
+        } else if(duty >= 0.9999f) {
+        	GPT.GTSTR.BIT.CST1 = 0;
+            PORTC.PMR.BIT.B3 = 0;
+            PORTC.PDR.BIT.B3 = 1;
+            PORTC.PODR.BIT.B3 = 1;            
+        } else {
+            PORTC.PMR.BIT.B3 = 1;
+            GPT1.GTCCRB = (uint16_t) (GPT1.GTPR * duty);
+        }        
+        GPT.GTSTR.BIT.CST1 = 1;
+    }
+
+    void setDutyGPTA2(float duty) {
+        duty = std::clamp<float>(duty, 0.0f, 1.0f);
+        dutyGPTA2 = duty;
+        if (std::fabs(duty) < FLT_EPSILON) {
+        	GPT.GTSTR.BIT.CST2 = 0;
+            PORTC.PMR.BIT.B2 = 0;
+            PORTC.PDR.BIT.B2 = 1;
+            PORTC.PODR.BIT.B2 = 0;
+        } else if(duty >= 0.9999f) {
+        	GPT.GTSTR.BIT.CST2 = 0;
+            PORTC.PMR.BIT.B2 = 0;
+            PORTC.PDR.BIT.B2 = 1;
+            PORTC.PODR.BIT.B2 = 1;
+        } else {
+            PORTC.PMR.BIT.B2 = 1;
+            GPT2.GTCCRB = (uint16_t) (GPT2.GTPR * duty);
+        }        
+        GPT.GTSTR.BIT.CST2 = 1;
+    }
+
+
 
     void setDutyMTU7(float duty) {
         duty = std::clamp<float>(duty, 0.0f, 1.0f);
         dutyMTU7 = duty;
-        if (fabs(duty) < FLT_EPSILON) {
-            PORTA.PMR.BIT.B2 = 0; 
+        if (std::fabs(duty) < FLT_EPSILON) {
+            PORTA.PMR.BIT.B2 = 0;
+            PORTA.PDR.BIT.B2 = 1;
             PORTA.PODR.BIT.B2 = 0; 
             //MTU4.TGRD = 1;
         } else if(duty >= 1.0f) {
             PORTA.PMR.BIT.B2 = 0; 
+            PORTA.PDR.BIT.B2 = 1;
             PORTA.PODR.BIT.B2 = 1; 
             //MTU4.TGRD = MTU4.TGRC-1;
         } else {
@@ -247,42 +329,24 @@ namespace periferal_driver {
     }
 
 
-    void setDutyTPU3(float duty) {
-        duty = std::clamp<float>(duty, 0.0f, 1.0f);
-        dutyMTU4 = duty;
-        if (fabs(duty) < FLT_EPSILON) {
-            PORT2.PMR.BIT.B0 = 0;
-            PORT2.PODR.BIT.B0 = 0;
-
-            //TPU3.TGRD = 1;
-        } else if(duty >= 1.0f) {
-            PORT2.PMR.BIT.B0 = 0;
-            PORT2.PODR.BIT.B0 = 1;
-            //TPU3.TGRD = TPU3.TGRC -1;
-        } else {
-            PORT2.PMR.BIT.B0 = 1;
-            TPU3.TGRD = (uint16_t) (TPU3.TGRC * duty);
-        }
-        TPUA.TSTR.BIT.CST3 = 1;
-
-    }
-
-
-
     float getDutyMTU0() {
         return dutyMTU0;
     }
 
-    float getDutyMTU3() {
-        return dutyMTU3;
+    float getDutyMTU3A() {
+        return dutyMTU3A;
     }
 
-    float getDutyMTU4() {
-        return dutyMTU4;
+    float getDutyMTU3C() {
+        return dutyMTU3C;
     }
 
-    float getDutyTPU3() {
-        return dutyTPU3;
+    float getDutyGPTA1() {
+        return dutyGPTA1;
+    }
+
+    float getDutyGPTA2() {
+        return dutyGPTA2;
     }
 
     float getDutyMTU7() {

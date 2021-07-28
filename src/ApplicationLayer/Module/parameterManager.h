@@ -44,7 +44,7 @@ namespace module {
         float mass; //0
         float dia_tire; //1
         float tread; //2
-        uint8_t dummy0;
+        float duty_limit;
         uint16_t dummy1;
         uint32_t dummy2;
         int8_t dummy3;

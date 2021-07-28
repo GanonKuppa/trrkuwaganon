@@ -15,7 +15,7 @@ namespace module {
         registration<float>(0, mass, "mass");
         registration<float>(1, dia_tire, "dia_tire");
         registration<float>(2, tread, "tread");
-        registration<uint8_t>(3, dummy0, "dummy0");
+        registration<float>(3, duty_limit, "duty_limit");
         registration<uint16_t>(4, dummy1, "dummy1");
         registration<uint32_t>(5, dummy2, "dummy2");
         registration<int8_t>(6, dummy3, "dummy3");
