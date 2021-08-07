@@ -2,16 +2,16 @@
 #include "hal_ad.h"
 #include "debugLog.h"
 
-#include "batteryVoltageMonitor.h"
-#include "batteryVoltageMsg.h"
+#include "batteryMonitor.h"
+#include "batteryMsg.h"
 #include "msgBroker.h"
 
 #include "ntlibc.h"
 
 
 namespace module {
-    BatteryVoltageMonitor::BatteryVoltageMonitor(){
-    	setModuleName("BatteryVoltageMonitor");
+    BatteryVoltageMonitor::BatteryMonitor(){
+    	setModuleName("BatteryMonitor");
         
         _count = 0;
     	_voltage = 4.2f;
@@ -73,10 +73,10 @@ namespace module {
         msg.voltage = _voltage;
         msg.voltage_ave = _voltage_ave;
         msg.is_low_voltage = _is_low_voltage;
-        publishMsg(msg_id::BATTERY_VOLTAGE, &msg);
+        publishMsg(msg_id::BATTERY_INFO, &msg);
     }
 
-    int usrcmd_batteryVoltageMonitor(int argc, char **argv){
+    int usrcmd_batteryMonitor(int argc, char **argv){
         if (ntlibc_strcmp(argv[1], "status") == 0) {
             BatteryVoltageMonitor::getInstance().debug();
             return 0;

@@ -4,13 +4,13 @@
 #include <deque>
 
 namespace module {
-    class BatteryVoltageMonitor : public BaseModule<BatteryVoltageMonitor> {
+    class BatteryMonitor : public BaseModule<BatteryMonitor> {
       public:
         void update0();
         void debug();
       private:
-        friend class BaseModule<BatteryVoltageMonitor>;
-        BatteryVoltageMonitor();
+        friend class BaseModule<BatteryMonitor>;
+        BatteryMonitor();
         void _publish();
         float _ad2Voltage(int16_t ad);
         void _lowVoltageCheck();
@@ -26,6 +26,6 @@ namespace module {
         const float ALERT_VOL = 3.3f;
     };
 
-    int usrcmd_batteryVoltageMonitor(int argc, char **argv);
+    int usrcmd_batteryMonitor(int argc, char **argv);
 
 }

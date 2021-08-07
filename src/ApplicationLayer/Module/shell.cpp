@@ -17,7 +17,7 @@
 #include "baseModule.h"
 #include "ledController.h"
 #include "wallSensor.h"
-#include "batteryVoltageMonitor.h"
+#include "batteryMonitor.h"
 #include "suction.h"
 #include "shell.h"
 #include "parameterManager.h"
@@ -43,8 +43,8 @@ typedef struct {
 static const cmd_table_t cmdlist[] = {
     { "help", "help command.", usrcmd_help },
     { "info", "system info.", usrcmd_info },
-    { "batteryVoltageMonitor", "BatteryVoltageMonitor Module.", module::usrcmd_batteryVoltageMonitor },
-    { "battery", "BatteryVoltageMonitor Module.", module::usrcmd_batteryVoltageMonitor },
+    { "batteryMonitor", "BatteryMonitor Module.", module::usrcmd_batteryMonitor },
+    { "battery", "BatteryVoltageMonitor Module.", module::usrcmd_batteryMonitor },
     { "communication", "Communication Module.", usrcmd_info },
     { "gamepad", "Gamepad Module.", usrcmd_info },
     { "heater", "Heater Module.", module::usrcmd_heater },

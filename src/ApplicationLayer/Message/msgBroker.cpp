@@ -10,7 +10,7 @@
 #include "imuMsg.h"
 #include "groundTruth.h"
 
-static BatteryVoltageMsg batteryVoltageMsg;
+static BatteryInfoMsg batteryInfoMsg;
 static CtrlSetpointMsg ctrlSetpointMsg;
 static GamepadMsg gamepadMsg;
 static ImuMsg imuMsg;
@@ -23,7 +23,7 @@ static GroundTruthMsg groundTruthMsg;
 
 void publishMsg(msg_id msg_id, void* msg){
 
-    if     (msg_id == msg_id::BATTERY_VOLTAGE)   {batteryVoltageMsg    = *(BatteryVoltageMsg*)msg   ;}
+    if     (msg_id == msg_id::BATTERY_INFO)      {batteryInfoMsg       = *(BatteryInfoMsg*)msg   ;}
     else if(msg_id == msg_id::CTRL_SETPOINT)     {ctrlSetpointMsg      = *(CtrlSetpointMsg*)msg     ;}
     else if(msg_id == msg_id::GAMEPAD)           {gamepadMsg           = *(GamepadMsg*)msg          ;}    
     else if(msg_id == msg_id::IMU)               {imuMsg               = *(ImuMsg*)msg              ;}
@@ -35,7 +35,7 @@ void publishMsg(msg_id msg_id, void* msg){
 }
 
 void copyMsg(msg_id msg_id, void *msg){
-    if     (msg_id == msg_id::BATTERY_VOLTAGE)   {*(BatteryVoltageMsg*   ) msg = batteryVoltageMsg   ;}
+    if     (msg_id == msg_id::BATTERY_INFO)      {*(BatteryInfoMsg*      ) msg = batteryInfoMsg      ;}
     else if(msg_id == msg_id::CTRL_SETPOINT)     {*(CtrlSetpointMsg*     ) msg = ctrlSetpointMsg     ;}
     else if(msg_id == msg_id::GAMEPAD)           {*(GamepadMsg*          ) msg = gamepadMsg          ;}    
     else if(msg_id == msg_id::IMU)               {*(ImuMsg*              ) msg = imuMsg              ;}

@@ -51,7 +51,7 @@ namespace module{
         _temp = imu_msg.temp;
 
         BatteryVoltageMsg _vol_msg;
-        copyMsg(msg_id::BATTERY_VOLTAGE, &_vol_msg);
+        copyMsg(msg_id::BATTERY_INFO, &_vol_msg);
         _voltage = _vol_msg.voltage;
 
         _p = pm.heater_p;

@@ -4,21 +4,16 @@
 
 class WheelOdometryMsg : public BaseMsg{
   public:
-    double v = 0.0;
-    double a = 0.0;
-    double v_R = 0.0;
-    double v_L = 0.0;
+    float v = 0.0;              // [m/s]
+    float v_r = 0.0;            // [m/s]
+    float v_l = 0.0;            // [m/s]
     
-    double v_ave = 0.0;
-    double v_R_ave = 0.0;
-    double v_L_ave = 0.0;
+    float rpm_r = 0.0f;         // [rpm] 
+    float rpm_l = 0.0f;         // [rpm]
+    
+    float ang_v = 0.0f;         // [deg/s]
+    float ang_v_rad = 0.0f;     // [rad/s]
 
-    float rpm_R = 0.0f;
-    float rpm_L = 0.0f;
-    float ang_v = 0.0f;
-    float kappa = 0.0f;
-    float r = 0.0f;
-
-    float tire_ang_R = 0.0f;
-    float tire_ang_L = 0.0f;
+    float ang_r = 0.0f;         // [deg]
+    float ang_l = 0.0f;         // [deg]
 };

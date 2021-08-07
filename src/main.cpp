@@ -30,7 +30,7 @@
 #include "parameterManager.h"
 #include "ledController.h"
 #include "wallSensor.h"
-#include "batteryVoltageMonitor.h"
+#include "batteryMonitor.h"
 #include "suction.h"
 #include "shell.h"
 #include "imuDriver.h"
