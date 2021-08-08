@@ -1,7 +1,7 @@
 #pragma once
 
 enum class msg_id{
-    BATTERY_VOLTAGE = 0,
+    BATTERY_INFO = 0,
     CTRL_SETPOINT,
     GAMEPAD,    
     IMU,

@@ -4,7 +4,7 @@
 #include "parameterManager.h"
 
 #include "imuMsg.h"
-#include "batteryVoltageMsg.h"
+#include "batteryInfoMsg.h"
 #include "msgBroker.h"
 
 #include "hal_pwm.h"
@@ -50,7 +50,7 @@ namespace module{
         copyMsg(msg_id::IMU, &imu_msg);
         _temp = imu_msg.temp;
 
-        BatteryVoltageMsg _vol_msg;
+        BatteryInfoMsg _vol_msg;
         copyMsg(msg_id::BATTERY_INFO, &_vol_msg);
         _voltage = _vol_msg.voltage;
 

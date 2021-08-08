@@ -1,7 +1,7 @@
 #include "msgBroker.h"
 #include "baseMsg.h"
 
-#include "batteryVoltageMsg.h"
+#include "batteryInfoMsg.h"
 #include "ctrlSetpointMsg.h"
 #include "gamepadMsg.h"
 #include "positionEstimatorMsg.h"

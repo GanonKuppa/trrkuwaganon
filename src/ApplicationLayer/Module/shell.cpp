@@ -44,7 +44,7 @@ static const cmd_table_t cmdlist[] = {
     { "help", "help command.", usrcmd_help },
     { "info", "system info.", usrcmd_info },
     { "batteryMonitor", "BatteryMonitor Module.", module::usrcmd_batteryMonitor },
-    { "battery", "BatteryVoltageMonitor Module.", module::usrcmd_batteryMonitor },
+    { "battery", "BatteryMonitor Module.", module::usrcmd_batteryMonitor },
     { "communication", "Communication Module.", usrcmd_info },
     { "gamepad", "Gamepad Module.", usrcmd_info },
     { "heater", "Heater Module.", module::usrcmd_heater },
@@ -122,7 +122,7 @@ int usrcmd_top(int argc, char **argv)
     hal::waitmsec(10);
     module::WallSensor::getInstance().printCycleTime();
     hal::waitmsec(10);
-    module::BatteryVoltageMonitor::getInstance().printCycleTime();
+    module::BatteryMonitor::getInstance().printCycleTime();
     hal::waitmsec(10);
     module::Suction::getInstance().printCycleTime();
     hal::waitmsec(10);

@@ -2,7 +2,7 @@
 
 #include "baseMsg.h"
 
-class BatteryVoltageMsg : public BaseMsg{
+class BatteryInfoMsg : public BaseMsg{
   public:   
     float voltage = 4.2;
     float voltage_ave = 4.2;

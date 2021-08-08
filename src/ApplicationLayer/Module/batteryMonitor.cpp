@@ -3,14 +3,14 @@
 #include "debugLog.h"
 
 #include "batteryMonitor.h"
-#include "batteryMsg.h"
+#include "batteryInfoMsg.h"
 #include "msgBroker.h"
 
 #include "ntlibc.h"
 
 
 namespace module {
-    BatteryVoltageMonitor::BatteryMonitor(){
+    BatteryMonitor::BatteryMonitor(){
     	setModuleName("BatteryMonitor");
         
         _count = 0;
@@ -23,7 +23,7 @@ namespace module {
 
     }
 
-    void BatteryVoltageMonitor::update0(){
+    void BatteryMonitor::update0(){
         int16_t ad = hal::startAD0();
         ad = hal::startAD0(); // 電荷を抜くために複数回AD変換
         _voltage = _ad2Voltage(ad);
@@ -48,11 +48,11 @@ namespace module {
 
     }
 
-    float BatteryVoltageMonitor::_ad2Voltage(int16_t ad) {
+    float BatteryMonitor::_ad2Voltage(int16_t ad) {
         return V_COEF * REG_VOLTAGE * (float(ad) / float(AD_RESOLUTION -1));
     }
 
-    void BatteryVoltageMonitor::_lowVoltageCheck() {
+    void BatteryMonitor::_lowVoltageCheck() {
         if(_voltage_ave < ALERT_VOL) {
              _is_low_voltage = true;
         }
@@ -61,15 +61,15 @@ namespace module {
         }
     }
 
-    void BatteryVoltageMonitor::debug() {
+    void BatteryMonitor::debug() {
         PRINTF_ASYNC("  ================\n");
         PRINTF_ASYNC("  now:%f \n", _voltage);
         PRINTF_ASYNC("  ave %f \n", _voltage_ave);
 
     }
 
-    void BatteryVoltageMonitor::_publish(){
-        BatteryVoltageMsg msg;
+    void BatteryMonitor::_publish(){
+        BatteryInfoMsg msg;
         msg.voltage = _voltage;
         msg.voltage_ave = _voltage_ave;
         msg.is_low_voltage = _is_low_voltage;
@@ -78,7 +78,7 @@ namespace module {
 
     int usrcmd_batteryMonitor(int argc, char **argv){
         if (ntlibc_strcmp(argv[1], "status") == 0) {
-            BatteryVoltageMonitor::getInstance().debug();
+            BatteryMonitor::getInstance().debug();
             return 0;
         }
 
