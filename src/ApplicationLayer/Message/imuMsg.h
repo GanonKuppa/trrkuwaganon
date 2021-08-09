@@ -3,12 +3,23 @@
 #include "baseMsg.h"
 
 class ImuMsg : public BaseMsg{
-  public:
-    float ang_v[3] = {0.0f, 0.0f, 0.0f};
-    float acc[3] = {0.0f, 0.0f, 0.0f};
+  public:   
+    float acc_x = 0.0f;
+    float acc_y = 0.0f;
+    float acc_z = 0.0f;
+
+    
+    float pitchrate = 0.0f;
+    float rollrate = 0.0f;
+    float yawrate = 0.0f;
+
+    float pitchrate_deg = 0.0f;
+    float rollrate_deg = 0.0f;
+    float yawrate_deg = 0.0f;
+
     float temp = 0.0f;
     float stop_time = 0.0f;
-    float upsideDown_time = 0.0f;
+    float upside_down_time = 0.0f;
 
     bool is_stop = false;
     bool is_upside_down = false;

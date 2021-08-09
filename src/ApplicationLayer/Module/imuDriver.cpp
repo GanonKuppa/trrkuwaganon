@@ -242,18 +242,23 @@ namespace module {
     }
 
     void ImuDriver::_publish(){
+        const float DEG2RAD = 57.2957795131f;
         ImuMsg msg;
-        msg.ang_v[0] = _ang_v_f[0];
-        msg.ang_v[1] = _ang_v_f[1];
-        msg.ang_v[2] = _ang_v_f[2];
+        msg.pitchrate = - _ang_v_f[0] * DEG2RAD;
+        msg.rollrate = - _ang_v_f[1] * DEG2RAD;
+        msg.yawrate = _ang_v_f[2] * DEG2RAD;
         
-        msg.acc[0] = _acc_f[0];
-        msg.acc[1] = _acc_f[1];
-        msg.acc[2] = _acc_f[2];
+        msg.pitchrate_deg = - _ang_v_f[0];
+        msg.rollrate_deg = - _ang_v_f[1];
+        msg.yawrate_deg = _ang_v_f[2];
+
+        msg.acc_x = - _acc_f[0];
+        msg.acc_y = - _acc_f[1];
+        msg.acc_z = _acc_f[2];
 
         msg.temp = _temp;
         msg.stop_time = 0.0f;
-        msg.upsideDown_time = 0.0f;
+        msg.upside_down_time = 0.0f;
         msg.is_stop = 0.0f;
         msg.is_upside_down = 0.0f;
         publishMsg(msg_id::IMU, &msg);

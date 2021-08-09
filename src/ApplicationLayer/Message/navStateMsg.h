@@ -21,6 +21,4 @@ class NavStateMsg : public BaseMsg {
     ENavStateMsg sub_mode = 0;
     uint8_t x_int = 0;
     uint8_t y_int = 0;
-    
-
 };
