@@ -154,8 +154,8 @@ namespace module {
         uint8_t out_temp_l = _readReg(0x20);
         uint8_t out_temp_h = _readReg(0x21);
 
-        _ang_v_raw[0] = concatenate2Byte_int(outx_h_g, outx_l_g);
-        _ang_v_raw[1] = concatenate2Byte_int(outy_h_g, outy_l_g);
+        _ang_v_raw[0] = - concatenate2Byte_int(outx_h_g, outx_l_g);
+        _ang_v_raw[1] = - concatenate2Byte_int(outy_h_g, outy_l_g);
         _ang_v_raw[2] = concatenate2Byte_int(outz_h_g, outz_l_g);
 
         _ang_v_c[0] = float(_ang_v_raw[0]) - _ang_v_offset[0];
@@ -166,8 +166,8 @@ namespace module {
         _ang_v_f[1] = float(_ang_v_c[1]) * gyro_scale;
         _ang_v_f[2] = float(_ang_v_c[2]) * gyro_scale;
 
-        _acc_raw[0] = concatenate2Byte_int(outx_h_a, outx_l_a);
-        _acc_raw[1] = concatenate2Byte_int(outy_h_a, outy_l_a);
+        _acc_raw[0] = - concatenate2Byte_int(outx_h_a, outx_l_a);
+        _acc_raw[1] = - concatenate2Byte_int(outy_h_a, outy_l_a);
         _acc_raw[2] = concatenate2Byte_int(outz_h_a, outz_l_a);
 
         _acc_c[0] = float(_acc_raw[0]) - _acc_offset[0];
@@ -244,16 +244,16 @@ namespace module {
     void ImuDriver::_publish(){
         const float DEG2RAD = 57.2957795131f;
         ImuMsg msg;
-        msg.pitchrate = - _ang_v_f[0] * DEG2RAD;
-        msg.rollrate = - _ang_v_f[1] * DEG2RAD;
+        msg.pitchrate = _ang_v_f[0] * DEG2RAD;
+        msg.rollrate = _ang_v_f[1] * DEG2RAD;
         msg.yawrate = _ang_v_f[2] * DEG2RAD;
         
-        msg.pitchrate_deg = - _ang_v_f[0];
-        msg.rollrate_deg = - _ang_v_f[1];
+        msg.pitchrate_deg = _ang_v_f[0];
+        msg.rollrate_deg = _ang_v_f[1];
         msg.yawrate_deg = _ang_v_f[2];
 
-        msg.acc_x = - _acc_f[0];
-        msg.acc_y = - _acc_f[1];
+        msg.acc_x = _acc_f[0];
+        msg.acc_y = _acc_f[1];
         msg.acc_z = _acc_f[2];
 
         msg.temp = _temp;
