@@ -15,8 +15,8 @@ namespace module {
     _count_l(0),
     _count_r_pre(0),
     _count_l_pre(0),
-    _ang_r(0.0f),
-    _ang_l(0.0f),
+    _ang_r_deg(0.0f),
+    _ang_l_deg(0.0f),
     _rpm_r(0.0f),
     _rpm_l(0.0f),
     _ang_r_cor(0.0f),
@@ -25,8 +25,8 @@ namespace module {
     _v_l(0.0f),
     _v(0.0f),
     _v_ave(0.0f),
-    _ang_v_rad(0.0f),
-    _ang_v(0.0f)
+    _yawrate_rad(0.0f),
+    _yawrate_deg(0.0f)
     {
         setModuleName("WheelOdometry");
         _updateParam();        
@@ -39,11 +39,11 @@ namespace module {
 
         hal::useCS0SPI1();
         _count_r = hal::communicate16bitSPI1(0);
-        _ang_r = (float)_count_r / ENC_RES * 360.0f;
+        _ang_r_deg = (float)_count_r / ENC_RES * 360.0f;
 
         hal::useCS1SPI1();
         _count_l = hal::communicate16bitSPI1(0);
-        _ang_l = (float)_count_l / ENC_RES * 360.0f;
+        _ang_l_deg = (float)_count_l / ENC_RES * 360.0f;
     }
 
     void WheelOdometry::_updateParam(){
@@ -79,8 +79,8 @@ namespace module {
 
         _v = (_v_r + _v_l) * 0.5f; 
 
-        _ang_v_rad = (_v_r - _v_l) / _tread;
-        _ang_v = _ang_v_rad * 180.0f / PI;
+        _yawrate_rad = (_v_r - _v_l) / _tread;
+        _yawrate_deg = _yawrate_rad * 180.0f / PI;
 
         _publish();
     }
@@ -90,8 +90,8 @@ namespace module {
         PRINTF_ASYNC("  count_l     : %d\n", _count_l);
         PRINTF_ASYNC("  count_r_pre : %d\n", _count_r_pre);
         PRINTF_ASYNC("  count_l_pre : %d\n", _count_l_pre);
-        PRINTF_ASYNC("  ang_r       : %f\n", _ang_r);
-        PRINTF_ASYNC("  ang_l       : %f\n", _ang_l);
+        PRINTF_ASYNC("  ang_r_deg   : %f\n", _ang_r_deg);
+        PRINTF_ASYNC("  ang_l_deg   : %f\n", _ang_l_deg);
         PRINTF_ASYNC("  rpm_r       : %f\n", _rpm_r);
         PRINTF_ASYNC("  rpm_l       : %f\n", _rpm_l);
         PRINTF_ASYNC("  ang_r_cor   : %f\n", _ang_r_cor);
@@ -100,8 +100,8 @@ namespace module {
         PRINTF_ASYNC("  v_l         : %f\n", _v_l);
         PRINTF_ASYNC("  v           : %f\n", _v);
         PRINTF_ASYNC("  v_ave       : %f\n", _v_ave);
-        PRINTF_ASYNC("  ang_v_rad   : %f\n", _ang_v_rad);
-        PRINTF_ASYNC("  ang_v       : %f\n", _ang_v);
+        PRINTF_ASYNC("  yawrate_rad : %f\n", _yawrate_rad);
+        PRINTF_ASYNC("  yawrate_deg : %f\n", _yawrate_deg);
     }
 
     void WheelOdometry::evalAng(float duty){
@@ -117,8 +117,8 @@ namespace module {
         pt.setDutyR(duty);
         hal::waitmsec(1000);
         for (uint16_t i = 0; i < num; i++) {            
-            ang_r_list[i] = _ang_r;
-            ang_l_list[i] = _ang_l;
+            ang_r_list[i] = _ang_r_deg;
+            ang_l_list[i] = _ang_l_deg;
             uint32_t start_usec = hal::getElapsedUsec();            
             while(1){
                 uint32_t end_usec = hal::getElapsedUsec();
@@ -173,11 +173,9 @@ namespace module {
         msg.rpm_r = _rpm_r;
         msg.rpm_l = _rpm_l;
 
-        msg.ang_v = _ang_v;
-        msg.ang_v_rad = _ang_v_rad;
-
-        msg.ang_r = _ang_r;
-        msg.ang_l = _ang_l;
+        msg.yawrate = _yawrate_rad;
+        msg.ang_r = _ang_r_deg * PI / 180.0f;
+        msg.ang_l = _ang_l_deg * PI / 180.0f;
 
         publishMsg(msg_id::WHEEL_ODOMETRY, &msg);
     }

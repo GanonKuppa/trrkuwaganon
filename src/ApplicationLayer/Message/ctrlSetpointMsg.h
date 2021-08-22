@@ -2,20 +2,58 @@
 
 #include "baseMsg.h"
 
+enum class ETrajType {
+    STOP = 0,
+    STRAIGHT,
+    DIAGONAL,    
+    SPINTURN,
+    CURVE
+};
+
+enum class ETurnType {
+    STOP = 0,
+    STRAIGHT,
+    STRAIGHT_WALL_CENTER,    
+    DIAGONAL,
+    DIAGONAL_CENTER,
+    TURN_90,
+    TURN_L_90,
+    TURN_180,
+    TURN_S2D_45,
+    TURN_S2D_135,
+    TURN_D_90,
+    TURN_D2S_45,
+    TURN_D2S_135,    
+    CIRCULAR    
+};
+
+enum class ETurnDir {
+    CW = -1, 
+    NO_TURN = 0, 
+    CCW = 1
+};
+
+
 class CtrlSetpointMsg : public BaseMsg{
   public:
-    uint8_t motion_type = 0;
-    uint8_t turn_type = 0;
+    float x = 0.0f;         // [m]
+    float v_x = 0.0f;       // [m/s]
+    float a_x = 0.0f;       // [m/s^2]
 
-    float x = 0.0f;
-    float x_d = 0.0f;
-    float x_dd = 0.0f;
-    float y = 0.0f;
-    float y_d = 0.0f;
-    float y_dd = 0.0f;
-    float ang = 0.0f;
-    float ang_v = 0.0f;
-    float ang_a = 0.0f;
-    float v = 0.0f;
-    float a = 0.0f;
+    float y = 0.0f;         // [m]
+    float v_y = 0.0f;       // [m/s]
+    float a_y = 0.0f;       // [m/s^2]
+
+    float v_xy_body = 0.0f; // [m/s]
+    float a_xy_body = 0.0f; // [m/s^2]
+
+    float yaw = 0.0f;       // [rad]
+    float yawrate = 0.0f;   // [rad/s]
+    float yawacc = 0.0f;    // [rad/s^2]
+
+    float beta = 0.0f;      // [rad]
+
+    ETrajType traj_type = ETrajType::STOP; // [enum]
+    ETurnType turn_type = ETurnType::STOP; // [enum]
+    ETurnDir turn_dir = ETurnDir::NO_TURN; // [enum]
 };

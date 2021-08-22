@@ -16,8 +16,8 @@ namespace module {
         int32_t _count_r_pre;
         int32_t _count_l_pre;
 
-        float _ang_r;
-        float _ang_l;
+        float _ang_r_deg;
+        float _ang_l_deg;
 
         float _rpm_r;
         float _rpm_l;
@@ -30,8 +30,8 @@ namespace module {
         float _v;
         float _v_ave;
 
-        float _ang_v_rad;
-        float _ang_v;
+        float _yawrate_rad;
+        float _yawrate_deg;
 
         const float ENC_RES = 65536;
         const float ENC_R_DIR = -1.0f;

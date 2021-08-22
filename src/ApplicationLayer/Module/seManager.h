@@ -15,22 +15,18 @@ namespace sound {
 }
 
 
-/*
+
 namespace module {
-
-
-
-
 
     class SeManager : public BaseModule<SeManager> {
       public:
-        void update();
-
-        enum
+        void update0();
 
       private:
         friend class BaseModule<SeManager>;
         SeManager();
     };
+
+    int usrcmd_seManager(int argc, char **argv);
+    
 }
-*/

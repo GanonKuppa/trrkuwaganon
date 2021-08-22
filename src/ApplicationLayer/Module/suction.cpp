@@ -28,4 +28,8 @@ namespace module{
         _duty = 0.0f;
         _on_time = 0.0f;
     }
+
+    int usrcmd_suction(int argc, char **argv){
+
+    }
 }

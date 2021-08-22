@@ -3,12 +3,15 @@
 enum class msg_id{
     BATTERY_INFO = 0,
     CTRL_SETPOINT,
-    GAMEPAD,    
+    ACTUATOR_OUTPUT,
     IMU,
-    WALL_SENSOR,
     WHEEL_ODOMETRY,
-    POSITION_ESTIMATOR,
-    GROUND_TRUTH
+    NAV_STATE,
+    WALL_SENSOR,
+    VEHICLE_POSITION,
+    VEHICLE_ATTITUDE,
+    GROUND_TRUTH,
+    GAMEPAD
 };
 
 void publishMsg(msg_id msg_id, void* msg);

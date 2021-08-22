@@ -41,5 +41,7 @@ namespace module {
         friend class BaseModule<Gamepad>;
     };
 
+    int usrcmd_gamepad(int argc, char **argv);
+
 }
 

@@ -22,4 +22,6 @@ namespace module {
         static int serial_write(const char *buf, int cnt, void *extobj);
     };
 
+    int usrcmd_shell(int argc, char **argv);
+
 }

@@ -50,3 +50,18 @@ namespace sound {
     }
 
 }
+
+namespace module{
+    SeManager::SeManager(){
+
+    }
+
+    void SeManager::update0(){
+        
+    }
+
+    int usrcmd_seManager(int argc, char **argv){
+
+    }
+
+}

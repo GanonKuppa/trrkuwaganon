@@ -48,4 +48,8 @@ namespace module {
         if(b) _led_b->flash(on_time, off_time);
         else _led_b->turn(false);
     }
+
+    int usrcmd_ledController(int argc, char **argv){
+    	return 0;
+    }
 }

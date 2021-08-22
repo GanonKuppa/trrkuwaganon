@@ -4,7 +4,7 @@
 
 class PositionEstimatorMsg : public BaseMsg{
   public:
-    float v_xy_body = 0.0f; // m/s
+    float v_xy_body_cmp = 0.0f; // m/s
     float v_xy_body_enc = 0.0f; // m/s
     float v_xy_body_acc = 0.0f; // m/s
     float v_xy_body_for_odom = 0.0f; // m/s

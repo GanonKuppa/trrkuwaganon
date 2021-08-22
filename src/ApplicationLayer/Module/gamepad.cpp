@@ -206,4 +206,8 @@ namespace module {
 #endif
     }
 
+    int usrcmd_gamepad(int argc, char **argv){
+        return 0;
+    };
+
 }

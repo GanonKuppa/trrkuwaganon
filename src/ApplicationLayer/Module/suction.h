@@ -18,4 +18,6 @@ namespace module{
         Suction();
     };
 
+    int usrcmd_suction(int argc, char **argv);
+
 }

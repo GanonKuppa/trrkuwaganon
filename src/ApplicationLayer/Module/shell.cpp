@@ -15,16 +15,24 @@
 
 // Module
 #include "baseModule.h"
-#include "ledController.h"
-#include "wallSensor.h"
 #include "batteryMonitor.h"
-#include "suction.h"
-#include "shell.h"
-#include "parameterManager.h"
-#include "imuDriver.h"
+#include "controlMixer.h"
 #include "heater.h"
-#include "wheelOdometry.h"
+#include "imuDriver.h"
+#include "ledController.h"
+#include "navigator.h"
+#include "parameterManager.h"
+#include "positionEstimator.h"
 #include "powerTransmission.h"
+#include "pseudoDial.h"
+#include "shell.h"
+#include "suction.h"
+#include "trajectoryCommander.h"
+#include "wallSensor.h"
+#include "wheelOdometry.h"
+#include "truthMaker.h"
+#include "gamepad.h"
+#include "seManager.h"
 
 static int usrcmd_help(int argc, char **argv);
 static int usrcmd_info(int argc, char **argv);
@@ -43,23 +51,31 @@ typedef struct {
 static const cmd_table_t cmdlist[] = {
     { "help", "help command.", usrcmd_help },
     { "info", "system info.", usrcmd_info },
+    { "top", "top command.", usrcmd_top },
     { "batteryMonitor", "BatteryMonitor Module.", module::usrcmd_batteryMonitor },
-    { "battery", "BatteryMonitor Module.", module::usrcmd_batteryMonitor },
-    { "communication", "Communication Module.", usrcmd_info },
-    { "gamepad", "Gamepad Module.", usrcmd_info },
+    { "battery", "alias of batteryMonitor command.", module::usrcmd_batteryMonitor },
+    { "ControlMixer", "ControlMixer.", module::usrcmd_controlMixer },
     { "heater", "Heater Module.", module::usrcmd_heater },
-    { "ledController", "LedController Module.", usrcmd_info },
-    { "suction", "Suction Module.", usrcmd_info },
-    { "wallSensor", "WallSensor Module.", module::usrcmd_wallSensor },
     { "imuDriver", "ImuDriver Module.", module::usrcmd_imuDriver },
-    { "imu", "ImuDriver Module.", module::usrcmd_imuDriver },
-    { "wheelOdometry", "WheelOdometry Module.", module::usrcmd_wheelOdometry },
-    { "wheel", "WheelOdometry Module.", module::usrcmd_wheelOdometry },
+    { "imu", "alias of imuDriver command.", module::usrcmd_imuDriver },
+    { "ledController", "LedController Module.", module::usrcmd_ledController },
+    { "navigator", "Navigator Module.", module::usrcmd_navigator },
     { "paramManager", "ParamManager Module.", module::usrcmd_parameterManager },
     { "param", "alias of paramManager command.", module::usrcmd_parameterManager },    
+    { "positionEstimator", "PositionEstimator Module.", module::usrcmd_positionEstimator },
+    { "position", "alias of positionEstimator command.", module::usrcmd_positionEstimator },
     { "powerTransmission", "PowerTransmission Module.", module::usrcmd_powerTransmission },
-    { "power", "PowerTransmission Module.", module::usrcmd_powerTransmission },
-    { "top", "top command.", usrcmd_top }
+    { "power", "alias of powerTransmission command.", module::usrcmd_powerTransmission },
+    { "pseudoDial", "pseudoDial Module.", module::usrcmd_pseudoDial },
+    { "shell", "shell Module.", module::usrcmd_shell },
+    { "suction", "Suction Module.", module::usrcmd_suction },
+    { "trajectoryCommander", "TrajectoryCommander Module.", module::usrcmd_trajectoryCommander },
+    { "wallSensor", "WallSensor Module.", module::usrcmd_wallSensor },
+    { "wheelOdometry", "WheelOdometry Module.", module::usrcmd_wheelOdometry },
+    { "wheel", "alias of wheelOdometry command.", module::usrcmd_wheelOdometry },
+    { "truthMaker", "TruthMaker Module.", module::usrcmd_truthMaker },
+    { "gamepad", "Gamepad Module.", module::usrcmd_gamepad },
+    { "seManager", "seManager Module.", module::usrcmd_seManager }
 };
 
 int usrcmd_help(int argc, char **argv)
@@ -118,19 +134,42 @@ int usrcmd_top(int argc, char **argv)
     PRINTF_ASYNC("\n");
 
     PRINTF_ASYNC("  --- Modules Time update0, update1, update2, update3\n");
-    module::LedController::getInstance().printCycleTime();
-    hal::waitmsec(10);
-    module::WallSensor::getInstance().printCycleTime();
-    hal::waitmsec(10);
     module::BatteryMonitor::getInstance().printCycleTime();
     hal::waitmsec(10);
-    module::Suction::getInstance().printCycleTime();
+    module::ControlMixer::getInstance().printCycleTime();
     hal::waitmsec(10);
-    module::Shell::getInstance().printCycleTime();
+    module::Heater::getInstance().printCycleTime();
     hal::waitmsec(10);
     module::ImuDriver::getInstance().printCycleTime();
     hal::waitmsec(10);
-    module::Heater::getInstance().printCycleTime();
+    module::LedController::getInstance().printCycleTime();
+    hal::waitmsec(10);
+    module::Navigator::getInstance().printCycleTime();
+    hal::waitmsec(10);
+    module::ParameterManager::getInstance().printCycleTime();
+    hal::waitmsec(10);
+    module::PositionEstimator::getInstance().printCycleTime();
+    hal::waitmsec(10);
+    module::PowerTransmission::getInstance().printCycleTime();
+    hal::waitmsec(10);
+    module::PseudoDial::getInstance().printCycleTime();
+    hal::waitmsec(10);
+    module::Shell::getInstance().printCycleTime();
+    hal::waitmsec(10);
+    module::Suction::getInstance().printCycleTime();
+    hal::waitmsec(10);
+    module::TrajectoryCommander::getInstance().printCycleTime();
+    hal::waitmsec(10);
+    module::WallSensor::getInstance().printCycleTime();
+    hal::waitmsec(10);
+    module::WheelOdometry::getInstance().printCycleTime();
+    hal::waitmsec(10);
+    module::TruthMaker::getInstance().printCycleTime();
+    hal::waitmsec(10);
+    module::Gamepad::getInstance().printCycleTime();
+    hal::waitmsec(10);
+    module::SeManager::getInstance().printCycleTime();
+    hal::waitmsec(10);
 
     return 0;
 }
@@ -214,6 +253,11 @@ namespace module {
     {
         hal::putnbyteUart1((uint8_t*)buf, cnt);
         return cnt;
+    }
+
+
+    int usrcmd_shell(int argc, char **argv){
+    	return 0;
     }
 
 

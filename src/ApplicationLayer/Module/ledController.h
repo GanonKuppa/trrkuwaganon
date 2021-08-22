@@ -21,4 +21,7 @@ namespace module {
         friend class BaseModule<LedController>;
         LedController();
     };
+
+    int usrcmd_ledController(int argc, char **argv);
+
 }

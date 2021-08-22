@@ -248,10 +248,6 @@ namespace module {
         msg.rollrate = _ang_v_f[1] * DEG2RAD;
         msg.yawrate = _ang_v_f[2] * DEG2RAD;
         
-        msg.pitchrate_deg = _ang_v_f[0];
-        msg.rollrate_deg = _ang_v_f[1];
-        msg.yawrate_deg = _ang_v_f[2];
-
         msg.acc_x = _acc_f[0];
         msg.acc_y = _acc_f[1];
         msg.acc_z = _acc_f[2];
