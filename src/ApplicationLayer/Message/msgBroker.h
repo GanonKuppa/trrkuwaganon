@@ -1,17 +1,18 @@
 #pragma once
 
 enum class msg_id{
-    BATTERY_INFO = 0,
+    ACTUATOR_OUTPUT =0,
+    BATTERY_INFO,
     CTRL_SETPOINT,
-    ACTUATOR_OUTPUT,
-    IMU,
-    WHEEL_ODOMETRY,
-    NAV_STATE,
-    WALL_SENSOR,
-    VEHICLE_POSITION,
-    VEHICLE_ATTITUDE,
+    DIAL_POSITION,
+    GAMEPAD,
     GROUND_TRUTH,
-    GAMEPAD
+    IMU,
+    NAV_STATE,    
+    VEHICLE_ATTITUDE,
+    VEHICLE_POSITION,
+    WALL_SENSOR,
+    WHEEL_ODOMETRY            
 };
 
 void publishMsg(msg_id msg_id, void* msg);
