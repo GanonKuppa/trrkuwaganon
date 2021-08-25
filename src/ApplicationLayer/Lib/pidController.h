@@ -139,14 +139,14 @@ class PidfController {
 
 
 class AngPidfController : public PidfController {
-    public:
+  public:
 
     virtual void update(float target, float observed_val) {
         if(!enable) return;
-
+        
         float ang_diff = target - observed_val;
-        while(ang_diff >  180.0f) ang_diff -= 360.0f;
-        while(ang_diff < -180.0f) ang_diff += 360.0f;
+        while(ang_diff >  PI) ang_diff -= 2.0f * PI;
+        while(ang_diff < -PI) ang_diff += 2.0f * PI;
         e_p0 = ang_diff;
 
         
@@ -167,7 +167,8 @@ class AngPidfController : public PidfController {
         u_k1 = u_k0;
 
     };
-
+  private:
+    const float PI = 3.141592653589f;
 
 };
 

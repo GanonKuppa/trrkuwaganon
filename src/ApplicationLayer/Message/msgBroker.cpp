@@ -1,6 +1,10 @@
 #include "msgBroker.h"
 #include "baseMsg.h"
 
+// Hal
+#include "hal_timer.h"
+
+// Msg
 #include "actuatorOutputMsg.h"
 #include "batteryInfoMsg.h"
 #include "ctrlSetpointMsg.h"
@@ -29,6 +33,7 @@ static WheelOdometryMsg wheelOdometryMsg;
 
 
 void publishMsg(msg_id msg_id, void* msg){
+	(*(BaseMsg*)msg).timestamp = hal::getElapsedUsec();
     if     (msg_id == msg_id::ACTUATOR_OUTPUT)   {actuatorOutputMsg    = *(ActuatorOutputMsg*)msg   ;}
     else if(msg_id == msg_id::BATTERY_INFO)      {batteryInfoMsg       = *(BatteryInfoMsg*)msg      ;}
     else if(msg_id == msg_id::CTRL_SETPOINT)     {ctrlSetpointMsg      = *(CtrlSetpointMsg*)msg     ;}

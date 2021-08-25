@@ -59,6 +59,11 @@ namespace module {
         registration<float>(182, heater_i_limit, "heater_i_limit"); //182
         registration<float>(183, heater_limit, "heater_limit"); //183
         registration<float>(184, heater_target_temp, "heater_target_temp"); //184
+        
+        registration<float>(185, dial_p, "dial_p"); //184
+        registration<float>(186, dial_i, "dial_i"); //185
+        registration<float>(187, dial_i_limit, "dial_i_limit"); //186
+        registration<float>(188, dial_limit, "dial_limit"); //187
 
     }
 

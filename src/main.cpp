@@ -17,16 +17,24 @@
 #include "hal_wdt.h"
 
 // Module
-#include "parameterManager.h"
-#include "ledController.h"
-#include "wallSensor.h"
 #include "batteryMonitor.h"
-#include "suction.h"
-#include "shell.h"
-#include "imuDriver.h"
+#include "controlMixer.h"
+#include "gamepad.h"
 #include "heater.h"
-#include "wheelOdometry.h"
+#include "imuDriver.h"
+#include "ledController.h"
+#include "navigator.h"
+#include "parameterManager.h"
+#include "positionEstimator.h"
 #include "powerTransmission.h"
+#include "pseudoDial.h"
+#include "seManager.h"
+#include "shell.h"
+#include "suction.h"
+#include "trajectoryCommander.h"
+#include "truthMaker.h"
+#include "wallsensor.h"
+#include "wheelOdometry.h"
 
 // Activity
 #include "ActivityFactory.h"
@@ -50,15 +58,16 @@ void timerInterrupt0() {
     uint32_t start_usec = hal::getElapsedUsec();
 
     // 毎回行う処理
-    {
-        module::BatteryMonitor::getInstance().cycle0();
+    {        
         module::Shell::getInstance().cycle0();
-        module::Heater::getInstance().cycle0();
+        module::Heater::getInstance().cycle0();        
     }
     // スロット0
     if (int_tick_count % 4 == 0) {
-        module::LedController::getInstance().cycle0();
-        module::WallSensor::getInstance().cycle0();
+        module::WheelOdometry::getInstance().cycle0();
+        module::ImuDriver::getInstance().cycle0();
+        module::BatteryMonitor::getInstance().cycle0();
+        module::PowerTransmission::getInstance().cycle0();
         module::Shell::getInstance().cycle1();
 
         uint32_t end_usec = hal::getElapsedUsec();        
@@ -66,6 +75,7 @@ void timerInterrupt0() {
     }
     // スロット1
     if (int_tick_count % 4 == 1) {
+        module::LedController::getInstance().cycle0();
         module::Shell::getInstance().cycle1();
 
         uint32_t end_usec = hal::getElapsedUsec();
@@ -74,7 +84,8 @@ void timerInterrupt0() {
     }
     // スロット2
     if (int_tick_count % 4 == 2) {
-        module::WallSensor::getInstance().cycle1();
+        module::WallSensor::getInstance().cycle0();
+        module::PseudoDial::getInstance().cycle0();      
         module::Shell::getInstance().cycle1();
 
         uint32_t end_usec = hal::getElapsedUsec();
@@ -82,9 +93,8 @@ void timerInterrupt0() {
     }
     // スロット3
     if (int_tick_count % 4 == 3) {        
-        module::Shell::getInstance().cycle1();
-        module::ImuDriver::getInstance().cycle0();
-        module::WheelOdometry::getInstance().cycle0();
+        module::WallSensor::getInstance().cycle1();        
+        module::Shell::getInstance().cycle1();                
 
         uint32_t end_usec = hal::getElapsedUsec();
         hal::setSlot3Time(end_usec - start_usec);
@@ -101,10 +111,16 @@ void timerInterrupt1() {
 int main(void) {
     halInit();
     startUpInit();
-    module::LedController::getInstance().flashFcled(1,0,0,0.5,0.5);
+    module::LedController::getInstance().turnFcled(1,0,0);
+    hal::waitmsec(100);
+    module::LedController::getInstance().turnFcled(0,1,0);
+    hal::waitmsec(100);
+    module::LedController::getInstance().turnFcled(0,0,1);
+    hal::waitmsec(100);
+    module::LedController::getInstance().turnFcled(0,0,0);
+    hal::waitmsec(100);
 
     while(1) {                
-        module::LedController::getInstance().turnFcled(0,0,0);
         auto activity = activity::ActivityFactory::cteateModeSelect();
         activity->start();
     }
@@ -145,16 +161,22 @@ void startUpInit() {
 }
 
 void object_init() {
-    module::ParameterManager::getInstance();
-    module::LedController::getInstance().setDeltaT(0.001f);
-    module::WallSensor::getInstance();
-    module::BatteryMonitor::getInstance().setDeltaT(0.00025f);
-    module::Suction::getInstance().setDeltaT(0.00025f);
-    module::ImuDriver::getInstance().setDeltaT(0.001f);
-    module::Shell::getInstance();
+    module::BatteryMonitor::getInstance().setDeltaT(0.001f);
+    module::ControlMixer::getInstance().setDeltaT(0.001f);
+    module::Gamepad::getInstance().setDeltaT(0.001f);
     module::Heater::getInstance().setDeltaT(0.00025f);
+    module::ImuDriver::getInstance().setDeltaT(0.001f);
+    module::LedController::getInstance().setDeltaT(0.001f);
+    module::Navigator::getInstance().setDeltaT(0.001f);
+    module::ParameterManager::getInstance();
+    module::PositionEstimator::getInstance().setDeltaT(0.001f);
+    module::PowerTransmission::getInstance().setDeltaT(0.001f);
+    module::PseudoDial::getInstance().setDeltaT(0.001f);
+    module::SeManager::getInstance();
+    module::Shell::getInstance();
+    module::Suction::getInstance().setDeltaT(0.00025f);
+    module::WallSensor::getInstance();    
     module::WheelOdometry::getInstance().setDeltaT(0.001f);
-    module::PowerTransmission::getInstance();
 }
 
 

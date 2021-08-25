@@ -3,16 +3,19 @@
 #include "math.h"
 #include <string>
 
-#include "hal_spi.h"
-#include "hal_timer.h"
+// Lib
+#include "ntlibc.h"
 #include "debugLog.h"
 
-#include "parameterManager.h"
+// Hal
+#include "hal_spi.h"
+#include "hal_timer.h"
 
-#include "imuMsg.h"
+// Module
 #include "msgBroker.h"
+#include "parameterManager.h"
+#include "imuMsg.h"
 
-#include "ntlibc.h"
 
 namespace module {
 

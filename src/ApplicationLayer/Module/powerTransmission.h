@@ -6,7 +6,7 @@
 namespace module {
     class PowerTransmission : public BaseModule<PowerTransmission> {
       public:
-      	//void update0();                        
+      	void update0();                        
         void debug();
         void setDutyL(float duty);
         void setDutyR(float duty);

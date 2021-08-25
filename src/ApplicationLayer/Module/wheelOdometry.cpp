@@ -40,10 +40,12 @@ namespace module {
         hal::useCS0SPI1();
         _count_r = hal::communicate16bitSPI1(0);
         _ang_r_deg = (float)_count_r / ENC_RES * 360.0f;
+        if(ENC_R_DIR  < 0.0f) _ang_r_deg = 360.0f - _ang_r_deg;
 
         hal::useCS1SPI1();
         _count_l = hal::communicate16bitSPI1(0);
         _ang_l_deg = (float)_count_l / ENC_RES * 360.0f;
+        if(ENC_L_DIR  < 0.0f) _ang_l_deg = 360.0f - _ang_l_deg;
     }
 
     void WheelOdometry::_updateParam(){

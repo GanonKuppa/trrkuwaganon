@@ -5,12 +5,18 @@
 #include <cfloat>
 #include <string>
 
-
-#include "parameterManager.h"
-#include "hal_pwm.h"
-
+// Lib
 #include "ntlibc.h"
 
+// Hal
+#include "hal_pwm.h"
+
+// Module
+#include "parameterManager.h"
+
+// Msg
+#include "msgBroker.h"
+#include "actuatorOutputMsg.h"
 
 namespace module {
 
@@ -21,6 +27,16 @@ namespace module {
         setModuleName("PowerTransmission");
         setDutyL(0.0f);
         setDutyR(0.0f);
+    }
+
+    void PowerTransmission::update0(){
+        ActuatorOutputMsg msg;
+        copyMsg(msg_id::ACTUATOR_OUTPUT, &msg);
+        
+        if(msg.ctrl_mode == ECtrlMode::PSEUDO_DIAL){
+            setDutyL(msg.duty_l);
+            setDutyR(msg.duty_r);
+        }
     }
 
     void PowerTransmission::debug(){

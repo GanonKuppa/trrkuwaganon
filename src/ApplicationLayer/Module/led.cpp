@@ -8,7 +8,7 @@ Led::Led(float delta_t, bool on_state, void (*setGpioFunc)(bool)):
     _off_time(0.0f),
     _delta_t(delta_t),
     _on_state(on_state),
-    _flash_flag(0.0f),
+    _flash_flag(false),
     _setGpioFunc(setGpioFunc)
 {}
 

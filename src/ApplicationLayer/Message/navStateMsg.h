@@ -5,7 +5,8 @@
 enum class ENavMode {
     STANDBY = 0,
     FASTEST,
-    SEARCH
+    SEARCH,
+    MODE_SELECT
 };
 
 enum class ENavSubMode {

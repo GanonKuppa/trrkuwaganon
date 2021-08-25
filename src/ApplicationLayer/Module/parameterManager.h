@@ -90,6 +90,10 @@ namespace module {
         float heater_limit; //183
         float heater_target_temp; //184
 
+        float dial_p; //185
+        float dial_i; //186
+        float dial_i_limit; //187
+        float dial_limit; //188
 
         //----管理下においた変数たち-----
 
