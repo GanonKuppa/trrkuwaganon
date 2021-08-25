@@ -1,6 +1,8 @@
 #include "dial.h"
 #include "debugLog.h"
 
+#include <cmath>
+
 Dial::Dial() :
 _enable(false),
 _dial_position(0),
@@ -9,7 +11,8 @@ _duty(0.0f),
 _p_gain(0.0f),
 _i_gain(0.0f),
 _i_limit(0.0f),
-_limit(0.0f)
+_limit(0.0f),
+_ang_origin(0.0f)
 {   
     _ang_pidf.set(0.0f, 0.0f, 0.0f, 0.0f);
 }
@@ -25,7 +28,11 @@ bool Dial::getEnable(){
 void Dial::update(){
     
     if(!_enable) return;
-    float angle_rad = getAngle();
+
+    float ang_div_half_offset = 0.0f;
+    if(_division_num != 0) ang_div_half_offset = 0.5f * 2.0f * PI / (float)_division_num;
+
+    float angle_rad = fmodf(getAngle() + ang_div_half_offset - _ang_origin + 2.0f * PI, 2.0f * PI);
     float angle_deg = angle_rad * RAD2DEG;
     _dial_position = (int)((angle_deg / 360.0) * (float)_division_num);
     
@@ -58,7 +65,7 @@ void Dial::decrementPosition() {
 }
 
 void Dial::setDivisionNum(uint8_t num){
-    _division_num = num;
+    _division_num = num;    
 }
 
 uint8_t Dial::getDialPosition(){
@@ -76,10 +83,10 @@ void Dial::setPiGain(float p_gain, float i_gain, float i_limit, float limit){
     _limit = limit;
 }
 
-void Dial::reset() {
-    //wodo.resetTireAng();
+void Dial::reset() {    
     _dial_position = 0;
     _ang_pidf.reset();
+    _ang_origin = getAngle();
 }
 
 void Dial::debug(){    
