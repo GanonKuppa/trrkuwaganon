@@ -140,6 +140,10 @@ namespace module {
         const float temp_scale = 0.00390625f;   // 256 LSB/degC
         const float temp_offset = 25.0f;
 
+/*
+        uint8_t out_temp_l = _readReg(0x20);
+        uint8_t out_temp_h = _readReg(0x21);
+
         uint8_t outx_l_g = _readReg(0x22);
         uint8_t outx_h_g = _readReg(0x23);
         uint8_t outy_l_g = _readReg(0x24);
@@ -153,10 +157,26 @@ namespace module {
         uint8_t outy_h_a = _readReg(0x2b);
         uint8_t outz_l_a = _readReg(0x2c);
         uint8_t outz_h_a = _readReg(0x2d);
+*/
+        uint8_t recv[15] = {0};
+        _readRegBurst(recv);
+        uint8_t out_temp_l = recv[1];
+        uint8_t out_temp_h = recv[2];
 
-        uint8_t out_temp_l = _readReg(0x20);
-        uint8_t out_temp_h = _readReg(0x21);
+        uint8_t outx_l_g = recv[3];
+        uint8_t outx_h_g = recv[4];
+        uint8_t outy_l_g = recv[5];
+        uint8_t outy_h_g = recv[6];
+        uint8_t outz_l_g = recv[7];
+        uint8_t outz_h_g = recv[8];
 
+        uint8_t outx_l_a = recv[9];
+        uint8_t outx_h_a = recv[10];
+        uint8_t outy_l_a = recv[11];
+        uint8_t outy_h_a = recv[12];
+        uint8_t outz_l_a = recv[13];
+        uint8_t outz_h_a = recv[14];
+        
         _ang_v_raw[0] = - concatenate2Byte_int(outx_h_g, outx_l_g);
         _ang_v_raw[1] = - concatenate2Byte_int(outy_h_g, outy_l_g);
         _ang_v_raw[2] = concatenate2Byte_int(outz_h_g, outz_l_g);
@@ -242,6 +262,18 @@ namespace module {
         sendBuf[1] = 0x00;
         hal::communicateNbyteSPI0(sendBuf, recvBuf, 2);
         return recvBuf[1];
+    }
+
+    void ImuDriver::_readRegBurst(uint8_t* recv){
+        hal::useCS0SPI0();
+        hal::setEnableSPI0(1);
+
+        uint8_t send[15] = {0};
+        const uint8_t READ_FLAG = 0x80;
+        const uint8_t adress = 0x20;        
+        send[0] = READ_FLAG | adress;
+        hal::communicateNbyteSPI0(send, recv, 15);
+
     }
 
     void ImuDriver::_publish(){

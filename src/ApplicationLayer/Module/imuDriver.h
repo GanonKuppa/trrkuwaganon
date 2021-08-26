@@ -40,6 +40,7 @@ namespace module {
         ImuDriver();
         void _writeReg(uint8_t adress, uint8_t data);
         uint8_t _readReg(uint8_t adress);
+        void _readRegBurst(uint8_t* recv);
         void _publish();
     };
 

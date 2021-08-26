@@ -12,6 +12,8 @@
 namespace module {
 
     ParameterManager::ParameterManager() {
+        setModuleName("ParameterManager");
+
         registration<float>(0, mass, "mass");
         registration<float>(1, dia_tire, "dia_tire");
         registration<float>(2, tread, "tread");

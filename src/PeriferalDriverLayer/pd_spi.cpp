@@ -3,19 +3,8 @@
 #include "iodefine.h"
 
 
-//8bitフリーランニングカウンタとして動作
-//TMR0をSPI受信時の待ち時間生成に利用
 
 namespace periferal_driver {
-    void initTMR0() {
-        SYSTEM.PRCR.WORD = 0xA502;
-        SYSTEM.MSTPCRA.BIT.MSTPA5 = 0; //TMR0と1 ON
-        SYSTEM.PRCR.WORD = 0xA500;
-
-        TMR0.TCCR.BIT.CSS = 1; //1:PCLKBをカウントソースに設定
-        TMR0.TCCR.BIT.CKS = 0; //0:分周比1
-        TMR0.TCSTR.BIT.TCS = 1; //1:カウント開始 0:カウンタストップ
-    }
 
     void initRSPI0() {
         int dummy;
@@ -28,34 +17,37 @@ namespace periferal_driver {
         PORTA.PMR.BIT.B5 = 0;
         PORTA.PMR.BIT.B6 = 0;
         PORTA.PMR.BIT.B7 = 0;
-        PORTA.PMR.BIT.B0 = 0;
-
+        
         MPC.PWPR.BIT.B0WI = 0; //書き込み許可 0で許可
         MPC.PWPR.BIT.PFSWE = 1; //書き込み許可  1で許可
-        MPC.PA4PFS.BIT.PSEL = 0b001101; //SSLA0に設定
-        MPC.PA0PFS.BIT.PSEL = 0b001101; //SSLA1に設定
+        //MPC.PA4PFS.BIT.PSEL = 0b001101; //SSLA0に設定 
 
         MPC.PA5PFS.BIT.PSEL = 0b001101; //RSPCKAに設定
         MPC.PA6PFS.BIT.PSEL = 0b001101; //MOSIAに設定
         MPC.PA7PFS.BIT.PSEL = 0b001101; //MISOAに設定
+
+        PORTA.PDR.BIT.B4 = 1;  //SSLA0はGPIOとしてCSを制御
+        PORTA.PODR.BIT.B4 = 1;
+
+
         MPC.PWPR.BIT.PFSWE = 0; //PFSWEの書き込み禁止 0
         MPC.PWPR.BIT.B0WI = 1; //書き込み禁止
 
-        PORTA.PMR.BIT.B4 = 1; //ピンの設定をするときはまずピンを汎用ポートに設定しておく
+        //PORTA.PMR.BIT.B4 = 1; //ピンの設定をするときはまずピンを汎用ポートに設定しておく
         PORTA.PMR.BIT.B5 = 1;
         PORTA.PMR.BIT.B6 = 1;
         PORTA.PMR.BIT.B7 = 1;
-        PORTA.PMR.BIT.B0 = 1;
+        
 
-        RSPI0.SPDCR.BIT.SPLW = 1; //SPDRレジスタへはロングアクセス
+        RSPI0.SPDCR.BIT.SPLW = 0; //SPDRレジスタへはワードアクセス
 
         //RSPIビットレートレジスタ(SPBR): 通常のシリアル通信と同様に設定する
         //ビットレート = f(PCLKA)/[2 × (n + 1) × 2^N]
+        //n=SPBR, N=BRDV
         //mpu9250は1MHzまでOK
         //icm20608gは8MHzまでOK
         //asm330lhhは10MHzまでOK
-        RSPI0.SPBR = 4; //10MHz
-        //RSPI0.SPBR = 20; //2MHz
+        RSPI0.SPBR = 4; //9.6MHz        
 
         //RSPI制御レジスタ(SPCR)
         RSPI0.SPCR.BIT.SPMS = 0;
@@ -72,79 +64,6 @@ namespace periferal_driver {
         RSPI0.SPDCR.BIT.SPRDTD = 0; //受信バッファを読み出す
         RSPI0.SPCR.BIT.MSTR = 1;
         dummy = RSPI0.SPCR.BIT.MSTR;
-
-        initTMR0();
-    }
-
-    void useSSLA0RSPI0() {
-        setEnableRSPI0(0);
-        RSPI0.SPBR = 5; //8MHz
-        RSPI0.SPCMD0.BIT.SSLA = 0; //0:SSL0 1:SSL1
-        RSPI0.SPCMD0.BIT.SPB = 0b0111;
-    }
-
-    void useSSLA0RSPI1() {
-        PORTA.PODR.BIT.B0 = 1;
-        PORTE.PODR.BIT.B4 = 1;
-        RSPI1.SPBR = 5; //8MHz
-        RSPI1.SPCMD0.BIT.SPB = 0b1111;        
-        PORTE.PODR.BIT.B4 = 0;
-    }
-
-    void useSSLA1RSPI1() {
-        PORTA.PODR.BIT.B0 = 1;
-        PORTE.PODR.BIT.B4 = 1;        
-        RSPI1.SPBR = 5; //8MHz
-        RSPI1.SPCMD0.BIT.SPB = 0b1111;
-        PORTA.PODR.BIT.B0 = 0;
-    }
-
-
-
-    uint8_t communicate8bitRSPI0(uint8_t transmit) {
-        unsigned int receive;
-        RSPI0.SPDR.LONG = (uint8_t) transmit;
-        while(RSPI0.SPSR.BIT.SPTEF != 1) {
-        };
-        while (RSPI0.SPSR.BIT.SPRF == 0) {
-        }
-        receive = RSPI0.SPDR.LONG;
-        return (uint8_t) (receive & 0xff);
-    }
-
-
-    uint8_t communicate8bitRSPI1(uint8_t transmit) {
-        unsigned int receive;
-        RSPI1.SPDR.LONG = transmit;
-        while (RSPI1.SPSR.BIT.SPRF == 0) {
-        };
-        receive = RSPI1.SPDR.LONG;
-        while(RSPI1.SPSR.BIT.SPRF == 1){
-        };
-        receive = RSPI1.SPDR.LONG;
-        return (uint8_t) (receive & 0xff);
-    }
-
-    uint32_t communicate16bitRSPI1(uint16_t transmit) {        
-        setEnableRSPI1(1);
-        unsigned int receive;
-        RSPI1.SPDR.LONG = transmit;
-        while (RSPI1.SPSR.BIT.SPTEF != 1) { };
-        while(RSPI1.SPSR.BIT.SPRF == 0){ };
-        receive = RSPI1.SPDR.LONG;
-        setEnableRSPI1(0);
-        PORTA.PODR.BIT.B0 = 1;
-        PORTE.PODR.BIT.B4 = 1;        
-        return (uint16_t) (receive & 0xffffffff);
-        
-    }
-
-    void setEnableRSPI0(uint8_t en) {
-        RSPI0.SPCR.BIT.SPE = en;
-    }
-
-    void setEnableRSPI1(uint8_t en) {
-        RSPI1.SPCR.BIT.SPE = en;
     }
 
     void initRSPI1() {
@@ -168,10 +87,10 @@ namespace periferal_driver {
         MPC.PE6PFS.BIT.PSEL = 0b001101; //MOSIBに設定
         MPC.PE7PFS.BIT.PSEL = 0b001101; //MISOBに設定
         
-        PORTE.PDR.BIT.B4 = 1;  //SSLB0
+        PORTE.PDR.BIT.B4 = 1;  //SSLB0はGPIOとしてCSを制御
         PORTE.PODR.BIT.B4 = 1;
         
-        PORTA.PDR.BIT.B0 = 1;  //SSLA0
+        PORTA.PDR.BIT.B0 = 1;  //SSLA1のピンだったのでGPIOとしてCSを制御
         PORTA.PODR.BIT.B0 = 1;
         MPC.PWPR.BIT.PFSWE = 0; //PFSWEの書き込み禁止 0
         MPC.PWPR.BIT.B0WI = 1; //書き込み禁止
@@ -187,7 +106,8 @@ namespace periferal_driver {
         //ビットレート = f(PCLKA)/[2 × (n + 1) × 2^N]
         //mpu9250は1MHzまでOK
         //icm20608gは8MHzまでOK
-        RSPI1.SPBR = 5;
+        //ma730は25MHzまでOK
+        RSPI1.SPBR = 1; // 24MHz
         //RSPI制御レジスタ(SPCR)
         RSPI1.SPCR.BIT.SPMS = 0;
         RSPI1.SPCR.BIT.TXMD = 0;
@@ -204,32 +124,95 @@ namespace periferal_driver {
         RSPI1.SPCR.BIT.MSTR = 1;
         dummy = RSPI1.SPCR.BIT.MSTR;
 
-        initTMR0();
+    }
 
+    void useSSLA0RSPI0() {
+        setEnableRSPI0(0);
+        PORTA.PODR.BIT.B4 = 1;
+        RSPI0.SPBR = 4; //9.6MHz
+        RSPI0.SPCMD0.BIT.SSLA = 0; //0:SSL0 1:SSL1
+        RSPI0.SPCMD0.BIT.SPB = 0b0111;
+        PORTA.PODR.BIT.B4 = 0;     
+    }
+
+    void useSSLA1SPI0() {
+
+    }
+
+    void useSSLA0RSPI1() {
+        PORTA.PODR.BIT.B0 = 1;
+        PORTE.PODR.BIT.B4 = 1;
+        RSPI1.SPBR = 1; //24MHz
+        RSPI1.SPCMD0.BIT.SPB = 0b1111;        
+        PORTE.PODR.BIT.B4 = 0;
+    }
+
+    void useSSLA1RSPI1() {
+        PORTA.PODR.BIT.B0 = 1;
+        PORTE.PODR.BIT.B4 = 1;        
+        RSPI1.SPBR = 1; //24MHz
+        RSPI1.SPCMD0.BIT.SPB = 0b1111;
+        PORTA.PODR.BIT.B0 = 0;
+    }
+
+    void setEnableRSPI0(uint8_t en) {
+        RSPI0.SPCR.BIT.SPE = en;
+    }
+
+    void setEnableRSPI1(uint8_t en) {
+        RSPI1.SPCR.BIT.SPE = en;
+    }
+
+    uint8_t communicate8bitRSPI0(uint8_t transmit) {
+        setEnableRSPI0(1);
+        unsigned int receive;
+        RSPI0.SPDR.WORD.H = (uint8_t) transmit;
+        while (RSPI0.SPSR.BIT.SPTEF != 1) { }
+        while (RSPI0.SPSR.BIT.SPRF == 0) { }
+        receive = RSPI0.SPDR.WORD.H;
+        setEnableRSPI0(0);
+        PORTA.PODR.BIT.B4 = 1;
+
+        return (uint8_t) (receive & 0xff);
+    }
+
+    uint8_t communicate8bitRSPI1(uint8_t transmit) {
+        setEnableRSPI1(1);
+        unsigned int receive;
+        RSPI1.SPDR.LONG = transmit;
+        while (RSPI1.SPSR.BIT.SPTEF != 1) { }        
+        while (RSPI1.SPSR.BIT.SPRF == 0){ }
+        receive = RSPI1.SPDR.LONG;
+        return (uint8_t) (receive & 0xff);
+    }
+
+    uint32_t communicate16bitRSPI1(uint16_t transmit) {        
+        setEnableRSPI1(1);
+        unsigned int receive;
+        RSPI1.SPDR.LONG = transmit;
+        while (RSPI1.SPSR.BIT.SPTEF != 1) { }
+        while (RSPI1.SPSR.BIT.SPRF == 0){ }
+        receive = RSPI1.SPDR.LONG;
+        setEnableRSPI1(0);
+        PORTA.PODR.BIT.B0 = 1;
+        PORTE.PODR.BIT.B4 = 1;        
+        return (uint16_t) (receive & 0xffffffff);        
     }
 
     void communicateNbyteRSPI0(uint8_t* send, uint8_t* recv, uint8_t num) {
         setEnableRSPI0(1);
-        for (int i = 0; i < num; i++) {
-            //1byte受信するたびにちょっと待ち時間が必要
-            uint32_t dummy = TMR0.TCNT;
-            while (dummy == TMR0.TCNT);
+        for (int i = 0; i < num; i++) {            
+            RSPI0.SPDR.WORD.H = send[i];
+            while (RSPI0.SPSR.BIT.SPTEF != 1) { }            
+            while (RSPI0.SPSR.BIT.SPRF == 0) { }            
+            recv[i] = RSPI0.SPDR.WORD.H;
 
-
-            recv[i] = communicate8bitRSPI0(send[i]);
         }
         setEnableRSPI0(0);
+        PORTA.PODR.BIT.B4 = 1;
     }
 
     void communicateNbyteRSPI1(uint8_t* send, uint8_t* recv, uint8_t num) {
-        setEnableRSPI1(1);
-        for (int i = 0; i < num; i++) {
 
-            //1byte受信するたびにちょっと待ち時間が必要
-            uint32_t dummy = TMR0.TCNT;
-            while (dummy == TMR0.TCNT);
-            recv[i] = communicate8bitRSPI1(send[i]);
-        }
-        setEnableRSPI1(0);
     }
 }

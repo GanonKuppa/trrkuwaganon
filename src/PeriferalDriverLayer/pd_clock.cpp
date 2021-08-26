@@ -53,7 +53,7 @@ namespace periferal_driver {
              available for use as the system clock.*/
         }
 
-        //-------クロックソースをPLlに設定
+        //-------クロックソースPLLに設定
         SYSTEM.SCKCR.BIT.ICK = 0b0001; //1: 2分周 0:1分周
         SYSTEM.SCKCR.BIT.PCKA = 0b0001; //2分周
         SYSTEM.SCKCR.BIT.PCKB = 0b0010; //4分周

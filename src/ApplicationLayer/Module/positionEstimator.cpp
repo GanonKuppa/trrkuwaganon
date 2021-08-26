@@ -31,6 +31,8 @@ namespace module {
 	_pitchrate(0.0f),
 	_after_curve_time(0.0f)
     {        
+        setModuleName("PositionEstimator");
+
         for (uint8_t i = 0; i < ACC_Y_AVERAGE_NUM; i++) {
             _acc_y_list.push_front(0.0f);
         }    

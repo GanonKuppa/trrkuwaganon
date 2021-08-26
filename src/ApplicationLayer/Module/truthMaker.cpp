@@ -4,7 +4,8 @@
 namespace module {
 
     TruthMaker::TruthMaker(){
-        
+        setModuleName("TruthMaker");
+
     }
 
     void TruthMaker::update0(){

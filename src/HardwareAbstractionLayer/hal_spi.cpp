@@ -17,6 +17,36 @@ namespace hal {
 #endif
     }
 
+    void useCS0SPI0() {
+#ifndef SILS
+        periferal_driver::useSSLA0RSPI0();
+#endif
+    }
+
+    void useCS0SPI1() {
+#ifndef SILS
+        periferal_driver::useSSLA0RSPI1();
+#endif
+    }
+
+    void useCS1SPI1() {
+#ifndef SILS
+        periferal_driver::useSSLA1RSPI1();
+#endif
+    }
+
+    void setEnableSPI0(uint8_t en) {
+#ifndef SILS
+        periferal_driver::setEnableRSPI0(en);
+#endif
+    }
+
+    void setEnableSPI1(uint8_t en) {
+#ifndef SILS
+        periferal_driver::setEnableRSPI1(en);
+#endif
+    }
+
     uint8_t communicate8bitSPI0(uint8_t transmit) {
 #ifndef SILS
         return periferal_driver::communicate8bitRSPI0(transmit);
@@ -55,36 +85,5 @@ namespace hal {
         periferal_driver::communicateNbyteRSPI1(send, recv, num);
 #endif
     }
-
-    void setEnableSPI0(uint8_t en) {
-#ifndef SILS
-        periferal_driver::setEnableRSPI0(en);
-#endif
-    }
-
-    void setEnableSPI1(uint8_t en) {
-#ifndef SILS
-        periferal_driver::setEnableRSPI1(en);
-#endif
-    }
-
-    void useCS0SPI0() {
-#ifndef SILS
-        periferal_driver::useSSLA0RSPI0();
-#endif
-    }
-
-    void useCS0SPI1() {
-#ifndef SILS
-        periferal_driver::useSSLA0RSPI1();
-#endif
-    }
-
-    void useCS1SPI1() {
-#ifndef SILS
-        periferal_driver::useSSLA1RSPI1();
-#endif
-    }
-
 
 }

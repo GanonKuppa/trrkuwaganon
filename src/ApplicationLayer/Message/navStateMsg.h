@@ -40,5 +40,5 @@ class NavStateMsg : public BaseMsg {
 
     EAzimuth azimuth = EAzimuth::N;               // [enum]
 
-    bool is_failsage = false;                     // [bool]
+    bool is_failsafe = false;                     // [bool]
 };

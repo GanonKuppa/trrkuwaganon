@@ -64,8 +64,8 @@ void timerInterrupt0() {
     }
     // スロット0
     if (int_tick_count % 4 == 0) {
-        module::WheelOdometry::getInstance().cycle0();
         module::ImuDriver::getInstance().cycle0();
+        module::WheelOdometry::getInstance().cycle0();
         module::BatteryMonitor::getInstance().cycle0();
         module::PowerTransmission::getInstance().cycle0();
         module::Shell::getInstance().cycle1();

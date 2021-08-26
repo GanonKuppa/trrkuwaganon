@@ -76,7 +76,12 @@ namespace activity {
             }
         }
         else{
-            _mode = dp_msg.dial_pos_l;            
+            _mode = dp_msg.dial_pos_l;
+
+            if(dp_msg.dial_pos_r  == 4) {
+                return ELoopStatus::FINISH;
+            }
+
         } 
 
         bool able_goal = false;//m.maze.isExistPath(pm.goal_x, pm.goal_y);

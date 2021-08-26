@@ -15,21 +15,23 @@
 
 namespace module{
     PseudoDial::PseudoDial(){
+        setModuleName("PseudoDial");
         ParameterManager& pm = ParameterManager::getInstance();
+        reset();
+        
         dial_l.setPiGain(pm.dial_p, pm.dial_i, pm.dial_i_limit, pm.dial_limit);
         dial_r.setPiGain(pm.dial_p, pm.dial_i, pm.dial_i_limit, pm.dial_limit);
     }
 
     void PseudoDial::update0(){
-                NavStateMsg ns_msg;
+        NavStateMsg ns_msg;
         copyMsg(msg_id::NAV_STATE, &ns_msg);        
                 
         if(true ||(!ns_msg.armed && ns_msg.mode == ENavMode::MODE_SELECT)){
             ParameterManager& pm = ParameterManager::getInstance();
             dial_l.setPiGain(pm.dial_p, pm.dial_i, pm.dial_i_limit, pm.dial_limit);
-            dial_l.setPiGain(pm.dial_p, pm.dial_i, pm.dial_i_limit, pm.dial_limit);
-            dial_r.setEnable(true);
-            dial_r.setEnable(true);
+            dial_r.setPiGain(pm.dial_p, pm.dial_i, pm.dial_i_limit, pm.dial_limit);
+            setEnable(true);
             dial_l.update();
             dial_r.update();
             _publish_dial_position();
@@ -51,17 +53,17 @@ namespace module{
 
     void PseudoDial::_publish_dial_position(){
         DialPositionMsg msg;
-        msg.dial_pos_r = dial_r.getDialPosition();
         msg.dial_pos_l = dial_l.getDialPosition();
-        msg.dial_div_num_r = dial_r.getDivisionNum();
+        msg.dial_pos_r = dial_r.getDialPosition();
         msg.dial_div_num_l = dial_l.getDivisionNum();
+        msg.dial_div_num_r = dial_r.getDivisionNum();
         publishMsg(msg_id::DIAL_POSITION, &msg);        
     }
 
     void PseudoDial::_publish_actuator_output(){
         ActuatorOutputMsg msg;
-        msg.duty_r = dial_r.getDuty();
-        msg.duty_l = dial_l.getDuty();        
+        msg.duty_l = dial_l.getDuty();
+        msg.duty_r = dial_r.getDuty();        
         msg.ctrl_mode = ECtrlMode::PSEUDO_DIAL;
         publishMsg(msg_id::ACTUATOR_OUTPUT, &msg);
     }

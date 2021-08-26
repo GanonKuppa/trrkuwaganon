@@ -8,6 +8,8 @@ namespace module {
       
       private:
         friend class BaseModule<TrajectoryCommander>;
+        
+        TrajectoryCommander();
         void  _publish();
 
     };

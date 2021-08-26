@@ -53,7 +53,7 @@ namespace sound {
 
 namespace module{
     SeManager::SeManager(){
-
+        setModuleName("SeManager");
     }
 
     void SeManager::update0(){
