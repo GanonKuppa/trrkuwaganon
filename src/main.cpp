@@ -60,7 +60,7 @@ void timerInterrupt0() {
     // 毎回行う処理
     {        
         module::Shell::getInstance().cycle0();
-        module::Heater::getInstance().cycle0();        
+        module::Heater::getInstance().cycle0();
     }
     // スロット0
     if (int_tick_count % 4 == 0) {
@@ -85,7 +85,8 @@ void timerInterrupt0() {
     // スロット2
     if (int_tick_count % 4 == 2) {
         module::WallSensor::getInstance().cycle0();
-        module::PseudoDial::getInstance().cycle0();      
+        module::PseudoDial::getInstance().cycle0();
+        module::Navigator::getInstance().cycle2();
         module::Shell::getInstance().cycle1();
 
         uint32_t end_usec = hal::getElapsedUsec();

@@ -27,7 +27,7 @@ namespace module{
         NavStateMsg ns_msg;
         copyMsg(msg_id::NAV_STATE, &ns_msg);        
                 
-        if(true ||(!ns_msg.armed && ns_msg.mode == ENavMode::MODE_SELECT)){
+        if((!ns_msg.armed && ns_msg.mode == ENavMode::MODE_SELECT)){
             ParameterManager& pm = ParameterManager::getInstance();
             dial_l.setPiGain(pm.dial_p, pm.dial_i, pm.dial_i_limit, pm.dial_limit);
             dial_r.setPiGain(pm.dial_p, pm.dial_i, pm.dial_i_limit, pm.dial_limit);

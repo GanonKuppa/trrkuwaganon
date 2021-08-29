@@ -8,7 +8,7 @@ namespace module {
       public:
         void update2();
         void setNavMode(ENavMode mode);
-        void setNavSubMode(ENavSubMode mode);
+        void setNavSubMode(ENavSubMode sub_mode);
 
       private:      
         friend class BaseModule<Navigator>;

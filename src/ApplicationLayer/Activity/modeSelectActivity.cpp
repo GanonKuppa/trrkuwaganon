@@ -7,7 +7,7 @@
 #include "ledController.h"
 #include "pseudoDial.h"
 #include "seManager.h"
-
+#include "navigator.h"
 
 // Activity
 #include "activityFactory.h"
@@ -17,6 +17,7 @@
 #include "dialPositionMsg.h"
 #include "wallSensorMsg.h"
 #include "gamepadMsg.h"
+
 
 namespace activity {
 
@@ -32,6 +33,10 @@ namespace activity {
         pd.reset();
         pd.setDivisionNum(8, 8);
         pd.setEnable(true);
+
+        module::Navigator& nav = module::Navigator::getInstance();
+        nav.setNavMode(ENavMode::MODE_SELECT);
+        nav.setNavSubMode(ENavSubMode::STANDBY);
     }
 
     void ModeSelectActivity::onFinish() {

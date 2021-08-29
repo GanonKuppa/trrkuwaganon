@@ -27,9 +27,17 @@ namespace module{
         msg.y_next = _y_next;
         msg.azimuth = _azimuth;
         msg.is_failsafe = _is_failsafe;
-        publishMsg(msg_id::ACTUATOR_OUTPUT, &msg);
-
+        publishMsg(msg_id::NAV_STATE, &msg);
     }
+
+    void Navigator::setNavMode(ENavMode mode){
+        _mode = mode;
+    }
+
+    void Navigator::setNavSubMode(ENavSubMode sub_mode){
+        _sub_mode = sub_mode;
+    }
+
 
     int usrcmd_navigator(int argc, char **argv){
         return 0;
