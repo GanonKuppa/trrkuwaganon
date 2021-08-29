@@ -14,13 +14,18 @@ class WallSensorMsg : public BaseMsg{
     float ahead_dist = 0.0f;          // [m]
     float dist_l = 0.0f;              // [m]
     float dist_r = 0.0f;              // [m]
+    float center_dist_l = 0.0f;       // [m]
+    float center_dist_r = 0.0f;       // [m]
 
     bool is_ahead_l = false;          // [bool]
     bool is_ahead_r = false;          // [bool]
     bool is_left = false;             // [bool]
     bool is_right = false;            // [bool]
+    bool is_left_ctrl = false;        // [bool]
+    bool is_right_ctrl = false;       // [bool]
+
     bool is_on_wall_center = false;   // [bool]
-    
+
     bool is_corner_l = false;         // [bool]
     bool is_corner_r = false;         // [bool]
 
