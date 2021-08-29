@@ -17,6 +17,8 @@
 // Msg
 #include "msgBroker.h"
 #include "actuatorOutputMsg.h"
+#include "batteryInfoMsg.h"
+#include "navigator.h"
 
 namespace module {
 
@@ -30,17 +32,65 @@ namespace module {
     }
 
     void PowerTransmission::update0(){
-        ActuatorOutputMsg msg;
-        copyMsg(msg_id::ACTUATOR_OUTPUT, &msg);
+        ActuatorOutputMsg ao_msg;
+        copyMsg(msg_id::ACTUATOR_OUTPUT, &ao_msg);
+
+        BatteryInfoMsg bat_msg;
+        copyMsg(msg_id::BATTERY_INFO, &bat_msg);
+        _voltage = bat_msg.voltage;
         
-        if(msg.ctrl_mode == ECtrlMode::PSEUDO_DIAL){
-            setDutyL(msg.duty_l);
-            setDutyR(msg.duty_r);
+        if(ao_msg.ctrl_mode == ECtrlMode::PSEUDO_DIAL){
+            setMaxVoltageDutyL(ao_msg.duty_l);
+            setMaxVoltageDutyR(ao_msg.duty_r);
+        }
+        else if(ao_msg.ctrl_mode == ECtrlMode::VEHICLE){
+            setMaxVoltageDutyL(ao_msg.duty_l);
+            setMaxVoltageDutyR(ao_msg.duty_r);
+        }
+        else{
+            setMaxVoltageDutyL(0.0f);
+            setMaxVoltageDutyR(0.0f);
         }
     }
 
     void PowerTransmission::debug(){
 
+    }
+
+
+    void PowerTransmission::setDutyR(float duty){
+        if( std::fabs(duty - _duty_r) < FLT_EPSILON &&
+            _duty_r < 0.999f &&
+            _duty_r > 0.0f) return;
+
+
+        ParameterManager& pm = ParameterManager::getInstance();
+        float abs_duty = std::clamp<float>(std::fabs(duty) , 0.0f, pm.duty_limit);
+
+        if(std::isnan(duty) || std::isnan(abs_duty)) {
+            _duty_r = 0.0f;
+        } 
+        else{
+            if(duty > 0.0f){
+                _duty_r = abs_duty;
+            }
+            else{
+                _duty_r = - abs_duty;
+            }
+        }
+
+        if ( std::fabs(_duty_r) < FLT_EPSILON) {
+            hal::setDutyPWM1(1.0f);
+            hal::setDutyPWM2(1.0f);
+        } 
+        else if ( _duty_r < 0.0f) {
+            hal::setDutyPWM1(1.0f - abs_duty);
+            hal::setDutyPWM2(1.0f);
+        } 
+        else {
+            hal::setDutyPWM1(1.0f);
+            hal::setDutyPWM2(1.0f - abs_duty);
+        }        
     }
 
     void PowerTransmission::setDutyL(float duty){
@@ -78,40 +128,17 @@ namespace module {
         }        
     }    
 
-    void PowerTransmission::setDutyR(float duty){
-        if( std::fabs(duty - _duty_r) < FLT_EPSILON &&
-            _duty_r < 0.999f &&
-            _duty_r > 0.0f) return;
-
-
-        ParameterManager& pm = ParameterManager::getInstance();
-        float abs_duty = std::clamp<float>(std::fabs(duty) , 0.0f, pm.duty_limit);
-
-        if(std::isnan(duty) || std::isnan(abs_duty)) {
-            _duty_r = 0.0f;
-        } 
-        else{
-            if(duty > 0.0f){
-                _duty_r = abs_duty;
-            }
-            else{
-                _duty_r = - abs_duty;
-            }
-        }
-
-        if ( std::fabs(_duty_r) < FLT_EPSILON) {
-            hal::setDutyPWM1(1.0f);
-            hal::setDutyPWM2(1.0f);
-        } 
-        else if ( _duty_r < 0.0f) {
-            hal::setDutyPWM1(1.0f - abs_duty);
-            hal::setDutyPWM2(1.0f);
-        } 
-        else {
-            hal::setDutyPWM1(1.0f);
-            hal::setDutyPWM2(1.0f - abs_duty);
-        }        
+    void PowerTransmission::setMaxVoltageDutyR(float duty){
+        float max_vol_duty = duty * MAX_VOLTAGE / _voltage;
+        setDutyR(max_vol_duty);
     }
+
+    void PowerTransmission::setMaxVoltageDutyL(float duty){
+        float max_vol_duty = duty * MAX_VOLTAGE / _voltage;
+        setDutyL(max_vol_duty);
+    }
+
+
 
     int usrcmd_powerTransmission(int argc, char **argv){
 
