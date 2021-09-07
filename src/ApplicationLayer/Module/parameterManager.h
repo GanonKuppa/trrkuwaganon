@@ -68,27 +68,27 @@ namespace module {
         float duty_offset_right_m; //37
  
 
-        float v_fb_enable; //50
-        float v_ff_enable; //51
-        float v_saturation_enable; //52
-        float v_i_saturation_enable; //53
+        uint8_t v_fb_enable; //50
+        uint8_t v_ff_enable; //51
+        uint8_t v_saturation_enable; //52
+        uint8_t v_i_saturation_enable; //53
         
-        float yawrate_fb_enable; //54
-        float yawrate_ff_enable; //55
-        float yawrate_saturation_enable; //56
-        float yawrate_i_saturation_enable; //57
+        uint8_t yawrate_fb_enable; //54
+        uint8_t yawrate_ff_enable; //55
+        uint8_t yawrate_saturation_enable; //56
+        uint8_t yawrate_i_saturation_enable; //57
         
-        float yaw_fb_enable; //58
-        float yaw_saturation_enable; //59
-        float yaw_i_saturation_enable; //60
+        uint8_t yaw_fb_enable; //58
+        uint8_t yaw_saturation_enable; //59
+        uint8_t yaw_i_saturation_enable; //60
 
-        float wall_fb_enable; //61
-        float wall_saturation_enable; //62
-        float wall_i_saturation_enable; //63
+        uint8_t wall_fb_enable; //61
+        uint8_t wall_saturation_enable; //62
+        uint8_t wall_i_saturation_enable; //63
 
-        float wall_diag_fb_enable; //64
-        float wall_diag_saturation_enable; //65
-        float wall_diag_i_saturation_enable; //66
+        uint8_t wall_diag_fb_enable; //64
+        uint8_t wall_diag_saturation_enable; //65
+        uint8_t wall_diag_i_saturation_enable; //66
         
         
         float v_ff_coef; //80

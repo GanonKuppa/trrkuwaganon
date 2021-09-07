@@ -64,23 +64,23 @@ namespace module {
         ;//47
         ;//48
         ;//49
-        registration<float>(50, v_fb_enable, "v_fb_enable"); //50
-        registration<float>(51, v_ff_enable, "v_ff_enable"); //51
-        registration<float>(52, v_saturation_enable, "v_saturation_enable"); //52
-        registration<float>(53, v_i_saturation_enable, "v_i_saturation_enable"); //53
-        registration<float>(54, yawrate_fb_enable, "yawrate_fb_enable"); //54
-        registration<float>(55, yawrate_ff_enable, "yawrate_ff_enable"); //55
-        registration<float>(56, yawrate_saturation_enable, "yawrate_saturation_enable"); //56
-        registration<float>(57, yawrate_i_saturation_enable, "yawrate_i_saturation_enable"); //57
-        registration<float>(58, yaw_fb_enable, "yaw_fb_enable"); //58
-        registration<float>(59, yaw_saturation_enable, "yaw_saturation_enable"); //59
-        registration<float>(60, yaw_i_saturation_enable, "yaw_i_saturation_enable"); //60
-        registration<float>(61, wall_fb_enable, "wall_fb_enable"); //61
-        registration<float>(62, wall_saturation_enable, "wall_saturation_enable"); //62
-        registration<float>(63, wall_i_saturation_enable, "wall_i_saturation_enable"); //63
-        registration<float>(64, wall_diag_fb_enable, "wall_diag_fb_enable"); //64
-        registration<float>(65, wall_diag_saturation_enable, "wall_diag_saturation_enable"); //65
-        registration<float>(66, wall_diag_i_saturation_enable, "wall_diag_i_saturation_enable"); //66
+        registration<uint8_t>(50, v_fb_enable, "v_fb_enable"); //50
+        registration<uint8_t>(51, v_ff_enable, "v_ff_enable"); //51
+        registration<uint8_t>(52, v_saturation_enable, "v_saturation_enable"); //52
+        registration<uint8_t>(53, v_i_saturation_enable, "v_i_saturation_enable"); //53
+        registration<uint8_t>(54, yawrate_fb_enable, "yawrate_fb_enable"); //54
+        registration<uint8_t>(55, yawrate_ff_enable, "yawrate_ff_enable"); //55
+        registration<uint8_t>(56, yawrate_saturation_enable, "yawrate_saturation_enable"); //56
+        registration<uint8_t>(57, yawrate_i_saturation_enable, "yawrate_i_saturation_enable"); //57
+        registration<uint8_t>(58, yaw_fb_enable, "yaw_fb_enable"); //58
+        registration<uint8_t>(59, yaw_saturation_enable, "yaw_saturation_enable"); //59
+        registration<uint8_t>(60, yaw_i_saturation_enable, "yaw_i_saturation_enable"); //60
+        registration<uint8_t>(61, wall_fb_enable, "wall_fb_enable"); //61
+        registration<uint8_t>(62, wall_saturation_enable, "wall_saturation_enable"); //62
+        registration<uint8_t>(63, wall_i_saturation_enable, "wall_i_saturation_enable"); //63
+        registration<uint8_t>(64, wall_diag_fb_enable, "wall_diag_fb_enable"); //64
+        registration<uint8_t>(65, wall_diag_saturation_enable, "wall_diag_saturation_enable"); //65
+        registration<uint8_t>(66, wall_diag_i_saturation_enable, "wall_diag_i_saturation_enable"); //66
         ;//67
         ;//68
         ;//69

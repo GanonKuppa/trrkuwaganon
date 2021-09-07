@@ -1,6 +1,8 @@
 #pragma once
 
-enum class msg_id{
+#include <stdint.h>
+
+enum class msg_id : uint8_t{
     ACTUATOR_OUTPUT =0,
     BATTERY_INFO,
     CTRL_SETPOINT,
@@ -8,7 +10,8 @@ enum class msg_id{
     GAMEPAD,
     GROUND_TRUTH,
     IMU,
-    NAV_STATE,    
+    NAV_STATE,
+    PID_CONTROL_VAL, 
     VEHICLE_ATTITUDE,
     VEHICLE_POSITION,
     WALL_SENSOR,

@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cfloat>
+
 
 class PidfController {
   public:
@@ -113,6 +115,13 @@ class PidfController {
         u_k1 = 0.0f;
     }
 
+    bool engaged(){
+        if (std::fabs(u_k0) < FLT_EPSILON) return false;
+        else return true;
+    }
+
+
+
   protected:
     float Kp;
     float Ki;
@@ -174,37 +183,27 @@ class AngPidfController : public PidfController {
 class WallPidfController : public PidfController {
   public:
 
-    void update(WallSensorMsg& ws_msg ,bool is_r_enable, bool is_l_enable, bool near_pillar) {
-        if( ws_msg.ahead_dist < 0.08 || (!is_r_enable && !is_l_wall) ) {
+    void update(float center_dist_r, float center_dist_l, bool is_r_enable, bool is_l_enable) {
+        if(!is_r_enable && !is_l_enable) {
             reset();
             return;
         }
-
-        float error = 0.0f;
-        float target_line = 0.045f;
-        e_r0 =   10000 * ws_msg.center_dist_r(target_line);
-        e_l0 = - 10000 * ws_msg.center_dist_l(0.09f - target_line);
-
-        bool is_right = ws.isRight_for_ctrl() && is_r_enable;
-        bool is_left =  ws.isLeft_for_ctrl() && is_l_enable;
-
-        // 柱を見ている際は柱に近づき過ぎている場合のみ壁制御をかける
-        if(near_pillar){
-            if( ws_msg.dist_r > 0.045f) is_right = false;
-            if( ws_msg.dist_l > 0.045f) is_left = false;
-        }
+             
+        e_r0 =   10000.0f * center_dist_r;
+        e_l0 = - 10000.0f * center_dist_l;
 
 
-        if(is_right && is_left) error = (float)(e_r0 + e_l0) / 2.0f;
-        else if(is_right) error = (float)(e_r0);
-        else if(is_left) error = (float)(e_l0);
+        float error = 0.0f;   
+        if(is_r_enable && is_l_enable) error = (float)(e_r0 + e_l0) / 2.0f;
+        else if(is_r_enable) error = (float)(e_r0);
+        else if(is_l_enable) error = (float)(e_l0);
         else error = 0.0f;
 
         e_p0 = error;
 
         
         if(integral_saturation_enable){
-            e_i0 = constrain(e_p0 + e_i1, -ABS(integral_saturation), ABS(integral_saturation));
+            e_i0 = (e_p0 + e_i1, -std::fabs(integral_saturation), std::fabs(integral_saturation));
         }
         else {
             e_i0 = e_p0 + e_i1;
@@ -212,7 +211,7 @@ class WallPidfController : public PidfController {
 
         e_d0 = F * e_d1 + (1.0f - F) * (e_p0 - e_p1);
     
-        u_k0 = constrain(Kp * e_p0 + Ki * e_i0 + Kd * e_d0, -ABS(saturation), ABS(saturation));
+        u_k0 = std::clamp<float>(Kp * e_p0 + Ki * e_i0 + Kd * e_d0, -std::fabs(saturation), std::fabs(saturation));        
 
         e_p1 = e_p0;
         e_i1 = e_i0;
@@ -221,19 +220,27 @@ class WallPidfController : public PidfController {
 
     };
     
-    WallPidfController(){
-    e_r0 = 0;
-    e_l0 = 0;
-    
-    e_r1 = 0;
-    e_l1 = 0;
+
+    void reset(){
+        e_r0 = 0;
+        e_l0 = 0;
+        e_r1 = 0;
+        e_l1 = 0;
+
+    }
+
+    WallPidfController():
+    e_r0(0),
+    e_l0(0),
+    e_r1(0),
+    e_l1(0)
+    {
 
     }
     
-    private:
+  private:
     int16_t e_r0;
     int16_t e_l0;
-
     int16_t e_r1;
     int16_t e_l1;
     

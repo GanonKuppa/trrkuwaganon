@@ -13,6 +13,7 @@
 #include "groundTruthMsg.h"
 #include "imuMsg.h"
 #include "navStateMsg.h"
+#include "pidControlValMsg.h"
 #include "VehicleAttitudeMsg.h"
 #include "vehiclePositionMsg.h"
 #include "wallSensorMsg.h"
@@ -26,6 +27,7 @@ static GamepadMsg gamepadMsg;
 static GroundTruthMsg groundTruthMsg;
 static ImuMsg imuMsg;
 static NavStateMsg navStateMsg;
+static PidControlValMsg pidControlValMsg;
 static VehicleAttitudeMsg vehicleAttitudeMsg;
 static VehiclePositionMsg vehiclePositionMsg;
 static WallSensorMsg wallSensorMsg;
@@ -42,6 +44,7 @@ void publishMsg(msg_id msg_id, void* msg){
     else if(msg_id == msg_id::GROUND_TRUTH)      {groundTruthMsg       = *(GroundTruthMsg*)msg      ;}
     else if(msg_id == msg_id::IMU)               {imuMsg               = *(ImuMsg*)msg              ;}
     else if(msg_id == msg_id::NAV_STATE)         {navStateMsg          = *(NavStateMsg*)msg         ;}
+    else if(msg_id == msg_id::PID_CONTROL_VAL)   {pidControlValMsg     = *(PidControlValMsg*)msg    ;}    
     else if(msg_id == msg_id::VEHICLE_ATTITUDE)  {vehicleAttitudeMsg   = *(VehicleAttitudeMsg*)msg  ;}
     else if(msg_id == msg_id::VEHICLE_POSITION)  {vehiclePositionMsg   = *(VehiclePositionMsg*)msg  ;}
     else if(msg_id == msg_id::WALL_SENSOR)       {wallSensorMsg        = *(WallSensorMsg*)msg       ;}
@@ -56,7 +59,8 @@ void copyMsg(msg_id msg_id, void *msg){
     else if(msg_id == msg_id::GAMEPAD)           {*(GamepadMsg*          ) msg = gamepadMsg          ;}
     else if(msg_id == msg_id::GROUND_TRUTH)      {*(GroundTruthMsg*      ) msg = groundTruthMsg      ;}
     else if(msg_id == msg_id::IMU)               {*(ImuMsg*              ) msg = imuMsg              ;}
-    else if(msg_id == msg_id::NAV_STATE)         {*(NavStateMsg*         ) msg = navStateMsg         ;}    
+    else if(msg_id == msg_id::NAV_STATE)         {*(NavStateMsg*         ) msg = navStateMsg         ;}
+    else if(msg_id == msg_id::PID_CONTROL_VAL)   {*(PidControlValMsg*    ) msg = pidControlValMsg    ;}    
     else if(msg_id == msg_id::VEHICLE_ATTITUDE)  {*(VehicleAttitudeMsg*  ) msg = vehicleAttitudeMsg  ;}
     else if(msg_id == msg_id::VEHICLE_POSITION)  {*(VehiclePositionMsg*  ) msg = vehiclePositionMsg  ;}
     else if(msg_id == msg_id::WALL_SENSOR)       {*(WallSensorMsg*       ) msg = wallSensorMsg       ;}

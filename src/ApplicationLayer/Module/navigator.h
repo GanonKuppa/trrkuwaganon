@@ -1,7 +1,12 @@
 #pragma once
 
 #include "baseModule.h"
+
+// Msg
 #include "navStateMsg.h"
+
+// Object
+#include "maze.h"
 
 namespace module {
     class Navigator : public BaseModule<Navigator> {
@@ -9,10 +14,12 @@ namespace module {
         void update2();
         void setNavMode(ENavMode mode);
         void setNavSubMode(ENavSubMode sub_mode);
+        Maze _maze;
 
       private:      
         friend class BaseModule<Navigator>;
-        Navigator();
+        Navigator();        
+        
         ENavMode _mode;
         ENavSubMode _sub_mode;
         bool _armed;
@@ -22,13 +29,31 @@ namespace module {
         int8_t _x_next;
         int8_t _y_next;
         
+        int8_t _x_start;
+        int8_t _y_start;
+
         int8_t _x_goal;
         int8_t _y_goal;
         
+        bool _r_wall_enable;
+        bool _l_wall_enable;
+        
+        float _dist_r;
+        float _dist_l;
+        float _dist_a;
+
         EAzimuth _azimuth;
         bool _is_failsafe;
+        float _x;
+        float _y;
 
+        void _updateParam();
         void _publish();
+
+        bool _existRWall(float x, float y, EAzimuth azimuth);
+        bool _existLWall(float x, float y, EAzimuth azimuth);
+        bool _watchedPillar(float x, float y, EAzimuth azimuth);
+        bool _isFailsafe();
 
     };
 

@@ -48,7 +48,7 @@ namespace activity {
         virtual ~BaseActivity() {};
 
       protected:
-        enum class ELoopStatus {
+        enum class ELoopStatus : uint8_t{
             CONTINUE = 1,
             FINISH = 0
         };

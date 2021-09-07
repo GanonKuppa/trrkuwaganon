@@ -32,20 +32,34 @@ namespace module {
     }
 
     void PowerTransmission::update0(){
-        ActuatorOutputMsg ao_msg;
-        copyMsg(msg_id::ACTUATOR_OUTPUT, &ao_msg);
+        ActuatorOutputMsg out_msg;
+        copyMsg(msg_id::ACTUATOR_OUTPUT, &out_msg);
 
         BatteryInfoMsg bat_msg;
         copyMsg(msg_id::BATTERY_INFO, &bat_msg);
         _voltage = bat_msg.voltage;
         
-        if(ao_msg.ctrl_mode == ECtrlMode::PSEUDO_DIAL){
-            setMaxVoltageDutyL(ao_msg.duty_l);
-            setMaxVoltageDutyR(ao_msg.duty_r);
+        if(out_msg.ctrl_mode == ECtrlMode::PSEUDO_DIAL){
+            setMaxVoltageDutyL(out_msg.duty_l);
+            setMaxVoltageDutyR(out_msg.duty_r);
         }
-        else if(ao_msg.ctrl_mode == ECtrlMode::VEHICLE){
-            setMaxVoltageDutyL(ao_msg.duty_l);
-            setMaxVoltageDutyR(ao_msg.duty_r);
+        else if(out_msg.ctrl_mode == ECtrlMode::VEHICLE){
+/*
+            // duty飽和時には回転系制御を優先
+            if(duty(0) > 1.0 || duty(1) > 1.0) {
+                float duty_overflow = 0.0f;
+                if(duty(0) > duty(1) ) {
+                    duty_overflow = duty(0) - 1.0f;
+                } else {
+                    duty_overflow = duty(1) - 1.0f;
+                }
+                duty(0) -= duty_overflow;
+                duty(1) -= duty_overflow;
+
+            }
+*/
+            setMaxVoltageDutyL(out_msg.duty_l);
+            setMaxVoltageDutyR(out_msg.duty_r);
         }
         else{
             setMaxVoltageDutyL(0.0f);

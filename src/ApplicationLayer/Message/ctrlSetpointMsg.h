@@ -1,8 +1,9 @@
 #pragma once
 
 #include "baseMsg.h"
+#include "stdint.h"
 
-enum class ETrajType {
+enum class ETrajType : uint8_t{
     STOP = 0,
     STRAIGHT,
     DIAGONAL,    
@@ -10,7 +11,7 @@ enum class ETrajType {
     CURVE
 };
 
-enum class ETurnType {
+enum class ETurnType : uint8_t{
     STOP = 0,
     STRAIGHT,
     STRAIGHT_WALL_CENTER,    
@@ -27,7 +28,7 @@ enum class ETurnType {
     CIRCULAR    
 };
 
-enum class ETurnDir {
+enum class ETurnDir : int8_t{
     CW = -1, 
     NO_TURN = 0, 
     CCW = 1
