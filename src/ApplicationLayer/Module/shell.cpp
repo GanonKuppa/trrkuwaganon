@@ -28,6 +28,7 @@
 #include "shell.h"
 #include "suction.h"
 #include "trajectoryCommander.h"
+#include "trajectoryInitializer.h"
 #include "wallSensor.h"
 #include "wheelOdometry.h"
 #include "truthMaker.h"
@@ -70,6 +71,7 @@ static const cmd_table_t cmdlist[] = {
     { "shell", "shell Module.", module::usrcmd_shell },
     { "suction", "Suction Module.", module::usrcmd_suction },
     { "trajectoryCommander", "TrajectoryCommander Module.", module::usrcmd_trajectoryCommander },
+    { "trajectoryInitializer", "TrajectoryInitializer Module.", module::usrcmd_trajectoryInitializer },
     { "wallSensor", "WallSensor Module.", module::usrcmd_wallSensor },
     { "wheelOdometry", "WheelOdometry Module.", module::usrcmd_wheelOdometry },
     { "wheel", "alias of wheelOdometry command.", module::usrcmd_wheelOdometry },

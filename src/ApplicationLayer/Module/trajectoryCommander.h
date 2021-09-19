@@ -11,7 +11,7 @@ namespace module {
         
         TrajectoryCommander();
         void  _publish();
-
+        void _initTraj();
     };
 
     int usrcmd_trajectoryCommander(int argc, char **argv);
