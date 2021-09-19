@@ -304,7 +304,29 @@ namespace module {
         registration<float>(287, shortest_4_v_135, "shortest_4_v_135"); //287
         registration<float>(288, shortest_4_a, "shortest_4_a"); //288
         registration<float>(289, shortest_4_a_diag, "shortest_4_a_diag"); //289
-
+        ;//290
+        ;//291
+        ;//292
+        ;//293
+        ;//294
+        ;//295
+        ;//296
+        ;//297
+        ;//298
+        ;//299       
+        float registration<float>(300, shape_factor_90, "shape_factor_90"); // 300
+        float registration<float>(301, shape_factor_l90, "shape_factor_l90"); // 301
+        float registration<float>(302, shape_factor_180, "shape_factor_180"); // 302
+        float registration<float>(303, shape_factor_d90, "shape_factor_d90"; // 303
+        float registration<float>(304, shape_factor_45, "shape_factor_45"; // 304
+        float registration<float>(305, shape_factor_135, "shape_factor_135"; // 305
+        float registration<float>(306, path_length_90, "path_length_90"; // 306
+        float registration<float>(307, path_length_l90, "path_length_l90"; // 307
+        float registration<float>(308, path_length_180, "path_length_180"; // 308
+        float registration<float>(309, path_length_d90, "path_length_d90"; // 309
+        float registration<float>(310, path_length_45, "path_length_45"; // 310
+        float registration<float>(311, path_length_135, "path_length_135"; // 311
+        float registration<float>(312, cp_coef, "cp_coef"; // 312
     }
 
     

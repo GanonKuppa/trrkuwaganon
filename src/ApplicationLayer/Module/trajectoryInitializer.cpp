@@ -11,6 +11,7 @@
 // Hal
 #include "hal_timer.h"
 
+#include ""
 
 namespace module {
 
@@ -19,23 +20,23 @@ namespace module {
         _init();
     }
 
-    float getV(ETurnParams tp, ETurnType tt){
+    float getV(ETurnParamSet tp, ETurnType tt){
         return _turnParams.at(tp).getV(tt);
     }
 
-    float getAcc(ETurnParams tp, ETurnType tt){
+    float getAcc(ETurnParamSet tp, ETurnType tt){
         return _turnParams.at(tp).getAcc(tt);
     }
     
-    float getPreDist(ETurnParams tp, ETurnType tt){
+    float getPreDist(ETurnParamSet tp, ETurnType tt){
         return _turnPreCalcs.at(tp).getPreDist(tt);
     }
 
-    float getFolDist(ETurnParams tp, ETurnType tt){
+    float getFolDist(ETurnParamSet tp, ETurnType tt){
         return _turnPreCalcs.at(tp).getFolDist(tt);
     }
 
-    float getTrajEndTime(ETurnParams tp, ETurnType tt){
+    float getTrajEndTime(ETurnParamSet tp, ETurnType tt){
         return _turnPreCalcs.at(tp).getTrajEndTime(tt);
     }
 
@@ -44,7 +45,14 @@ namespace module {
     }
 
     void _init(){
-        
+        _turnParams.at(ETurnParamSet::SEARCH) = TurnParameter();
+        _turnParams.at(ETurnParamSet::SAFE0) = TurnParameter();
+        _turnParams.at(ETurnParamSet::SAFE1) = TurnParameter();
+        _turnParams.at(ETurnParamSet::FAST0) = TurnParameter();
+        _turnParams.at(ETurnParamSet::FAST1) = TurnParameter();
+        _turnParams.at(ETurnParamSet::FAST2) = TurnParameter();
+        _turnParams.at(ETurnParamSet::FAST3) = TurnParameter();
+        _turnParams.at(ETurnParamSet::FAST4) = TurnParameter();
     }
 
 

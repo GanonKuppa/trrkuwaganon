@@ -3,8 +3,16 @@
 #include <memory>
 
 class TurnPreCalculation{
-  public:  
-    TurnPreCalculation();
+  public:
+    TurnPreCalculation(float shape_factor, 
+                       float path_length, 
+                       float target_ang,
+                       float start_ang,
+                       float start_x,
+                       float start_y,
+                       float v, 
+                       float cp, 
+                       float delta_t);
     std::unique_ptr<TurnIterator> GenerateTurnIterator();
 
     void init();
@@ -23,6 +31,7 @@ class TurnPreCalculation{
     float _int_molli_c;
     float _v;
     float _cp;
+    float _delta_t;
 }
 
 class TurnPreCalculations{
@@ -125,8 +134,9 @@ class TurnPreCalculations{
                 return nullptr;
         }
     };
+  private:
+    _init(){
 
-
-
+    }
 }
 

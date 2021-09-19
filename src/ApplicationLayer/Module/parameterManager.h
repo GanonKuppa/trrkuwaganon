@@ -216,7 +216,7 @@ namespace module {
         float dial_p; //185
         float dial_i; //186
         float dial_i_limit; //187
-        float dial_limit; //188
+        float dial_limit; //188        
 
         float shortest_0_v; //200
         float shortest_0_v_d; //201
@@ -309,7 +309,19 @@ namespace module {
         float shortest_4_a; //288
         float shortest_4_a_diag; //289
 
-
+        float shape_factor_90; // 300
+        float shape_factor_l90; // 301
+        float shape_factor_180; // 302
+        float shape_factor_d90; // 303
+        float shape_factor_45; // 304
+        float shape_factor_135; // 305
+        float path_length_90; // 306
+        float path_length_l90; // 307
+        float path_length_180; // 308
+        float path_length_d90; // 309
+        float path_length_45; // 310
+        float path_length_135; // 311
+        float cp_coef; // 312
 
         //----管理下においた変数たち-----
 

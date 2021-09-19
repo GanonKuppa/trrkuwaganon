@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ctrlSetpointMsg.h"
+#include "turnEnum.h"
 
 class TurnParameter {
     public:
