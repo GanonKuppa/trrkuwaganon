@@ -1,7 +1,11 @@
-.settings
-.project
-.cproject
 HardwareDebug
+.settings
+.cproject
+.project
 trr_kuwaganon Debug.launch
 trrkuwaganon HardwareDebug.launch
 ~*
+*node_modules/
+*build/
+tool/docygen/html
+tool/doxygen/*.tmp

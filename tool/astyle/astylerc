@@ -1,0 +1,38 @@
+# C, C++ モード
+mode=c
+
+# googleスタイル
+style=google
+
+# インデントはスペース4つ
+indent=spaces=4
+
+# namespace文の中をインデントする
+indent-namespaces
+
+# switch文の中をインデントする
+indent-switches
+
+# case文の中をインデントする
+indent-cases
+
+# タブをスペースに変換
+convert-tabs
+
+# 1行ブロックをそのままにする
+keep-one-line-blocks
+
+# ワンライナーをそのままにする
+keep-one-line-blocks
+
+# int* hoge のようにする
+align-pointer=type
+
+# int& hoge のようにする
+align-reference=type
+
+# フォルダ内のファイルを再帰的に整形
+recursive
+
+# 元のファイルのバックアップを作らない 
+suffix=none
