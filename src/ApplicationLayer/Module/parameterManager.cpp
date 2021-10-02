@@ -27,8 +27,8 @@ namespace module {
         registration<float>(10, a_search_run, "a_search_run"); //10
         registration<float>(11, spin_yawrate_max, "spin_yawrate_max"); //11
         registration<float>(12, spin_yawacc, "spin_yawacc"); //12
-        registration<float>(13, goal_x, "goal_x"); //13
-        registration<float>(14, goal_y, "goal_y"); //14
+        registration<uint8_t>(13, goal_x, "goal_x"); //13
+        registration<uint8_t>(14, goal_y, "goal_y"); //14
         registration<float>(15, search_limit_time_sec, "search_limit_time_sec"); //15
         ;//16
         ;//17
@@ -203,7 +203,7 @@ namespace module {
         registration<float>(186, dial_i, "dial_i"); //186
         registration<float>(187, dial_i_limit, "dial_i_limit"); //187
         registration<float>(188, dial_limit, "dial_limit"); //188
-        ;//189
+        registration<float>(189, cp_coef, "cp_coef"); // 189
         ;//190
         ;//191
         ;//192
@@ -304,29 +304,7 @@ namespace module {
         registration<float>(287, shortest_4_v_135, "shortest_4_v_135"); //287
         registration<float>(288, shortest_4_a, "shortest_4_a"); //288
         registration<float>(289, shortest_4_a_diag, "shortest_4_a_diag"); //289
-        ;//290
-        ;//291
-        ;//292
-        ;//293
-        ;//294
-        ;//295
-        ;//296
-        ;//297
-        ;//298
-        ;//299       
-        float registration<float>(300, shape_factor_90, "shape_factor_90"); // 300
-        float registration<float>(301, shape_factor_l90, "shape_factor_l90"); // 301
-        float registration<float>(302, shape_factor_180, "shape_factor_180"); // 302
-        float registration<float>(303, shape_factor_d90, "shape_factor_d90"; // 303
-        float registration<float>(304, shape_factor_45, "shape_factor_45"; // 304
-        float registration<float>(305, shape_factor_135, "shape_factor_135"; // 305
-        float registration<float>(306, path_length_90, "path_length_90"; // 306
-        float registration<float>(307, path_length_l90, "path_length_l90"; // 307
-        float registration<float>(308, path_length_180, "path_length_180"; // 308
-        float registration<float>(309, path_length_d90, "path_length_d90"; // 309
-        float registration<float>(310, path_length_45, "path_length_45"; // 310
-        float registration<float>(311, path_length_135, "path_length_135"; // 311
-        float registration<float>(312, cp_coef, "cp_coef"; // 312
+        
     }
 
     
@@ -455,40 +433,43 @@ namespace module {
                 std::string key_str = pm.valStrkeyMap[val_num];
                 Type_e val_type = pm.typeMap[val_num];
                 
-                if(val_type == Type_e::FLOAT){
+                if(key_str.empty()){
+                    PRINTF_ASYNC("    %3d\n", val_num);
+                }
+                else if(val_type == Type_e::FLOAT){
                     std::string type_str = "float";
                     float val = pm.read<float>(val_num);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %f\n", val_num, type_str.c_str(), key_str. c_str(), val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %f\n", val_num, type_str.c_str(), key_str.c_str(), val);
                 }
                 else if(val_type == Type_e::UINT8){
                     std::string type_str = "uint8";
                     uint8_t val = pm.read<uint8_t>(val_num);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), key_str. c_str(), val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), key_str.c_str(), val);
                 }
                 else if(val_type == Type_e::UINT16){
                     std::string type_str = "uint16";
                     uint16_t val = pm.read<uint16_t>(val_num);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), key_str. c_str(), val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), key_str.c_str(), val);
                 }
                 else if(val_type == Type_e::UINT32){
                     std::string type_str = "uint32";
                     uint32_t val = pm.read<uint32_t>(val_num);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), key_str. c_str(), val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), key_str.c_str(), val);
                 }
                 else if(val_type == Type_e::INT8){
                     std::string type_str = "int8";
                     int8_t val = pm.read<int8_t>(val_num);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), key_str. c_str(), val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), key_str.c_str(), val);
                 }
                 else if(val_type == Type_e::INT16){
                     std::string type_str = "int16";
                     int16_t val = pm.read<int16_t>(val_num);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), key_str. c_str(), val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), key_str.c_str(), val);
                 }
                 else if(val_type == Type_e::INT32){
                     std::string type_str = "int32";
                     int32_t val = pm.read<int32_t>(val_num);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), key_str. c_str(), val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), key_str.c_str(), val);
                 }
                 else{
                     PRINTF_ASYNC("  invalid type!\n");                
@@ -509,7 +490,11 @@ namespace module {
                 std::string key_str = pm.valStrkeyMap[val_num];
                 Type_e val_type = pm.typeMap[val_num];
                 
-                if(val_type == Type_e::FLOAT){
+                if(key_str.empty()){
+                    PRINTF_ASYNC("; %3d |\n", val_num);
+                }
+
+                else if(val_type == Type_e::FLOAT){
                     std::string type_str = "float";
                     float val = pm.read<float>(val_num);                
                     PRINTF_ASYNC("; %3d | %-7s\n", val_num, type_str.c_str());

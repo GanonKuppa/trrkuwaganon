@@ -3,6 +3,8 @@
 #include <cmath>
 #include <cfloat>
 
+#include "mollifier.h"
+
 class TurnIterator{
   public:
     TurnIterator(float int_molli_c, float shape_factor, float path_length, float target_ang, float v, float cp, float delta_t){
@@ -14,7 +16,7 @@ class TurnIterator{
         float S = int_molli_c;
         _a = 1.0f / (target_ang / _b / S);
         _delta_t = delta_t;
-        _t_moli = 0.0f;
+        _t_molli = 0.0f;
         _t = 0.0f;
         _beta = 0.0f;
         _yaw = 0.0f;
@@ -23,13 +25,13 @@ class TurnIterator{
     }
     
     void next(){
-        float _yawrate_now = mollifier_f(_t_molli * _v, a, b, c);
+        float _yawrate_now = mollifier_f(_t_molli * _v, _a, _b, _c);
         if(_yawrate_now < 0.01745f){ // 0.01745 rad/s = 1deg/s
             _t_molli += _delta_t;
             next();
         }
 
-        _yawacc = (_yawrate_now - _yawrate) / delta_t;
+        _yawacc = (_yawrate_now - _yawrate) / _delta_t;
         _yawrate = _yawrate_now;
         _yaw = _yawrate * _delta_t;
 
@@ -63,6 +65,7 @@ class TurnIterator{
     float _delta_t;
     float _v;
     float _cp;
+    float _target_ang;
 
     float _a;
     float _b;
@@ -78,4 +81,4 @@ class TurnIterator{
     float _rk4_f(float t, float y){
         return -_cp * y / _v - _v * mollifier_f(t * _v, _a, _b, _c);
     }
-}
+};

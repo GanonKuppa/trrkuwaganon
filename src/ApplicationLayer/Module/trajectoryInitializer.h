@@ -7,6 +7,8 @@
 #include "baseModule.h"
 #include "turnParameter.h"
 #include "turnEnum.h"
+#include "turnPreCalculations.h"
+
 
 namespace module {
     class TrajectoryInitializer : public BaseModule<TrajectoryInitializer>{
@@ -16,8 +18,10 @@ namespace module {
         float getPreDist(ETurnParamSet tp, ETurnType tt);
         float getFolDist(ETurnParamSet tp, ETurnType tt);
         float getTrajEndTime(ETurnParamSet tp, ETurnType tt);
-        std::unique_ptr<TurnIterator> generateTurnIterator(ETurnParams tp, ETurnType tt);
-        void debug();
+        std::unique_ptr<TurnIterator> generateTurnIterator(ETurnParamSet tp, ETurnType tt);
+        void debugMollifier();
+        void debugParamSet();
+        void debugPreCalcs();
       private:
         friend class BaseModule<TrajectoryInitializer>;
         TrajectoryInitializer();
