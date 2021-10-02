@@ -7,5 +7,5 @@ trrkuwaganon HardwareDebug.launch
 ~*
 *node_modules/
 *build/
-tool/docygen/html
+tool/doxygen/html
 tool/doxygen/*.tmp
