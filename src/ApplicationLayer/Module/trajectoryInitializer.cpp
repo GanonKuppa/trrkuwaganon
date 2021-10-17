@@ -239,13 +239,13 @@ namespace module {
         PRINTF_ASYNC("--- turnPreCalcs --- \n");
         for(auto turn : turnList){
             PRINTF_ASYNC("  --- %s --- \n", turnType2Str(turn).c_str());
-            PRINTF_ASYNC("    v,     pre,     fol,     end_time");
+            PRINTF_ASYNC("    v,     pre,     fol,     end_time\n");
             
             for(auto paramSet : paramSetList){
-                float v = 0.0f;//getV(paramSet, turn);
-                float pre = 0.0f;//getPreDist(paramSet, turn);
-                float fol = 0.0f;//getFolDist(paramSet, turn);
-                float end_time = 0.0f;//getTrajEndTime(paramSet, turn);
+                float v = getV(paramSet, turn);
+                float pre = getPreDist(paramSet, turn);
+                float fol = getFolDist(paramSet, turn);
+                float end_time = getTrajEndTime(paramSet, turn);
                 PRINTF_ASYNC("    %f, %f, %f, %f\n",v, pre, fol, end_time);
             }
             hal::waitmsec(10);

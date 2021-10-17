@@ -74,7 +74,7 @@ float TurnPreCalculation::getBetaAbsMax(){
 };
 
 void TurnPreCalculation::_init(){
-    float delta_t_for_calc_dist = 0.0001f;
+    float delta_t_for_calc_dist = 0.0005f;
     auto turn_itr = TurnIterator(_int_molli_c, _shape_factor, _path_length, _target_ang, _v, _cp, delta_t_for_calc_dist);
     float x = _start_x;
     float y = _start_y;

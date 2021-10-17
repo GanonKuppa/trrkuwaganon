@@ -182,8 +182,7 @@ std::unique_ptr<TurnIterator> TurnPreCalculations::generateTurnIterator(ETurnTyp
     }
 }
 
-void TurnPreCalculations::_init(){
-    return;
+void TurnPreCalculations::_init(){    
     _turn_90 = TurnPreCalculation(
         SHAPE_FACTOR_90, 
         PATH_LENGTH_90,
