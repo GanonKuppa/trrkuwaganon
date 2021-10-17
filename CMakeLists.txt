@@ -14,64 +14,64 @@ set(CMAKE_CXX_STANDARD, 17)
 set(CMAKE_CXX_FLAGS "-O2 -Wall -DSILS")
 
 
-
-# cpp
+# cpp c
 file(GLOB_RECURSE APP_CPP src/ApplicationLayer/*.cpp)
+file(GLOB_RECURSE APP_C src/ApplicationLayer/*.c)
+file(GLOB_RECURSE HAL_CPP src/HardwareAbstractionLayer/*.cpp)
+file(GLOB_RECURSE HAL_C src/HardwareAbstractionLayer/*.c)
+file(GLOB_RECURSE SILS_UTIL_CPP src/SilsUtil/*.cpp)
+file(GLOB_RECURSE SILS_UTIL_C src/SilsUtil/*.c)
+
 message(STATUS ${APP_CPP})
-#file(GLOB_RECURSE APP_ACTIVITY_CPP src/ApplicationLayer/Activity/*.cpp)
-#file(GLOB_RECURSE APP_LIB_CPP src/ApplicationLayer/Lib/*.cpp)
-#file(GLOB_RECURSE APP_MESSAGE_CPP src/ApplicationLayer/Message/*.cpp)
-#file(GLOB_RECURSE APP_MODULE_CPP src/ApplicationLayer/Module/*.cpp)
-#file(GLOB_RECURSE APP_OBJECT_CPP src/ApplicationLayer/Object/*.cpp)
-#file(GLOB_RECURSE HAL_CPP src/HardwareAbstractionLayer/*.cpp)
-#file(GLOB_RECURSE SILS_UTIL_CPP src/SilsUtil/*.cpp)
+message(STATUS ${APP_C})
+message(STATUS ${HAL_CPP})
+message(STATUS ${HAL_C})
+message(STATUS ${SILS_UTIL_CPP})
+message(STATUS ${SILS_UTIL_C})
+
 
 # h
-#set(APP_ACTIVITY_H src/ApplicationLayer/Activity)
-#set(APP_LIB_H src/ApplicationLayer/Lib)
-#set(APP_MESSAGE_H src/ApplicationLayer/Message/)
-#set(APP_MODULE_H src/ApplicationLayer/Module)
-#set(APP_OBJECT_H src/ApplicationLayer/Object)
-#set(HAL_H src/HardwareAbstractionLayer)
+set(SRC_DIR src)
+set(APP_ACTIVITY_H src/ApplicationLayer/Activity)
+set(APP_LIB_H src/ApplicationLayer/Lib)
+set(APP_MESSAGE_H src/ApplicationLayer/Message/)
+set(APP_MODULE_H src/ApplicationLayer/Module)
+set(APP_OBJECT_H src/ApplicationLayer/Object)
+set(HAL_H src/HardwareAbstractionLayer)
+set(SILS_UTIL_H src/SilsUtil)
 
+set(EIGEN_DIR src/ApplicationLayer/Lib/Eigen)
+set(NTSHELL_CORE_DIR src/ApplicationLayer/Lib/ntshell/core)
+set(NTSHELL_UTIL_DIR src/ApplicationLayer/Lib/ntshell/util)
 
-#set(SILS_UTIL_H src/SilsUtil)
+include_directories(
+   ${SRC_DIR}
+   ${APP_ACTIVITY_H}
+   ${APP_LIB_H}
+   ${APP_MESSAGE_H}
+   ${APP_MODULE_H}
+   ${APP_OBJECT_H}
+   ${HAL_H}
+   ${SILS_UTIL_H}
+   ${EIGEN_DIR}
+   ${NTSHELL_CORE_DIR}
+   ${NTSHELL_UTIL_DIR}
+)
 
-# src/
-
-#set(EIGEN_DIR src/ApplicationLayer/Lib/Eigen)
-#set(LIB_H src/ApplicationLayer/Lib)
-
-
-#message(STATUS ${HAL_H})
-#message(STATUS ${APP_ACTIVITY_H})
-#message(STATUS ${APP_MODULE_H})
-#message(STATUS ${APP_MESSAGE_H})
-#message(STATUS ${SILS_UTIL_H})
-
-
-#include_directories(
- #   ${EIGEN_DIR}
- #   ${HAL_H}
-#    ${APP_ACTIVITY_H}
-#    ${APP_MODULE_H}
-  #  ${APP_MESSAGE_H}
- #   ${SILS_UTIL_H}
-#    ${LIB_H}
-#)
-
-#target_link_libraries(main -lboost_system -lboost_filesystem)
-
-#add_executable(sils_main 
-#    src/sils_main.cpp
-#    ${APP_ACTIVITY_CPP}
-#    ${HAL_CPP}
-#   ${MODULE_CPP}
-#    ${SILS_UTIL_CPP}
-#)
-#target_link_libraries(sils_main 
-#    wsock32 
-#    ws2_32 
-#    Xinput
-#    winmm
-#)
+add_executable(sils_main 
+    src/sils_main.cpp
+    src/oneshotTask.cpp
+    ${APP_CPP}
+    ${APP_C}
+    ${HAL_CPP}
+    ${HAL_C}
+    ${SILS_UTIL_CPP}
+    ${SILS_UTIL_C}
+)
+target_link_libraries(
+    sils_main 
+    wsock32 
+    ws2_32 
+    Xinput
+    winmm
+)

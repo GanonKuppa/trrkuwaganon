@@ -19,53 +19,69 @@ class TurnIterator{
         _t_molli = 0.0f;
         _t = 0.0f;
         _beta = 0.0f;
+        _beta_abs_max = 0.0f;
         _yaw = 0.0f;
         _yawrate = 0.0f;
         _yawacc = 0.0f;
     }
     
     void next(){
-        float _yawrate_now = mollifier_f(_t_molli * _v, _a, _b, _c);
-        if(_yawrate_now < 0.01745f){ // 0.01745 rad/s = 1deg/s
-            _t_molli += _delta_t;
+        float yawrate_pre = _yawrate;
+        float yawrate_pre_plus_half_dt = _v * mollifier_f((_t_molli + _delta_t * 0.5f) * _v, _a, _b, _c);
+        float yawrate_now = _v * mollifier_f(_t_molli * _v, _a, _b, _c);
+        float yawrate_next = _v * mollifier_f((_t_molli + _delta_t) * _v, _a, _b, _c);
+        _t_molli += _delta_t;
+        if(yawrate_now < 0.01745f && _yaw < 0.0001745f){ // 0.01745 rad/s = 1deg/s            
+            _yawrate = yawrate_now;
             next();
         }
 
-        _yawacc = (_yawrate_now - _yawrate) / _delta_t;
-        _yawrate = _yawrate_now;
-        _yaw = _yawrate * _delta_t;
+        _yawacc = (yawrate_next - yawrate_pre) / (2.0f * _delta_t); // 中心差分による微分計算
+        _yaw += _rk4_yaw_delta(yawrate_pre, yawrate_pre_plus_half_dt, yawrate_now);
+        _yawrate = yawrate_now;
 
-        float beta_pre = _beta;
-        float t_pre = _t;
-        float k1 = _rk4_f(t_pre                , beta_pre                     );
-        float k2 = _rk4_f(t_pre + _delta_t*0.5f, beta_pre + _delta_t * 0.5f*k1);
-        float k3 = _rk4_f(t_pre + _delta_t*0.5f, beta_pre + _delta_t * 0.5f*k2);
-        float k4 = _rk4_f(t_pre + _delta_t     , beta_pre + _delta_t * k3     );
-        _beta = beta_pre + (k1 + 2.0f*k2 + 2.0f*k3 + k4) * _delta_t / 6.0f;    
+        float beta_pre = _beta;        
+        _beta += _rk4_beta_delta(beta_pre, yawrate_pre, yawrate_pre_plus_half_dt, yawrate_now);
+        if(_beta_abs_max < std::fabs(_beta)){
+            _beta_abs_max = std::fabs(_beta);
+        }
         _t += _delta_t;
     };
+
     float getYawrate(){
         return _yawrate;
     };
+
     float getYawAcc(){
         return _yawacc;
     };
+
+    float getYaw(){
+        return _yaw;
+    }
+
     float getBeta(){
         return _beta;
     };
+
+    float getBetaAbsMax(){
+        return _beta_abs_max;
+    }
+
     float getElapsedTime(){
         return _t;
     };
-
+    
     bool isEnd(){
-        // 0.01745 rad/s = 1deg/s
-        return (_yaw > _target_ang * 0.99f) && (_yawrate < FLT_EPSILON) && std::fabs(_beta) < 0.01745f;
+        // 0.001745f rad = 0.1deg 0.01745 rad/s = 1deg/s
+        return (std::fabs(_yaw - _target_ang) < 0.001745f) && (_yawrate < 0.001745f) && std::fabs(_beta) < 0.01745f;
     };
   private:
     float _delta_t;
     float _v;
     float _cp;
     float _target_ang;
+    float _start_ang;
 
     float _a;
     float _b;
@@ -74,11 +90,32 @@ class TurnIterator{
     float _t_molli;
     float _t;
     float _beta;
+    float _beta_abs_max;
     float _yaw;
     float _yawrate;
     float _yawacc;
 
-    float _rk4_f(float t, float y){
-        return -_cp * y / _v - _v * mollifier_f(t * _v, _a, _b, _c);
+    float _move_x;
+    float _move_y;
+
+    float _rk4_beta_f(float beta, float yawrate){
+        return -_cp * beta / _v - yawrate;
     }
+
+    float _rk4_beta_delta(float beta_pre, float yawrate_pre, float yawrate_pre_plus_half_dt, float yawrate_now){
+        float k1 = _rk4_beta_f(beta_pre                       , yawrate_pre);
+        float k2 = _rk4_beta_f(beta_pre + _delta_t * 0.5f * k1, yawrate_pre_plus_half_dt);
+        float k3 = _rk4_beta_f(beta_pre + _delta_t * 0.5f * k2, yawrate_pre_plus_half_dt);
+        float k4 = _rk4_beta_f(beta_pre + _delta_t * k3       , yawrate_now);
+        return (k1 + 2.0f*k2 + 2.0f*k3 + k4) * _delta_t / 6.0f;
+    }
+
+    float _rk4_yaw_delta(float yawrate_pre, float yawrate_pre_plus_dt, float yawrate_now){                
+        float k1 = yawrate_pre;
+        float k2 = yawrate_pre_plus_dt;
+        float k3 = k2;
+        float k4 = yawrate_now;
+        return (k1 + 2.0f*k2 + 2.0f*k3 + k4) * _delta_t / 6.0f;
+    }
+
 };

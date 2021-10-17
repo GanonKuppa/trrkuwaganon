@@ -46,7 +46,7 @@ build_mot:
 .PHONY: clean
 clean:
 	@- $(RM)
-	@  cd HardwareDebug & make clean
+#	@  cd HardwareDebug & make clean
 	@  echo clean!
 
 .PHONY: format
@@ -60,3 +60,11 @@ doxygen:
 .PHONY: help
 help:
 	@- $(HELP)
+
+.PHONY: test_traj
+test_traj:
+	@- cd test/traj & rmdir /s /q build > NUL 2>&1 & if ERRORLEVEL 1 cmd /c exit 0
+	@- cd test/traj & mkdir build > NUL 2>&1 & if ERRORLEVEL 1 cmd /c exit 0
+	@  cd test/traj/build & cmake ..  -G Ninja  -DCMAKE_MAKE_PROGRAM="C:/ninja-win/ninja"	                        
+	@  cd test/traj/build & C:/ninja-win/ninja
+	@  test/traj/build/main.exe

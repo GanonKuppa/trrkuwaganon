@@ -34,7 +34,6 @@
 // Module
 #include "ledController.h"
 #include "gamepad.h"
-#include "communication.h"
 
 // Activity
 #include "ActivityFactory.h"
