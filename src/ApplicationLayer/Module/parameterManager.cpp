@@ -318,8 +318,14 @@ namespace module {
         strkeyMap[key] = val_num;
         valStrkeyMap[val_num] = key;
         T* adr = &r_val;
-        adrMap[val_num] = reinterpret_cast<uint32_t>(adr);        
-        r_val = read<T>(val_num);
+        adrMap[val_num] = reinterpret_cast<uint32_t>(adr);
+        *reinterpret_cast<T*>(adrMap[val_num]) = read<T>(val_num);
+        
+        if(val_num == 184 ){
+            PRINTF_ASYNC("187|| %d %d: %f %f %f\n",adrMap[val_num], reinterpret_cast<uint32_t>(adr), read<T>(val_num), r_val, *reinterpret_cast<T*>(adrMap[val_num]));    
+        }
+        //PRINTF_ASYNC("|| write d: %d %d \n", val, *reinterpret_cast<T*>(adrMap[val_num]));
+
 
         if (typeid(float) == typeid(r_val)) typeMap[val_num] = Type_e::FLOAT;
         if (typeid(uint8_t) == typeid(r_val)) typeMap[val_num] = Type_e::UINT8;
@@ -329,6 +335,8 @@ namespace module {
         if (typeid(int16_t) == typeid(r_val)) typeMap[val_num] = Type_e::INT16;
         if (typeid(int32_t) == typeid(r_val)) typeMap[val_num] = Type_e::INT32;
     }
+
+
 
     template<typename T>
     bool ParameterManager::write(uint16_t val_num, T val) {
@@ -438,38 +446,45 @@ namespace module {
                 }
                 else if(val_type == Type_e::FLOAT){
                     std::string type_str = "float";
+                    float val_from_adr = *reinterpret_cast<float*>(pm.adrMap[val_num]);
                     float val = pm.read<float>(val_num);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %f\n", val_num, type_str.c_str(), key_str.c_str(), val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-28s, %f, %f\n", val_num, type_str.c_str(), key_str.c_str(), val, val_from_adr);
                 }
                 else if(val_type == Type_e::UINT8){
                     std::string type_str = "uint8";
+                    uint8_t val_from_adr = *reinterpret_cast<uint8_t*>(pm.adrMap[val_num]);
                     uint8_t val = pm.read<uint8_t>(val_num);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), key_str.c_str(), val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-28s, %d, %d\n", val_num, type_str.c_str(), key_str.c_str(), val, val_from_adr);
                 }
                 else if(val_type == Type_e::UINT16){
                     std::string type_str = "uint16";
+                    uint16_t val_from_adr = *reinterpret_cast<uint16_t*>(pm.adrMap[val_num]);
                     uint16_t val = pm.read<uint16_t>(val_num);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), key_str.c_str(), val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-28s, %d, %d\n", val_num, type_str.c_str(), key_str.c_str(), val, val_from_adr);
                 }
                 else if(val_type == Type_e::UINT32){
                     std::string type_str = "uint32";
+                    uint32_t val_from_adr = *reinterpret_cast<uint32_t*>(pm.adrMap[val_num]);
                     uint32_t val = pm.read<uint32_t>(val_num);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), key_str.c_str(), val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-28s, %d, %d\n", val_num, type_str.c_str(), key_str.c_str(), val, val_from_adr);
                 }
                 else if(val_type == Type_e::INT8){
                     std::string type_str = "int8";
+                    int8_t val_from_adr = *reinterpret_cast<int8_t*>(pm.adrMap[val_num]);
                     int8_t val = pm.read<int8_t>(val_num);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), key_str.c_str(), val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-28s, %d, %d\n", val_num, type_str.c_str(), key_str.c_str(), val, val_from_adr);
                 }
                 else if(val_type == Type_e::INT16){
                     std::string type_str = "int16";
+                    int16_t val_from_adr = *reinterpret_cast<int16_t*>(pm.adrMap[val_num]);
                     int16_t val = pm.read<int16_t>(val_num);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), key_str.c_str(), val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-28s, %d\n", val_num, type_str.c_str(), key_str.c_str(), val, val_from_adr);
                 }
                 else if(val_type == Type_e::INT32){
                     std::string type_str = "int32";
+                    int32_t val_from_adr = *reinterpret_cast<int32_t*>(pm.adrMap[val_num]);
                     int32_t val = pm.read<int32_t>(val_num);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), key_str.c_str(), val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-28s, %d\n", val_num, type_str.c_str(), key_str.c_str(), val, val_from_adr);
                 }
                 else{
                     PRINTF_ASYNC("  invalid type!\n");                
