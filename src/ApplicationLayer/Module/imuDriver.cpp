@@ -1,6 +1,6 @@
 #include "imuDriver.h"
 
-#include "math.h"
+#include <math.h>
 #include <string>
 
 // Lib
@@ -11,10 +11,12 @@
 #include "hal_spi.h"
 #include "hal_timer.h"
 
-// Module
+// Msg
 #include "msgBroker.h"
-#include "parameterManager.h"
 #include "imuMsg.h"
+
+// Module
+#include "parameterManager.h"
 
 
 namespace module {

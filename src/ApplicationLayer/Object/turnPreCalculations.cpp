@@ -16,10 +16,10 @@
     constexpr float PATH_LENGTH_L_90 = 0.11f;
     constexpr float PATH_LENGTH_180 = 0.1f;
     constexpr float PATH_LENGTH_S2D_45 = 0.04f;
-    constexpr float PATH_LENGTH_S2D_135 = 0.11f;
-    constexpr float PATH_LENGTH_D_90 = 0.07f;
+    constexpr float PATH_LENGTH_S2D_135 = 0.1f;
+    constexpr float PATH_LENGTH_D_90 = 0.05f;
     constexpr float PATH_LENGTH_D2S_45 = 0.04f;
-    constexpr float PATH_LENGTH_D2S_135 = 0.11f;
+    constexpr float PATH_LENGTH_D2S_135 = 0.1f;
 
     constexpr float TARGET_ANG_90 = 90.0f * DEG2RAD;
     constexpr float TARGET_ANG_L_90 = 90.0f * DEG2RAD;
@@ -158,6 +158,53 @@ float TurnPreCalculations::getFolDist(ETurnType tt){
             return 0.0;
     }
 }
+
+float TurnPreCalculations::getMoveX(ETurnType tt){
+    switch (tt) {
+        case ETurnType::TURN_90:
+            return _turn_90.getMoveX();
+        case ETurnType::TURN_L_90:
+            return _turn_l_90.getMoveX();
+        case ETurnType::TURN_180:
+            return _turn_180.getMoveX();
+        case ETurnType::TURN_S2D_45:
+            return _turn_s2d_45.getMoveX();
+        case ETurnType::TURN_S2D_135:
+            return _turn_s2d_135.getMoveX();
+        case ETurnType::TURN_D2S_45:
+            return _turn_d2s_45.getMoveX();
+        case ETurnType::TURN_D2S_135:
+            return _turn_d2s_135.getMoveX();
+        case ETurnType::TURN_D_90:
+            return _turn_d_90.getMoveX();
+        default:
+            return 0.0;
+    }
+}
+
+float TurnPreCalculations::getMoveY(ETurnType tt){
+    switch (tt) {
+        case ETurnType::TURN_90:
+            return _turn_90.getMoveY();
+        case ETurnType::TURN_L_90:
+            return _turn_l_90.getMoveY();
+        case ETurnType::TURN_180:
+            return _turn_180.getMoveY();
+        case ETurnType::TURN_S2D_45:
+            return _turn_s2d_45.getMoveY();
+        case ETurnType::TURN_S2D_135:
+            return _turn_s2d_135.getMoveY();
+        case ETurnType::TURN_D2S_45:
+            return _turn_d2s_45.getMoveY();
+        case ETurnType::TURN_D2S_135:
+            return _turn_d2s_135.getMoveY();
+        case ETurnType::TURN_D_90:
+            return _turn_d_90.getMoveY();
+        default:
+            return 0.0;
+    }
+}
+
 
 std::unique_ptr<TurnIterator> TurnPreCalculations::generateTurnIterator(ETurnType tt){
     switch (tt) {

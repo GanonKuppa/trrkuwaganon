@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#ifdef SILS
+#ifdef SILS_WINDOWS
 #include <XInput.h>
 #include <windows.h>
 #endif
@@ -39,7 +39,7 @@ namespace module {
 
 
     bool Gamepad::_isConnected() {
-#ifndef SILS
+#ifndef SILS_WINDOWS
         if(hal::getElapsedMsec() - _preRecieveTime < 200) {
             return true;
         } else {
@@ -68,7 +68,7 @@ namespace module {
 
     //1msec毎に呼ぶこと
     void Gamepad::update0() {
-#ifndef SILS
+#ifndef SILS_WINDOWS
         uint8_t* command = receiveCommand;
         if((command[6] & 0x01) == 1) _A_bt++;
         else _A_bt = 0;
@@ -181,7 +181,7 @@ namespace module {
 
 
     void Gamepad::debug() {
-#ifndef SILS
+#ifndef SILS_WINDOWS
         //printfAsync("A:%d, B:%d, X:%d, Y:%d, RT:%d, LT:%d  \n", A,B,X,Y,RT,LT);
 #else
         printf("==================\n");
@@ -192,7 +192,7 @@ namespace module {
     };
 
     void Gamepad::debug_xinput() {
-#ifdef SILS
+#ifdef SILS_WINDOWS
         XINPUT_STATE state;
         XInputGetState(0, &state);
         printf("==================\n");

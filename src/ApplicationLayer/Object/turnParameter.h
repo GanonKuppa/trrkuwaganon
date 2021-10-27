@@ -65,7 +65,9 @@ class TurnParameter {
         switch (turn_type) {
             case ETurnType::STRAIGHT:
                 return _v_straight;
-            case ETurnType::STRAIGHT_WALL_CENTER:
+            case ETurnType::STRAIGHT_CENTER:
+            	return _v_straight;
+            case ETurnType::STRAIGHT_CENTER_EDGE:
             	return _v_straight;
             case ETurnType::TURN_90:
                 return _v_turn_90;
@@ -87,6 +89,8 @@ class TurnParameter {
                 return _v_d_straight;
             case ETurnType::DIAGONAL_CENTER:
                 return _v_d_straight;
+            case ETurnType::DIAGONAL_CENTER_EDGE:
+                return _v_d_straight;
             default:
                 return 0.0;
         }
@@ -96,7 +100,7 @@ class TurnParameter {
         switch (turn_type) {
             case ETurnType::STRAIGHT:
                 return _a_straight;
-            case ETurnType::STRAIGHT_WALL_CENTER:
+            case ETurnType::STRAIGHT_CENTER:
             	return _a_straight;
             case ETurnType::DIAGONAL:
                 return _a_d_straight;

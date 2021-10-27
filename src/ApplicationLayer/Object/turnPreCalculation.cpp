@@ -60,7 +60,6 @@ float TurnPreCalculation::getTrajEndTime(){
     return _end_time;
 }
 
-
 float TurnPreCalculation::getPreDist(){
     return _pre_dist;
 }
@@ -69,9 +68,17 @@ float TurnPreCalculation::getFolDist(){
     return _fol_dist;
 }
 
+float TurnPreCalculation::getMoveX(){
+    return _move_x;
+}
+
+float TurnPreCalculation::getMoveY(){
+    return _move_y;
+}
+
 float TurnPreCalculation::getBetaAbsMax(){
     return _beta_abs_max;
-};
+}
 
 void TurnPreCalculation::_init(){
     float delta_t_for_calc_dist = 0.0005f;

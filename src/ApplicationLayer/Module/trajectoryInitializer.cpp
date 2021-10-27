@@ -39,6 +39,14 @@ namespace module {
         return _turnPreCalcs.at(tp).getFolDist(tt);
     }
 
+    float TrajectoryInitializer::getMoveX(ETurnParamSet tp, ETurnType tt){
+        return _turnPreCalcs.at(tp).getMoveX(tt);
+    }
+
+    float TrajectoryInitializer::getMoveY(ETurnParamSet tp, ETurnType tt){
+        return _turnPreCalcs.at(tp).getMoveY(tt);
+    }
+
     float TrajectoryInitializer::getTrajEndTime(ETurnParamSet tp, ETurnType tt){
         return _turnPreCalcs.at(tp).getTrajEndTime(tt);
     }

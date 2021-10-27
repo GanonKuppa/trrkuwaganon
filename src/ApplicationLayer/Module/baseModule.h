@@ -62,8 +62,8 @@ namespace module {
         std::string _module_name;
         uint32_t _cycle_time_us[4];
         BaseModule(): _delta_t(0.001f), 
-                      _cycle_time_us{0, 0, 0, 0},
-                      _module_name("BaseModule")
+                      _module_name("BaseModule"),
+                      _cycle_time_us{0, 0, 0, 0}                      
         { }
 
       private:

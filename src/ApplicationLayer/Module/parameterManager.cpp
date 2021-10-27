@@ -318,13 +318,13 @@ namespace module {
         strkeyMap[key] = val_num;
         valStrkeyMap[val_num] = key;
         T* adr = &r_val;
+
+#ifndef SILS
         adrMap[val_num] = reinterpret_cast<uint32_t>(adr);
-        *reinterpret_cast<T*>(adrMap[val_num]) = read<T>(val_num);
-#ifdef DEBUG_HEATER_TARGET_TEMP_CHANGE_BUG
-        if(val_num == 184 ){
-            PRINTF_ASYNC("184|| %d %d: %f %f %f\n",adrMap[val_num], reinterpret_cast<uint32_t>(adr), read<T>(val_num), r_val, *reinterpret_cast<T*>(adrMap[val_num]));    
-        }
+#else
+        adrMap[val_num] = reinterpret_cast<uint64_t>(adr);
 #endif
+        *reinterpret_cast<T*>(adrMap[val_num]) = read<T>(val_num);
 
         if (typeid(float) == typeid(r_val)) typeMap[val_num] = Type_e::FLOAT;
         if (typeid(uint8_t) == typeid(r_val)) typeMap[val_num] = Type_e::UINT8;

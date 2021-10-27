@@ -1,0 +1,27 @@
+1   ls
+2   sudo apt update
+3   sudo apt upgrade -y
+4   date
+5   git
+6   gcc --version
+7   sudo apt install gcc
+8   gcc -v
+9   g++ -v
+10  sudo apt install g++
+11  sudo apt install build-essential
+12  gcc -o hello hello.c && ./hello 
+13  g++ -v
+14  sudo apt install make
+15  make -v
+16  sudo apt install cmake
+17  cmake -v
+18  cmake -V
+19  cmake
+20  cmake --help
+21  apt-show-versions -p cmake
+22  apt list cmake
+23  apt install ninja-build
+24  sudo apt install ninja-build
+25  ninja --version
+26  ls
+27  history

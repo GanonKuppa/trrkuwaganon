@@ -158,7 +158,7 @@ namespace module{
         }
 
         // 壁制御
-        if(_turn_type == ETurnType::STRAIGHT_WALL_CENTER) {
+        if(_turn_type == ETurnType::STRAIGHT_CENTER || _turn_type == ETurnType::STRAIGHT_CENTER_EDGE) {
             
             if(_nav_msg.mode == ENavMode::SEARCH || _nav_msg.mode == ENavMode::FASTEST){
                 _wall_pidf.update(_ws_msg.center_dist_r, _ws_msg.center_dist_l, _nav_msg.r_wall_enable, _nav_msg.l_wall_enable);

@@ -14,7 +14,7 @@
 #include "imuMsg.h"
 #include "navStateMsg.h"
 #include "pidControlValMsg.h"
-#include "VehicleAttitudeMsg.h"
+#include "vehicleAttitudeMsg.h"
 #include "vehiclePositionMsg.h"
 #include "wallSensorMsg.h"
 #include "wheelOdometryMsg.h"

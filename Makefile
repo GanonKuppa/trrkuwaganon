@@ -62,9 +62,17 @@ help:
 	@- $(HELP)
 
 .PHONY: test_traj
-test_traj:
-	@- cd test/traj & rmdir /s /q build > NUL 2>&1 & if ERRORLEVEL 1 cmd /c exit 0
-	@- cd test/traj & mkdir build > NUL 2>&1 & if ERRORLEVEL 1 cmd /c exit 0
-	@  cd test/traj/build & cmake ..  -G Ninja  -DCMAKE_MAKE_PROGRAM="C:/ninja-win/ninja"	                        
-	@  cd test/traj/build & C:/ninja-win/ninja
-	@  test/traj/build/main.exe
+test_traj:	
+	- rm -r test/traj/build
+	- mkdir test/traj/build
+	- cd test/traj/build; cmake .. -G Ninja                         
+	- cd test/traj/build; ninja
+	- test/traj/build/main
+
+.PHONY: test_trajSetpoint
+test_trajSetpoint:
+	- rm -r test/trajSetpoint/build
+	- mkdir test/trajSetpoint/build
+	- cd test/trajSetpoint/build; cmake .. -G Ninja                         
+	- cd test/trajSetpoint/build; ninja
+	- test/trajSetpoint/build/main

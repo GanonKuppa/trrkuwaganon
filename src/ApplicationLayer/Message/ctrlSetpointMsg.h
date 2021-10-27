@@ -21,6 +21,7 @@ class CtrlSetpointMsg : public BaseMsg{
     float yawacc = 0.0f;    // [rad/s^2]
 
     float beta = 0.0f;      // [rad]
+    float beta_dot = 0.0f;  // [rad/s]
 
     ETrajType traj_type = ETrajType::STOP; // [enum]
     ETurnType turn_type = ETurnType::STOP; // [enum]

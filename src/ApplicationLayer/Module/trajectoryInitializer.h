@@ -17,7 +17,9 @@ namespace module {
         float getAcc(ETurnParamSet tp, ETurnType tt);
         float getPreDist(ETurnParamSet tp, ETurnType tt);
         float getFolDist(ETurnParamSet tp, ETurnType tt);
-        float getTrajEndTime(ETurnParamSet tp, ETurnType tt);
+        float getMoveX(ETurnParamSet tp, ETurnType tt);
+        float getMoveY(ETurnParamSet tp, ETurnType tt);
+        float getTrajEndTime(ETurnParamSet tp, ETurnType tt);        
         std::unique_ptr<TurnIterator> generateTurnIterator(ETurnParamSet tp, ETurnType tt);
         void debugMollifier();
         void debugParamSet();

@@ -42,8 +42,8 @@ static int usrcmd_top(int argc, char **argv);
 typedef int (*USRCMDFUNC)(int argc, char **argv);
 
 typedef struct {
-    char *cmd;
-    char *desc;
+    const char *cmd;
+    const char *desc;
     USRCMDFUNC func;
 } cmd_table_t;
 

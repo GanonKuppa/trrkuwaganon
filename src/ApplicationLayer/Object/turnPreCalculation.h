@@ -28,7 +28,9 @@ class TurnPreCalculation{
     float getTrajEndTime();
     float getPreDist();
     float getFolDist();
-    float getBetaAbsMax();
+    float getMoveX();
+    float getMoveY();
+    float getBetaAbsMax();    
   private:
     float _pre_dist;
     float _fol_dist;

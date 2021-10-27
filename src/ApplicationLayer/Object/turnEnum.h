@@ -5,18 +5,21 @@
 
 enum class ETrajType : uint8_t{
     STOP = 0,
-    STRAIGHT,
-    DIAGONAL,    
     SPINTURN,
-    CURVE
+    STRAIGHT,        
+    CURVE,
+    NONE
 };
 
 enum class ETurnType : uint8_t{
     STOP = 0,
+    SPINTURN,
     STRAIGHT,
-    STRAIGHT_WALL_CENTER,    
+    STRAIGHT_CENTER,
+    STRAIGHT_CENTER_EDGE,
     DIAGONAL,
     DIAGONAL_CENTER,
+    DIAGONAL_CENTER_EDGE,
     TURN_90,
     TURN_L_90,
     TURN_180,
@@ -25,7 +28,8 @@ enum class ETurnType : uint8_t{
     TURN_D_90,
     TURN_D2S_45,
     TURN_D2S_135,    
-    CIRCULAR
+    CIRCULAR,
+    NONE
 };
 
 enum class ETurnDir : int8_t{
@@ -52,7 +56,7 @@ inline std::string turnDir2Str(ETurnDir td){
         case ETurnDir::NO_TURN:
             return std::string("NO_TURN");
         case ETurnDir::CCW:
-            return std::string("CCW");
+            return std::string("CCW");      
         default:
             return std::string("");
     }
@@ -62,14 +66,14 @@ inline std::string trajType2Str(ETrajType tt){
     switch (tt) {
         case ETrajType::STOP:
             return std::string("STOP");
-        case ETrajType::STRAIGHT:
-            return std::string("STRAIGHT");
-        case ETrajType::DIAGONAL:
-            return std::string("DIAGONAL");
         case ETrajType::SPINTURN:
             return std::string("SPINTURN");
+        case ETrajType::STRAIGHT:
+            return std::string("STRAIGHT");
         case ETrajType::CURVE:
             return std::string("CURVE");
+        case ETrajType::NONE:
+            return std::string("NONE");
         default:
             return std::string("");
     }
@@ -79,10 +83,14 @@ inline std::string turnType2Str(ETurnType tt){
     switch (tt) {
         case ETurnType::STOP:
             return std::string("STOP");
+        case ETurnType::SPINTURN:
+            return std::string("SPINTURN");
         case ETurnType::STRAIGHT:
             return std::string("STRAIGHT");
-        case ETurnType::STRAIGHT_WALL_CENTER:
-            return std::string("STRAIGHT_WALL_CENTER");
+        case ETurnType::STRAIGHT_CENTER:
+            return std::string("STRAIGHT_CENTER");
+        case ETurnType::STRAIGHT_CENTER_EDGE:
+            return std::string("STRAIGHT_CENTER_EDGE");
         case ETurnType::TURN_90:
             return std::string("TURN_90");
         case ETurnType::TURN_L_90:
@@ -103,8 +111,12 @@ inline std::string turnType2Str(ETurnType tt){
             return std::string("DIAGONAL");
         case ETurnType::DIAGONAL_CENTER:
             return std::string("DIAGONAL_CENTER");
+        case ETurnType::DIAGONAL_CENTER_EDGE:
+            return std::string("DIAGONAL_CENTER_EDGE");
         case ETurnType::CIRCULAR:
             return std::string("CIRCULAR");
+        case ETurnType::NONE:
+            return std::string("NONE");
         default:
             return std::string("");
     }
@@ -132,3 +144,19 @@ inline std::string turnParamSet2Str(ETurnParamSet tp){
             return std::string("");
     }
 };
+
+inline bool isTurnStraight(ETurnType turn_type){
+    if(turn_type == ETurnType::STRAIGHT ||
+       turn_type == ETurnType::STRAIGHT_CENTER ||
+       turn_type == ETurnType::STRAIGHT_CENTER_EDGE ||
+       turn_type == ETurnType::DIAGONAL ||
+       turn_type == ETurnType::DIAGONAL_CENTER ||
+       turn_type == ETurnType::DIAGONAL_CENTER_EDGE
+    ){
+        return true;
+    }
+    else {
+        return false;        
+    }
+}
+

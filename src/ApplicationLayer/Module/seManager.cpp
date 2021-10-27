@@ -1,6 +1,6 @@
 #include "seManager.h"
 
-#ifndef SILS
+#ifndef SILS_WINDOWS
 
 #else
 #include <windows.h>
@@ -9,7 +9,7 @@
 
 namespace sound {
     void cursor_move(){
-#ifndef SILS
+#ifndef SILS_WINDOWS
         
 #else
         Beep( 3951, 100 );
@@ -17,7 +17,7 @@ namespace sound {
     }
 
     void confirm(){
-#ifndef SILS
+#ifndef SILS_WINDOWS
         
 #else
         Beep( 3520, 60 );

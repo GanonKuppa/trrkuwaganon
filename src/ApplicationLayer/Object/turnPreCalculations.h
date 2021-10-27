@@ -19,6 +19,8 @@ class TurnPreCalculations{
     float getTrajEndTime(ETurnType tt);
     float getPreDist(ETurnType tt);
     float getFolDist(ETurnType tt);
+    float getMoveX(ETurnType tt);
+    float getMoveY(ETurnType tt);
     std::unique_ptr<TurnIterator> generateTurnIterator(ETurnType tt);
   
   private:    

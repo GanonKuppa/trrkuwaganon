@@ -19,6 +19,7 @@ class TurnIterator{
         _t_molli = 0.0f;
         _t = 0.0f;
         _beta = 0.0f;
+        _beta_dot = 0.0f;
         _beta_abs_max = 0.0f;
         _yaw = 0.0f;
         _yawrate = 0.0f;
@@ -40,7 +41,8 @@ class TurnIterator{
         _yaw += _rk4_yaw_delta(yawrate_pre, yawrate_pre_plus_half_dt, yawrate_now);
         _yawrate = yawrate_now;
 
-        float beta_pre = _beta;        
+        float beta_pre = _beta;
+        _beta_dot = _rk4_beta_f(beta_pre, yawrate_pre);
         _beta += _rk4_beta_delta(beta_pre, yawrate_pre, yawrate_pre_plus_half_dt, yawrate_now);
         if(_beta_abs_max < std::fabs(_beta)){
             _beta_abs_max = std::fabs(_beta);
@@ -64,6 +66,10 @@ class TurnIterator{
         return _beta;
     };
 
+    float getBetaDot(){
+        return _beta_dot;
+    }
+
     float getBetaAbsMax(){
         return _beta_abs_max;
     }
@@ -71,6 +77,10 @@ class TurnIterator{
     float getElapsedTime(){
         return _t;
     };
+
+    float getTargetAng(){
+        return _target_ang;
+    }
     
     bool isEnd(){
         // 0.001745f rad = 0.1deg 0.01745 rad/s = 1deg/s
@@ -90,6 +100,7 @@ class TurnIterator{
     float _t_molli;
     float _t;
     float _beta;
+    float _beta_dot;
     float _beta_abs_max;
     float _yaw;
     float _yawrate;
