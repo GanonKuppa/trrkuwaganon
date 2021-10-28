@@ -89,7 +89,7 @@ class SpinTurnTrajectory : public BaseTrajectory {
     float _target_cumulative_yaw;
     float _abs_yawacc;
     float _abs_yawrate_max;
-    float _yawrate_end;
+    float _abs_yawrate_min;
 };
 
 class StopTrajectory : public BaseTrajectory {

@@ -232,17 +232,16 @@ SpinTurnTrajectory::SpinTurnTrajectory(float target_cumulative_yaw, float abs_ya
     
     _traj_type = ETrajType::SPINTURN;
     _turn_type = ETurnType::SPINTURN;
-    _turn_dir = (ETurnDir)((_target_cumulative_yaw>0)-(_target_cumulative_yaw<0));
+    _turn_dir = (ETurnDir)((target_cumulative_yaw>0)-(target_cumulative_yaw<0));
 
 
     _target_cumulative_yaw = target_cumulative_yaw;
-    abs_yawrate_max = _abs_yawrate_max;
-    abs_yawacc = _abs_yawacc;
+    _yawacc = (float)_turn_dir * abs_yawacc;
 
     _target_cumulative_yaw = target_cumulative_yaw;
     _abs_yawacc = abs_yawacc;
-    _abs_yawrate_max = abs_yawrate_max;
-    _yawrate_end = 0.0f;
+    _abs_yawrate_max = abs_yawrate_max;    
+    _abs_yawrate_min = 0.349f;  // 0.349rad = 20deg/sec    
 }
 
 float SpinTurnTrajectory::getEndX() {
@@ -260,13 +259,19 @@ float SpinTurnTrajectory::getEndYaw() {
 
 void SpinTurnTrajectory::update() {        
     BaseTrajectory::update();
-    float yaw_bre = 0.0f;
-
-    if (_yawacc != 0.0f){
-        yaw_bre = (_yawrate * _yawrate - 0.0f * 0.0f) / (2.0f * _abs_yawacc);
+    
+    float abs_yaw_bre = 0.0f;
+    float abs_target_cumulative_yaw = std::fabs(_target_cumulative_yaw);
+    if(abs_target_cumulative_yaw > 0.174f){ // 0.174rad = 10deg, 0.0174*3.0 rad = 2deg
+        abs_target_cumulative_yaw -= 0.0174f * 2.0f;
     }
 
-    if (yaw_bre > (std::fabs(_target_cumulative_yaw) - std::fabs(_cumulative_yaw))){
+
+    if (_abs_yawacc != 0.0f){
+        abs_yaw_bre = (_yawrate * _yawrate - _abs_yawrate_min * _abs_yawrate_min) / (2.0f * _abs_yawacc);
+    }
+
+    if (abs_yaw_bre >= (abs_target_cumulative_yaw - std::fabs(_cumulative_yaw))){
         _yawacc = - (float)_turn_dir * _abs_yawacc;
     }
 
@@ -275,8 +280,9 @@ void SpinTurnTrajectory::update() {
         _yawacc = 0.0f;
     }
 
-    if (std::fabs(_yawrate) < std::fabs(_yawrate_end)){
-        _yawrate = _yawrate_end;
+    if (std::fabs(_yawrate) <= _abs_yawrate_min && _yawacc * (float)_turn_dir < 0.0f){
+        _yawrate = (float)_turn_dir * _abs_yawrate_min;
+        _yawacc = 0.0f;
     }
 }
 
@@ -339,7 +345,7 @@ void StopTrajectory::update() {
 }
 
 bool StopTrajectory::isEnd() {
-    if(_stop_time <= _cumulative_t){
+    if(_cumulative_t >= _stop_time){
         _x = getEndX();
         _y = getEndY();
         _yaw = getEndYaw();
@@ -380,7 +386,6 @@ float CurveTrajectory::getEndYaw(){
     float target_ang = (float)(_turn_dir) * _turn_iterator->getTargetAng();
     constexpr float PI = 3.14159265f;
     return fmod(_yaw_0 + target_ang + 2.0f * PI, 2.0f * PI);
-
 }
 
 float CurveTrajectory::getNecessaryTime(){
@@ -394,7 +399,7 @@ void CurveTrajectory::update(){
     _a_x = _a_xy_body * cosf(_yaw + _beta) - _v_xy_body * (_yawrate + _beta_dot) * sinf(_yaw + _beta);
     _a_y = _a_xy_body * sinf(_yaw + _beta) + _v_xy_body * (_yawrate + _beta_dot) * cosf(_yaw + _beta);
 
-    _yawacc = _turn_iterator->getYawAcc();
+    _yawacc = _turn_iterator->getYawAcc() * (float)(_turn_dir);
     _yawrate = _turn_iterator->getYawrate() * (float)(_turn_dir);
     _beta = _turn_iterator->getBeta() * (float)(_turn_dir);
     _beta_dot = _turn_iterator->getBetaDot() * (float)(_turn_dir);

@@ -13,6 +13,9 @@ namespace module {
 
     ParameterManager::ParameterManager() {
         setModuleName("ParameterManager");
+#ifdef SILS
+        return;
+#endif
 
         registration<float>(0, mass, "mass"); //0
         registration<float>(1, dia_tire, "dia_tire"); //1
