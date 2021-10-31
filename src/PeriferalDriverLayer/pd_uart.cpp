@@ -92,7 +92,7 @@ namespace periferal_driver {
     static std::deque<uint8_t> recvBuf;//受信用データバッファ
     static bool send_lock = false;
     static bool recv_lock = false;
-    static const int SEND_BUF_MAX = 512;
+    static const int SEND_BUF_MAX = 2048;
     static const int RECV_BUF_MAX = 512;
 
     /***********nbyte送信関数*******************/

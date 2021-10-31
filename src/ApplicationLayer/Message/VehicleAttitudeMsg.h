@@ -17,6 +17,7 @@ class VehicleAttitudeMsg : public BaseMsg{
     float pitch_acc;   // [rad]
 
     float beta;        // [rad]
+    float beta_dot;    // [rad]
 
     float yawrate;     // [rad]
     float rollrate;    // [rad]

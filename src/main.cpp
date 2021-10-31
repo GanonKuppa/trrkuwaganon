@@ -23,6 +23,7 @@
 #include "heater.h"
 #include "imuDriver.h"
 #include "ledController.h"
+#include "logger.h"
 #include "navigator.h"
 #include "parameterManager.h"
 #include "positionEstimator.h"
@@ -32,6 +33,7 @@
 #include "shell.h"
 #include "suction.h"
 #include "trajectoryCommander.h"
+#include "trajectoryInitializer.h"
 #include "truthMaker.h"
 #include "wallsensor.h"
 #include "wheelOdometry.h"
@@ -64,8 +66,10 @@ void timerInterrupt0() {
     }
     // スロット0
     if (int_tick_count % 4 == 0) {
+        module::TrajectoryCommander::getInstance().cycle0();
         module::ImuDriver::getInstance().cycle0();
         module::WheelOdometry::getInstance().cycle0();
+        module::PositionEstimator::getInstance().cycle0();
         module::BatteryMonitor::getInstance().cycle0();
         module::PowerTransmission::getInstance().cycle0();
         module::Shell::getInstance().cycle1();
@@ -95,7 +99,8 @@ void timerInterrupt0() {
     // スロット3
     if (int_tick_count % 4 == 3) {        
         module::WallSensor::getInstance().cycle1();        
-        module::Shell::getInstance().cycle1();                
+        module::Shell::getInstance().cycle1();
+        module::Logger::getInstance().cycle3();
 
         uint32_t end_usec = hal::getElapsedUsec();
         hal::setSlot3Time(end_usec - start_usec);
@@ -176,8 +181,10 @@ void object_init() {
     module::SeManager::getInstance();
     module::Shell::getInstance();
     module::Suction::getInstance().setDeltaT(0.00025f);
+    module::TrajectoryCommander::getInstance();
+    module::TrajectoryInitializer::getInstance();
     module::WallSensor::getInstance();    
-    module::WheelOdometry::getInstance().setDeltaT(0.001f);
+    module::WheelOdometry::getInstance().setDeltaT(0.001f);    
 }
 
 

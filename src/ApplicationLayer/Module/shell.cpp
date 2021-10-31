@@ -1,5 +1,7 @@
 #include "shell.h"
 
+#include <string.h>
+
 // Lib/ntshell
 #include "ntopt.h"
 #include "ntlibc.h"
@@ -7,8 +9,8 @@
 
 
 #include "debugLog.h"
-#include "string.h"
 
+// Hal
 #include "hal_uart.h"
 #include "hal_timerInterrupt.h"
 #include "hal_timer.h"
@@ -20,6 +22,7 @@
 #include "heater.h"
 #include "imuDriver.h"
 #include "ledController.h"
+#include "logger.h"
 #include "navigator.h"
 #include "parameterManager.h"
 #include "positionEstimator.h"
@@ -60,6 +63,7 @@ static const cmd_table_t cmdlist[] = {
     { "imuDriver", "ImuDriver Module.", module::usrcmd_imuDriver },
     { "imu", "alias of imuDriver command.", module::usrcmd_imuDriver },
     { "ledController", "LedController Module.", module::usrcmd_ledController },
+    { "logger", "Logger Module.", module::usrcmd_logger },
     { "navigator", "Navigator Module.", module::usrcmd_navigator },
     { "paramManager", "ParamManager Module.", module::usrcmd_parameterManager },
     { "param", "alias of paramManager command.", module::usrcmd_parameterManager },    
@@ -146,6 +150,8 @@ int usrcmd_top(int argc, char **argv)
     hal::waitmsec(10);
     module::LedController::getInstance().printCycleTime();
     hal::waitmsec(10);
+    module::Logger::getInstance().printCycleTime();
+    hal::waitmsec(10);
     module::Navigator::getInstance().printCycleTime();
     hal::waitmsec(10);
     module::ParameterManager::getInstance().printCycleTime();
@@ -161,6 +167,8 @@ int usrcmd_top(int argc, char **argv)
     module::Suction::getInstance().printCycleTime();
     hal::waitmsec(10);
     module::TrajectoryCommander::getInstance().printCycleTime();
+    hal::waitmsec(10);
+    module::TrajectoryInitializer::getInstance().printCycleTime();
     hal::waitmsec(10);
     module::WallSensor::getInstance().printCycleTime();
     hal::waitmsec(10);
@@ -191,11 +199,13 @@ namespace module {
     };
 
     void Shell::update0(){
+        hal::sendDataUart1();
         hal::recvDataUart1();
         hal::sendDataUart1();
     }
 
     void Shell::update1(){
+        hal::sendDataUart1();
         hal::recvDataUart1();
         hal::sendDataUart1();
     }

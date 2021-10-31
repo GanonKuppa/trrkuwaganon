@@ -1,14 +1,27 @@
 #include "positionEstimator.h"
+
+#include <cmath>
+#include <deque>
+
+// Lib
+#include "ntlibc.h"
+#include "debugLog.h"
+
+// Msg
+#include "msgBroker.h"
+#include "ctrlSetpointMsg.h"
+#include "imuMsg.h"
+#include "wheelOdometryMsg.h"
 #include "vehicleAttitudeMsg.h"
 #include "vehiclePositionMsg.h"
-#include "msgBroker.h"
+
 
 
 namespace module {
 
     PositionEstimator::PositionEstimator() :
-	_x(0.0f),
-	_y(0.0f),
+	_x(0.045f),
+	_y(0.045f),
 	_z(0.0f),
 	_v_xy_body_cmp(0.0f),
 	_v_xy_body_enc(0.0f),
@@ -25,24 +38,163 @@ namespace module {
 	_yaw(90.0f * DEG2RAD),
 	_roll(0.0f),
 	_pitch(0.0f),
-	_beta(0.0f),
+	_q(Eigen::Quaternionf::Identity()),
+    _roll_acc(0.0f),
+    _pitch_acc(0.0f),
+    _beta(0.0f),
+    _beta_dot(0.0f),
 	_yawrate(0.0f),
 	_rollrate(0.0f),
 	_pitchrate(0.0f),
-	_after_curve_time(0.0f)
+	_beta_expiration_time(0.0f)    
     {        
         setModuleName("PositionEstimator");
-
+        
         for (uint8_t i = 0; i < ACC_Y_AVERAGE_NUM; i++) {
             _acc_y_list.push_front(0.0f);
+            _v_enc_list.push_front(0.0f);
         }    
     }
 
-    void PositionEstimator::reset(){
+    void PositionEstimator::reset(float x, float y, float yaw){
+        _x = x;
+        _y = y;
+        _z = 0.0f;
+        _yaw = yaw;
+        _beta = 0.0f;
+        _beta_dot = 0.0f;
+        _beta_expiration_time = 0.0f;
+
+        for (uint8_t i = 0; i < ACC_Y_AVERAGE_NUM; i++) {
+            _acc_y_list[i] = 0.0f;
+            _v_enc_list[i] = 0.0f;
+        }    
     }
 
     void PositionEstimator::update0(){
+        ImuMsg imu_msg;
+        WheelOdometryMsg wodo_msg;
+        CtrlSetpointMsg ctrl_msg;
+        copyMsg(msg_id::IMU, &imu_msg);
+        copyMsg(msg_id::WHEEL_ODOMETRY, &wodo_msg);
+        copyMsg(msg_id::CTRL_SETPOINT, &ctrl_msg);
 
+        float yawrate_pre = _yawrate; // yawrateは今期に取得したものは今期のデータ
+        float yaw_pre = _yaw;
+        float v_x_pre = _v_x;
+        float v_y_pre = _v_y;
+        float v_xy_body_for_odom_pre = v_xy_body_for_odom_pre; //エンコーダ計測速度は今期に取得できるものが前期のデータ
+        float a_body_x_pre = _a_body_x;
+        float a_body_y_pre = _a_body_y;
+        float a_body_z_pre = _a_body_z;
+        float beta_pre = _beta;
+
+        _a_body_x = imu_msg.acc_x;
+        _a_body_y = imu_msg.acc_y;
+        _a_body_z = imu_msg.acc_z;
+
+        _acc_y_list.push_front(imu_msg.acc_y);
+        _acc_y_list.pop_back();
+        _v_enc_list.push_front(wodo_msg.v);
+        _v_enc_list.pop_back();
+
+        // 角度算出
+        _yawrate = imu_msg.yawrate;
+        _yaw += yawrate_pre * _delta_t;
+        _yaw = fmodf(_yaw + 2.0 * PI, 2.0 * PI);
+        
+        // 並進速度算出
+        float acc_y_sum = 0.0f;
+        float v_sum = 0.0f;
+        for (uint8_t i=0; i< ACC_Y_AVERAGE_NUM; i++){
+            acc_y_sum += _acc_y_list[i];
+            v_sum += _v_enc_list[i];
+        }
+        
+        _v_xy_body_enc = wodo_msg.v;         
+        _v_xy_body_ave = v_sum / (float)ACC_Y_AVERAGE_NUM;
+        _v_xy_body_cmp = _v_xy_body_ave + acc_y_sum * _delta_t;
+        _v_xy_body_for_odom = _v_xy_body_enc;
+        _v_xy_body_for_ctrl = _v_xy_body_enc;
+        
+        // 加速度積分速度算出
+        _v_xy_body_acc += imu_msg.acc_y;
+        if(std::fabs(_v_xy_body_enc) < 0.01f){
+            _v_xy_body_acc = _v_xy_body_enc;
+        }
+
+        // グローバル座標系速度算出
+        _v_x = _v_xy_body_for_odom * cosf(yaw_pre + beta_pre);
+        _v_y = _v_xy_body_for_odom * sinf(yaw_pre + beta_pre);
+
+        // グローバル座標系位置算出
+        _x += _delta_t * v_x_pre;
+        _y += _delta_t * v_y_pre;
+
+        // スリップ角算出
+        _beta_expiration_time -= _delta_t;
+        if(_beta_expiration_time < 0.0f){
+            _beta_expiration_time = 0.0f;
+        }
+        
+        if(ctrl_msg.traj_type == ETrajType::CURVE){
+            _beta_expiration_time = _afrer_curve_beta_expiration_time;
+        }
+        
+        if(ctrl_msg.traj_type == ETrajType::CURVE || _beta_expiration_time > 0.0f){
+            _beta_dot = -a_body_x_pre / _v_xy_body_for_odom - yawrate_pre;
+            _beta += _beta_dot * _delta_t;            
+        }
+        else{
+            _beta_dot = 0.0f;
+            _beta = 0.0f;
+        }
+
+        _publish_vehicle_position();
+        _publish_vehicle_attitude();
+    }
+
+    void PositionEstimator::debug(){
+        PRINTF_ASYNC(  "  ---\n");
+        PRINTF_ASYNC(  "  x                    : %f\n", _x);
+        PRINTF_ASYNC(  "  y                    : %f\n", _y);
+        PRINTF_ASYNC(  "  z                    : %f\n", _z);
+        PRINTF_ASYNC(  "  ---\n");
+        PRINTF_ASYNC(  "  v_xy_body_cmp        : %f\n", _v_xy_body_cmp);
+        PRINTF_ASYNC(  "  v_xy_body_enc        : %f\n", _v_xy_body_enc);
+        PRINTF_ASYNC(  "  v_xy_body_ave        : %f\n", _v_xy_body_ave);
+        PRINTF_ASYNC(  "  v_xy_body_acc        : %f\n", _v_xy_body_acc);
+        PRINTF_ASYNC(  "  ---\n");
+        PRINTF_ASYNC(  "  v_x                  : %f\n", _v_x);
+        PRINTF_ASYNC(  "  v_y                  : %f\n", _v_y);
+        PRINTF_ASYNC(  "  v_z                  : %f\n", _v_z);
+        PRINTF_ASYNC(  "  ---\n");
+        PRINTF_ASYNC(  "  v_xy_body_for_odom   : %f\n", _v_xy_body_for_odom);
+        PRINTF_ASYNC(  "  v_xy_body_for_ctrl   : %f\n", _v_xy_body_for_ctrl);
+        PRINTF_ASYNC(  "  ---\n");
+        PRINTF_ASYNC(  "  yaw                  : %f\n", _yaw * RAD2DEG);
+        PRINTF_ASYNC(  "  roll                 : %f\n", _roll * RAD2DEG);
+        PRINTF_ASYNC(  "  pitch                : %f\n", _pitch * RAD2DEG);
+        PRINTF_ASYNC(  "  ---\n");
+        PRINTF_ASYNC(  "  yawrate              : %f\n", _yawrate * RAD2DEG);
+        PRINTF_ASYNC(  "  rollrate             : %f\n", _rollrate * RAD2DEG);
+        PRINTF_ASYNC(  "  pitchrate            : %f\n", _pitchrate * RAD2DEG);
+        PRINTF_ASYNC(  "  ---\n");
+        PRINTF_ASYNC(  "  beta                 : %f\n", _beta * RAD2DEG);
+        PRINTF_ASYNC(  "  beta_dot             : %f\n", _beta_dot * RAD2DEG);
+        PRINTF_ASYNC(  "  beta_expiration_time : %f\n", _beta_expiration_time);
+        PRINTF_ASYNC(  "  ---\n");
+        PRINTF_ASYNC(  "  a_body_x             : %f\n", _a_body_x);
+        PRINTF_ASYNC(  "  a_body_y             : %f\n", _a_body_y);
+        PRINTF_ASYNC(  "  a_body_z             : %f\n", _a_body_z);
+        PRINTF_ASYNC(  "  ---\n");
+        PRINTF_ASYNC(  "  roll_acc             : %f\n", _roll_acc * RAD2DEG);
+        PRINTF_ASYNC(  "  pitch_acc            : %f\n", _pitch_acc * RAD2DEG);
+        PRINTF_ASYNC(  "  ---\n");
+        PRINTF_ASYNC(  "  q0                   : %f\n", _q.w());
+        PRINTF_ASYNC(  "  q1                   : %f\n", _q.x());
+        PRINTF_ASYNC(  "  q2                   : %f\n", _q.y());
+        PRINTF_ASYNC(  "  q3                   : %f\n", _q.z());
     }
 
     void PositionEstimator::_publish_vehicle_position(){
@@ -87,6 +239,7 @@ namespace module {
         msg.pitch_acc = _pitch_acc;
 
         msg.beta = _beta;
+        msg.beta_dot = _beta_dot;
 
         msg.yawrate = _yawrate;
         msg.rollrate = _rollrate;
@@ -97,7 +250,20 @@ namespace module {
 
 
     int usrcmd_positionEstimator(int argc, char **argv){
+        if (ntlibc_strcmp(argv[1], "status") == 0) {
+            PositionEstimator::getInstance().debug();
             return 0;
+        }
+
+        if (ntlibc_strcmp(argv[1], "reset") == 0) {
+        	constexpr float DEG2RAD = 3.14159265f/180.0f;
+            PositionEstimator::getInstance().reset(0.045f, 0.045f, 90.0f * DEG2RAD);
+            return 0;
+        }
+
+
+        PRINTF_ASYNC("  Unknown sub command found\r\n");
+        return -1;
     }
 
 }

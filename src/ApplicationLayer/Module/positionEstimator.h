@@ -11,7 +11,7 @@ namespace module {
       public:
         void update0();
         void debug();
-        void reset();
+        void reset(float x, float y, float yaw);
 
       private:
         friend class BaseModule<PositionEstimator>;
@@ -50,17 +50,21 @@ namespace module {
         float _pitch_acc;
 
         float _beta;
+        float _beta_dot;
 
         float _yawrate;
         float _rollrate;
         float _pitchrate;
 
         std::deque<float> _acc_y_list;
+        std::deque<float> _v_enc_list;
         const uint8_t ACC_Y_AVERAGE_NUM = 15;
-        const float DEG2RAD = 3.14159265358979f/180.0f;
+        const float PI = 3.14159265f;
+        const float DEG2RAD = PI/180.0f;
+        const float RAD2DEG = 180.0f/PI;
 
-        const float _afrer_curve_beta_dot_time = 0.050f;
-        float _after_curve_time;
+        const float _afrer_curve_beta_expiration_time = 0.050f;
+        float _beta_expiration_time;
 
     };
 

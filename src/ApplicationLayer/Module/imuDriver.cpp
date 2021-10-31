@@ -279,7 +279,7 @@ namespace module {
     }
 
     void ImuDriver::_publish(){
-        const float DEG2RAD = 57.2957795131f;
+        constexpr float DEG2RAD = 3.14159265f/180.0f;
         ImuMsg msg;
         msg.pitchrate = _ang_v_f[0] * DEG2RAD;
         msg.rollrate = _ang_v_f[1] * DEG2RAD;
@@ -339,5 +339,5 @@ namespace module {
         PRINTF_ASYNC("  Unknown sub command found\r\n");
         return -1;
 
-    };
+    }
 }
