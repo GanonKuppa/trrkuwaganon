@@ -1,7 +1,9 @@
 #pragma once
 
-#include "baseModule.h"
 #include <stdint.h>
+#include <deque>
+
+#include "baseModule.h"
 
 namespace module {
     class WheelOdometry : public BaseModule<WheelOdometry> {
@@ -21,14 +23,19 @@ namespace module {
 
         float _rpm_r;
         float _rpm_l;
-        
+        float _rpm_r_ave;
+        float _rpm_l_ave;
+
+
         float _ang_r_cor;
         float _ang_l_cor;
 
         float _v_r;
         float _v_l;
-        float _v;
-        float _v_ave;
+        float _v_r_ave;
+        float _v_l_ave;
+
+        float _v;        
 
         float _yawrate_rad;
         float _yawrate_deg;
@@ -44,6 +51,9 @@ namespace module {
         float _dia_tire;
         float _tread;
 
+        const uint8_t AVERAGE_NUM = 30;
+        std::deque<float> _v_r_list;
+        std::deque<float> _v_l_list;
 
         WheelOdometry();
         void _publish();

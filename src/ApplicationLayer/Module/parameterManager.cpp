@@ -54,7 +54,7 @@ namespace module {
         registration<float>(34, duty_coef_left_m, "duty_coef_left_m"); //34
         registration<float>(35, duty_offset_left_m, "duty_offset_left_m"); //35
         registration<float>(36, duty_coef_right_m, "duty_coef_right_m"); //36
-        registration<float>(37, duty_offset_right_p, "duty_offset_right_p"); //37
+        registration<float>(37, duty_offset_right_m, "duty_offset_right_m"); //37
         ;//38
         ;//39
         ;//40

@@ -7,7 +7,8 @@ enum class ENavMode : uint8_t{
     STANDBY = 0,
     FASTEST,
     SEARCH,
-    MODE_SELECT
+    MODE_SELECT,
+    DEBUG
 };
 
 enum class ENavSubMode : uint8_t{

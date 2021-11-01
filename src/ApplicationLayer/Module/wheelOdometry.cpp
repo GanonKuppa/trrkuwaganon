@@ -1,13 +1,26 @@
 #include "wheelOdometry.h"
-#include "wheelOdometryMsg.h"
-#include "msgBroker.h"
 
+#include <numeric>
 
-#include "parameterManager.h"
-#include "hal_spi.h"
-#include "powerTransmission.h"
-
+// Lib
 #include "ntlibc.h"
+#include "debugLog.h"
+
+// Hal
+#include "hal_spi.h"
+
+// Module
+#include "parameterManager.h"
+#include "powerTransmission.h"
+#include "navigator.h"
+
+// Msg
+#include "msgBroker.h"
+#include "wheelOdometryMsg.h"
+
+
+
+
 
 namespace module {
     WheelOdometry::WheelOdometry() :
@@ -19,16 +32,24 @@ namespace module {
     _ang_l_deg(0.0f),
     _rpm_r(0.0f),
     _rpm_l(0.0f),
+    _rpm_r_ave(0.0f),
+    _rpm_l_ave(0.0f),
     _ang_r_cor(0.0f),
-    _ang_l_cor(0.0f),    
+    _ang_l_cor(0.0f),
     _v_r(0.0f),
     _v_l(0.0f),
-    _v(0.0f),
-    _v_ave(0.0f),
+    _v_r_ave(0.0f),
+    _v_l_ave(0.0f),
+    _v(0.0f),    
     _yawrate_rad(0.0f),
     _yawrate_deg(0.0f)
     {
         setModuleName("WheelOdometry");
+        for (uint8_t i = 0; i < AVERAGE_NUM; i++) {
+            _v_r_list.push_front(0.0f);
+            _v_l_list.push_front(0.0f);
+        }
+
         _updateParam();        
     }
 
@@ -84,6 +105,15 @@ namespace module {
         _yawrate_rad = (_v_r - _v_l) / _tread;
         _yawrate_deg = _yawrate_rad * 180.0f / PI;
 
+        _v_r_list.push_front(_v_r);
+        _v_r_list.pop_back();
+        _v_l_list.push_front(_v_l);
+        _v_l_list.pop_back();
+        _v_r_ave = std::accumulate(_v_r_list.begin(), _v_r_list.end(), 0.0f) / (float)AVERAGE_NUM;
+        _v_l_ave = std::accumulate(_v_l_list.begin(), _v_l_list.end(), 0.0f) / (float)AVERAGE_NUM;
+        _rpm_r_ave = _v_r_ave * 60.0f / (PI * _dia_tire);
+        _rpm_l_ave = _v_l_ave * 60.0f / (PI * _dia_tire);
+
         _publish();
     }
 
@@ -96,12 +126,15 @@ namespace module {
         PRINTF_ASYNC("  ang_l_deg   : %f\n", _ang_l_deg);
         PRINTF_ASYNC("  rpm_r       : %f\n", _rpm_r);
         PRINTF_ASYNC("  rpm_l       : %f\n", _rpm_l);
+        PRINTF_ASYNC("  rpm_r_ave   : %f\n", _rpm_r_ave);
+        PRINTF_ASYNC("  rpm_l_ave   : %f\n", _rpm_l_ave);
         PRINTF_ASYNC("  ang_r_cor   : %f\n", _ang_r_cor);
         PRINTF_ASYNC("  ang_l_cor   : %f\n", _ang_l_cor);
         PRINTF_ASYNC("  v_r         : %f\n", _v_r);
         PRINTF_ASYNC("  v_l         : %f\n", _v_l);
+        PRINTF_ASYNC("  v_r_ave     : %f\n", _v_r_ave);
+        PRINTF_ASYNC("  v_l_ave     : %f\n", _v_l_ave);
         PRINTF_ASYNC("  v           : %f\n", _v);
-        PRINTF_ASYNC("  v_ave       : %f\n", _v_ave);
         PRINTF_ASYNC("  yawrate_rad : %f\n", _yawrate_rad);
         PRINTF_ASYNC("  yawrate_deg : %f\n", _yawrate_deg);
     }
@@ -111,6 +144,8 @@ namespace module {
         float ang_r_list[num];
         float ang_l_list[num];
 
+        Navigator::getInstance().setNavMode(ENavMode::DEBUG);
+        hal::waitmsec(10);
         PRINTF_ASYNC("---------------------\n");
         PRINTF_ASYNC("time[sec], ang_l[deg], ang_r[deg]\n");
 
@@ -141,6 +176,8 @@ namespace module {
         float v_r_list[num];
         float v_l_list[num];
 
+        Navigator::getInstance().setNavMode(ENavMode::DEBUG);
+        hal::waitmsec(10);
         PRINTF_ASYNC("---------------------\n");
         PRINTF_ASYNC("time[sec], v_l[m/s], v_r[m/s]\n");
 
@@ -171,9 +208,13 @@ namespace module {
         msg.v = _v;
         msg.v_r = _v_r;
         msg.v_l = _v_l;
-        
+        msg.v_r_ave = _v_r_ave;
+        msg.v_l_ave = _v_l_ave;
+
         msg.rpm_r = _rpm_r;
         msg.rpm_l = _rpm_l;
+        msg.rpm_r_ave = _rpm_r_ave;
+        msg.rpm_l_ave = _rpm_l_ave;
 
         msg.yawrate = _yawrate_rad;
         msg.ang_r = _ang_r_deg * PI / 180.0f;
