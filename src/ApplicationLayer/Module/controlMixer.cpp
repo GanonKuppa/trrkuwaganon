@@ -161,10 +161,10 @@ namespace module{
         if(_turn_type == ETurnType::STRAIGHT_CENTER || _turn_type == ETurnType::STRAIGHT_CENTER_EDGE) {
             
             if(_nav_msg.mode == ENavMode::SEARCH || _nav_msg.mode == ENavMode::FASTEST){
-                _wall_pidf.update(_ws_msg.center_dist_r, _ws_msg.center_dist_l, _nav_msg.r_wall_enable, _nav_msg.l_wall_enable);
+                _wall_pidf.update(_ws_msg.dist_r, _ws_msg.dist_l, _nav_msg.r_wall_enable, _nav_msg.l_wall_enable);
             }
             else if(_nav_msg.mode == ENavMode::STANDBY){
-                _wall_pidf.update(_ws_msg.center_dist_r, _ws_msg.center_dist_l, true, true);
+                _wall_pidf.update(_ws_msg.dist_r, _ws_msg.dist_l, true, true);
             }
             
             // 壁制御量は曲率とみなし, 速度をかけることで角速度に変換

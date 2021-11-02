@@ -30,6 +30,21 @@ namespace module {
         std::deque<int16_t> _left_q;
         std::deque<int16_t> _right_q;
 
+        float _dist_al;
+        float _dist_ar;
+        float _dist_a;
+        float _dist_l;
+        float _dist_r;
+
+        bool _is_ahead_l;
+        bool _is_ahead_r;
+        bool _is_ahead;
+        bool _is_left;
+        bool _is_right;
+        bool _is_left_ctrl;
+        bool _is_right_ctrl;
+
+        bool _is_on_wall_center;
 
         const uint8_t BUFF_SIZE = 30;
         const uint16_t LED_ON_USEC = 30;
@@ -40,6 +55,12 @@ namespace module {
         void _turnLed(bool sled1, bool sled2, bool sled3, bool sled4);
         void _modulateVal();
         void _publish();
+
+        float _aheadDistL(float ad);
+        float _aheadDistR(float ad);
+        float _distL(float ad);
+        float _distR(float ad);
+        float _aheadDist(float dist_al, float dist_ar);
 
         friend class BaseModule<WallSensor>;
     };
