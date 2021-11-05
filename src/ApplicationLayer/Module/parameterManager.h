@@ -45,7 +45,7 @@ namespace module {
         float dia_tire; //1
         float tread; //2
         float duty_limit; //3
-        float silent_flag; //4
+        uint8_t silent_flag; //4
         float test_run_v; //5
         float test_run_a; //6
         float test_run_x; //7

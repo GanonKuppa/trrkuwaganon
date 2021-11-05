@@ -16,8 +16,7 @@ namespace activity {
       public:
         void start(std::unique_ptr<Intent> intent) {
             _lower_limit_loop_msec = 1;
-            _intent = std::move(intent);
-            //std::string mode_name("ModeSelectActivity");
+            _intent = std::move(intent);            
             
             PRINTF_ASYNC("\n");
             PRINTF_ASYNC("--- %s start ---\n", getModeName().c_str());
@@ -57,7 +56,6 @@ namespace activity {
         virtual ELoopStatus loop() = 0;
         virtual void onStart() = 0;
         virtual void onFinish() = 0;
-
 
         uint32_t _lower_limit_loop_msec;
         std::unique_ptr<Intent> _intent;

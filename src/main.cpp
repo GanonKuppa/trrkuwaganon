@@ -127,7 +127,7 @@ int main(void) {
     hal::waitmsec(100);
 
     while(1) {                
-        auto activity = activity::ActivityFactory::cteateModeSelect();
+        auto activity = activity::ActivityFactory::createModeSelect();
         activity->start();
     }
     return 0;

@@ -41,7 +41,11 @@ namespace module {
         _is_right(false),
         _is_left_ctrl(false),
         _is_right_ctrl(false),
-        _is_on_wall_center(false)
+        _is_contact_wall(false),
+        _is_on_wall_center(false),
+        _contact_wall_time(0.0f),
+        _on_wall_ahead_time(0.0f),
+        _on_wall_center_time(0.0f)
     {
         setModuleName("WallSensor");
         for (uint8_t i = 0; i < BUFF_SIZE; i++) {
@@ -110,7 +114,29 @@ namespace module {
         _is_right = (_dist_r <= 0.055f);
         _is_left_ctrl = _is_left;
         _is_right_ctrl = _is_right;
+        _is_contact_wall = (_dist_al < 0.04) && (_dist_ar < 0.04);
         _is_on_wall_center = (std::fabs(_dist_r - 0.045f) < 0.005) || (std::fabs(_dist_l - 0.045f) < 0.005);
+        
+        if(_is_contact_wall){
+            _contact_wall_time += _delta_t;
+        }
+        else{
+            _contact_wall_time = 0.0f;
+        }
+
+        if(_is_ahead){
+            _on_wall_ahead_time += _delta_t;
+        }
+        else{
+            _on_wall_ahead_time = 0.0f;
+        }
+
+        if(_is_on_wall_center){
+            _on_wall_center_time += _delta_t;
+        }
+        else{
+            _on_wall_center_time = 0.0f;
+        }
 
         _publish();
 
@@ -227,6 +253,11 @@ namespace module {
         msg.is_right_ctrl = _is_right_ctrl;
         msg.is_on_wall_center = _is_on_wall_center;
 
+        msg.contact_wall_time = _contact_wall_time;
+        msg.on_wall_ahead_time = _on_wall_ahead_time;
+        msg.on_wall_center_time = _on_wall_center_time;
+        
+
         publishMsg(msg_id::WALL_SENSOR, &msg);
     }
 
@@ -311,14 +342,21 @@ namespace module {
         PRINTF_ASYNC("  =============================\n");
         PRINTF_ASYNC("  dist   : al, l, r, ar: %f, %f, %f, %f\n", _dist_al, _dist_l, _dist_r, _dist_ar);
         PRINTF_ASYNC("  dist_a : %f\n", _dist_a);
-        PRINTF_ASYNC("  =============================\n");        
-        PRINTF_ASYNC("  is_ahead_l   : %d\n", _is_ahead_l);
-        PRINTF_ASYNC("  is_ahead_r   : %d\n", _is_ahead_r);
-        PRINTF_ASYNC("  is_ahead     : %d\n", _is_ahead);
-        PRINTF_ASYNC("  is_left      : %d\n", _is_left);
-        PRINTF_ASYNC("  is_right     : %d\n", _is_right);
-        PRINTF_ASYNC("  is_left_ctrl : %d\n", _is_left_ctrl);
-        PRINTF_ASYNC("  is_right_ctrl: %d\n", _is_right_ctrl);
+        PRINTF_ASYNC("  =============================\n");
+        PRINTF_ASYNC("  is_ahead_l          : %d\n", _is_ahead_l);
+        PRINTF_ASYNC("  is_ahead_r          : %d\n", _is_ahead_r);
+        PRINTF_ASYNC("  is_ahead            : %d\n", _is_ahead);
+        PRINTF_ASYNC("  is_left             : %d\n", _is_left);
+        PRINTF_ASYNC("  is_right            : %d\n", _is_right);
+        PRINTF_ASYNC("  is_left_ctrl        : %d\n", _is_left_ctrl);
+        PRINTF_ASYNC("  is_right_ctrl       : %d\n", _is_right_ctrl);
+        PRINTF_ASYNC("  =============================\n");
+        PRINTF_ASYNC("  is_contact_wall     : %d\n", _is_contact_wall);
+        PRINTF_ASYNC("  is_on_wall_center   : %d\n", _is_on_wall_center);
+        PRINTF_ASYNC("  =============================\n");
+        PRINTF_ASYNC("  contact_wall_time   : %f\n", _contact_wall_time);
+        PRINTF_ASYNC("  on_wall_ahead_time  : %f\n", _on_wall_ahead_time);
+        PRINTF_ASYNC("  on_wall_center_time : %f\n", _on_wall_center_time);
     };
 
     int usrcmd_wallSensor(int argc, char **argv){

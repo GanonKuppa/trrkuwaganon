@@ -15,11 +15,15 @@
 // Msg
 #include "msgBroker.h"
 #include "dialPositionMsg.h"
-#include "wallSensorMsg.h"
 #include "gamepadMsg.h"
 
 
 namespace activity {
+
+    ModeSelectActivity::ModeSelectActivity() :
+    _mode(0),
+    _mode_num(8)
+    { }
 
     std::string ModeSelectActivity::getModeName()
     {
@@ -28,10 +32,11 @@ namespace activity {
     }
 
     void ModeSelectActivity::onStart() {
+
         module::PseudoDial& pd = module::PseudoDial::getInstance();
         pd.setEnable(false);
         pd.reset();
-        pd.setDivisionNum(8, 8);
+        pd.setDivisionNum(_mode_num, 8);
         pd.setEnable(true);
 
         module::Navigator& nav = module::Navigator::getInstance();
@@ -53,23 +58,20 @@ namespace activity {
 
     ModeSelectActivity::ELoopStatus ModeSelectActivity::loop() {        
         GamepadMsg gp_msg;
-        DialPositionMsg dp_msg;
-        WallSensorMsg ws_msg;
+        DialPositionMsg dp_msg;        
 
         copyMsg(msg_id::GAMEPAD, &gp_msg);
         copyMsg(msg_id::DIAL_POSITION, &dp_msg);
-        copyMsg(msg_id::WALL_SENSOR, &ws_msg);
-
-
+        uint8_t mode_pre = _mode;
         if(gp_msg.connected){
             if(gp_msg.cross_y == 1){
-                _mode =  (_mode + MODE_NUM + 1) % MODE_NUM;
+                _mode =  (_mode + _mode_num + 1) % _mode_num;
                 hal::waitmsec(100);
                 sound::cursor_move();
             }
             
             if(gp_msg.cross_y == -1){
-                _mode =  (_mode + MODE_NUM - 1) % MODE_NUM;
+                _mode =  (_mode + _mode_num - 1) % _mode_num;
                 hal::waitmsec(100);
                 sound::cursor_move();
             }
@@ -83,14 +85,16 @@ namespace activity {
         else{
             _mode = dp_msg.dial_pos_l;
 
-            if(dp_msg.dial_pos_r  == 4) {
+            if(dp_msg.dial_pos_r  == 4 && dp_msg.same_pos_time_r > 0.5f) {
                 return ELoopStatus::FINISH;
             }
 
         } 
 
         bool able_goal = false;//m.maze.isExistPath(pm.goal_x, pm.goal_y);
-        _turnFcled(_mode, able_goal);
+        if(_mode != mode_pre){
+            _turnFcled(_mode, able_goal);
+        }
         return ELoopStatus::CONTINUE;
     }
 

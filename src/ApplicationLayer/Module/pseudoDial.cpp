@@ -21,6 +21,8 @@ namespace module{
         
         dial_l.setPiGain(pm.dial_p, pm.dial_i, pm.dial_i_limit, pm.dial_limit);
         dial_r.setPiGain(pm.dial_p, pm.dial_i, pm.dial_i_limit, pm.dial_limit);
+        dial_l.setDeltaT(_delta_t);
+        dial_r.setDeltaT(_delta_t);
     }
 
     void PseudoDial::update0(){
@@ -57,6 +59,8 @@ namespace module{
         msg.dial_pos_r = dial_r.getDialPosition();
         msg.dial_div_num_l = dial_l.getDivisionNum();
         msg.dial_div_num_r = dial_r.getDivisionNum();
+        msg.same_pos_time_l = dial_l.getSamePosTime();
+        msg.same_pos_time_r = dial_r.getSamePosTime();
         publishMsg(msg_id::DIAL_POSITION, &msg);        
     }
 

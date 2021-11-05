@@ -44,7 +44,12 @@ namespace module {
         bool _is_left_ctrl;
         bool _is_right_ctrl;
 
+        bool _is_contact_wall;
         bool _is_on_wall_center;
+
+        float _contact_wall_time;        
+        float _on_wall_ahead_time;
+        float _on_wall_center_time;
 
         const uint8_t BUFF_SIZE = 30;
         const uint16_t LED_ON_USEC = 30;

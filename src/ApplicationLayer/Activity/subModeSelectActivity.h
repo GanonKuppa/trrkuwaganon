@@ -3,18 +3,19 @@
 
 #include <stdint.h>
 
-#include "baseActivity.h"
-#include "activityFactory.h"
+#include "modeSelectActivity.h"
 
 namespace activity {
 
-    class SubModeSelectActivity : public BaseActivity {
+    class SubModeSelectActivity : public ModeSelectActivity {
       public:
-        std::string getModeName();
-        void onStart();
-        void onFinish();
-        ELoopStatus loop();
+        virtual std::string getModeName();
+        virtual void onStart();
+        virtual void onFinish();
+        virtual ELoopStatus loop();
+      private:
+        float _led_on_sec;
+        float _led_off_sec;
+        void _turnFcled(uint8_t mode);
     };
-
-
 }

@@ -1,8 +1,18 @@
 #include "ledController.h"
-#include "hal_gpio.h"
-#include "led.h"
+
 #include <memory>
 #include <stdint.h>
+
+// Lib
+#include "debugLog.h"
+#include "ntlibc.h"
+
+// Hal
+#include "hal_gpio.h"
+
+// Object
+#include "led.h"
+
 
 namespace module {
     LedController::LedController() {
@@ -49,7 +59,21 @@ namespace module {
         else _led_b->turn(false);
     }
 
+    void LedController::debug(){
+        PRINTF_ASYNC(  "-- led_r --\n");
+        _led_r->debug();
+        PRINTF_ASYNC(  "-- led_g --\n");
+        _led_g->debug();
+        PRINTF_ASYNC(  "-- led_b --\n");
+        _led_b->debug();
+    }
+
     int usrcmd_ledController(int argc, char **argv){
-    	return 0;
+    	if (ntlibc_strcmp(argv[1], "status") == 0) {
+            LedController::getInstance().debug();
+            return 0;
+        }
+
+        return 0;
     }
 }

@@ -23,12 +23,13 @@ class WallSensorMsg : public BaseMsg{
     bool is_left_ctrl = false;        // [bool]
     bool is_right_ctrl = false;       // [bool]
 
-    bool is_on_wall_center = false;   // [bool]
+    bool is_contact_wall = false;     // [bool]
+    bool is_on_wall_center = false;   // [bool]        
 
     bool is_corner_l = false;         // [bool]
     bool is_corner_r = false;         // [bool]
 
-    float contract_wall_time = 0.0f;  // [s]
+    float contact_wall_time = 0.0f;  // [s]
     float on_wall_ahead_time = 0.0f;  // [s]
     float on_wall_center_time = 0.0f; // [s]
 };

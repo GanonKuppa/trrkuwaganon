@@ -12,6 +12,7 @@ class Dial {
         virtual float getVelocity() = 0;
       public:
         void setEnable(bool enable);
+        void setDeltaT(float delta_t);
         bool getEnable();
         void update();
         float getDuty();
@@ -20,6 +21,7 @@ class Dial {
         void setDivisionNum(uint8_t num);
         uint8_t getDialPosition();
         uint8_t getDivisionNum();
+        float getSamePosTime();
         void setPiGain(float p_gain, float i_gain, float i_limit, float limit);
         void reset();
         void debug();
@@ -37,4 +39,8 @@ class Dial {
         float _i_limit;
         float _limit;
         float _ang_origin;
+        float _same_pos_time;
+        float _delta_t;
+        float _target_ang;
+        float _ang;
     };

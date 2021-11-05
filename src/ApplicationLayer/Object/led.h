@@ -9,6 +9,7 @@ class Led {
     void turn(bool state);
     void flash(float on_time, float off_time);
     void setDeltaT(float delta_t);
+    void debug();
 
   private:
     bool _state;

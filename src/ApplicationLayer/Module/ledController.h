@@ -13,6 +13,7 @@ namespace module {
         void flashFcled(bool r, bool g, bool b, float on_time, float off_time);
         uint8_t getFcledState();
         void setDeltaT(float delta_t);
+        void debug();
       private:
         std::unique_ptr<Led> _led_r;
         std::unique_ptr<Led> _led_g;

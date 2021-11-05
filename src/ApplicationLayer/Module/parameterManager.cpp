@@ -21,7 +21,7 @@ namespace module {
         registration<float>(1, dia_tire, "dia_tire"); //1
         registration<float>(2, tread, "tread"); //2
         registration<float>(3, duty_limit, "duty_limit"); //3
-        registration<float>(4, silent_flag, "silent_flag"); //4
+        registration<uint8_t>(4, silent_flag, "silent_flag"); //4
         registration<float>(5, test_run_v, "test_run_v"); //5
         registration<float>(6, test_run_a, "test_run_a"); //6
         registration<float>(7, test_run_x, "test_run_x"); //7

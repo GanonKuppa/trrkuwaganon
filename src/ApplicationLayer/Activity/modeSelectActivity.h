@@ -13,13 +13,14 @@ namespace activity {
 
     class ModeSelectActivity : public BaseActivity {
       public:
-        std::string getModeName();
-        void onStart();
-        void onFinish();
-        ELoopStatus loop();
-      private:
+        ModeSelectActivity();
+        virtual std::string getModeName();
+        virtual void onStart();
+        virtual void onFinish();
+        virtual ELoopStatus loop();
+      protected:
         uint8_t _mode;
-        static constexpr uint8_t MODE_NUM = 8;
+        uint8_t _mode_num;        
         void _turnFcled(uint8_t mode, bool able_goal);
         EActivityColor _modeNum2Color(uint8_t mode);
     };
