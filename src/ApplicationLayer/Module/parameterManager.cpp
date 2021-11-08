@@ -25,7 +25,7 @@ namespace module {
         registration<float>(5, test_run_v, "test_run_v"); //5
         registration<float>(6, test_run_a, "test_run_a"); //6
         registration<float>(7, test_run_x, "test_run_x"); //7
-        registration<float>(8, test_run_wall_flag, "test_run_wall_flag"); //8
+        registration<uint8_t>(8, test_run_wall_flag, "test_run_wall_flag"); //8
         registration<float>(9, v_search_run, "v_search_run"); //9
         registration<float>(10, a_search_run, "a_search_run"); //10
         registration<float>(11, spin_yawrate_max, "spin_yawrate_max"); //11

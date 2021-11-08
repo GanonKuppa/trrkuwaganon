@@ -49,7 +49,7 @@ namespace module {
         float test_run_v; //5
         float test_run_a; //6
         float test_run_x; //7
-        float test_run_wall_flag; //8
+        uint8_t test_run_wall_flag; //8
         float v_search_run; //9
         float a_search_run; //10
         float spin_yawrate_max; //11
