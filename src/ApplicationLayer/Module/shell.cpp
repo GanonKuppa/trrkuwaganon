@@ -58,7 +58,7 @@ static const cmd_table_t cmdlist[] = {
     { "top", "top command.", usrcmd_top },
     { "batteryMonitor", "BatteryMonitor Module.", module::usrcmd_batteryMonitor },
     { "battery", "alias of batteryMonitor command.", module::usrcmd_batteryMonitor },
-    { "ControlMixer", "ControlMixer.", module::usrcmd_controlMixer },
+    { "controlMixer", "ControlMixer.", module::usrcmd_controlMixer },
     { "heater", "Heater Module.", module::usrcmd_heater },
     { "imuDriver", "ImuDriver Module.", module::usrcmd_imuDriver },
     { "imu", "alias of imuDriver command.", module::usrcmd_imuDriver },

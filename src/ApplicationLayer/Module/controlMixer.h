@@ -15,7 +15,9 @@
 
 namespace module {
     class ControlMixer : public BaseModule<ControlMixer> {
+      public:  
         void update0();
+        void debug();
       private:
         friend class BaseModule<ControlMixer>;
         

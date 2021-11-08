@@ -496,7 +496,7 @@ namespace module {
             return 0;
         }
 
-        if(ntlibc_strcmp(argv[1], "ttl") == 0){
+        if (ntlibc_strcmp(argv[1], "ttl") == 0){
             PRINTF_ASYNC("\n");                           
             PRINTF_ASYNC(";-------- teraterm macro file --------\n");                           
             auto &pm = ParameterManager::getInstance();
@@ -631,6 +631,64 @@ namespace module {
             }
             return 0;
         }
+
+        if (ntlibc_strcmp(argv[1], "read") == 0 ) {
+            if(argc != 3){
+                PRINTF_ASYNC("  invalid param num!\n");
+                return -1;
+            }
+            std::string param_name_str(argv[2]);
+            auto &pm = ParameterManager::getInstance();
+            if (pm.strkeyMap.find(param_name_str) == pm.strkeyMap.end()) {
+                PRINTF_ASYNC("  %s | parameter not found!\n", param_name_str.c_str());
+            }
+            else{
+                uint16_t val_num = pm.strkeyMap[param_name_str];
+                Type_e val_type = pm.typeMap[val_num];
+
+                if(val_type == Type_e::FLOAT){
+                    float param_val = pm.read<float>(val_num);
+                    std::string type_str = "float";                    
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %f\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val);
+                }
+                else if(val_type == Type_e::UINT8){
+                    uint8_t param_val = pm.read<uint8_t>(val_num);
+                    std::string type_str = "uint8_t";
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val);
+                }
+                else if(val_type == Type_e::UINT16){
+                    uint16_t param_val = pm.read<uint16_t>(val_num);
+                    std::string type_str = "uint16_t";
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val);
+                }
+                else if(val_type == Type_e::UINT32){
+                    uint32_t param_val = pm.read<uint32_t>(val_num);
+                    std::string type_str = "uint32_t";
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val);
+                }
+                else if(val_type == Type_e::INT8){
+                    int8_t param_val = pm.read<int8_t>(val_num);
+                    std::string type_str = "int8_t";
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val);
+                }
+                else if(val_type == Type_e::INT16){
+                    int16_t param_val = pm.read<int16_t>(val_num);
+                    std::string type_str = "int16_t";                    
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val);
+                }
+                else if(val_type == Type_e::INT32){
+                    int32_t param_val = pm.read<int32_t>(val_num);
+                    std::string type_str = "int32_t";
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val);
+                }
+                else{
+                    PRINTF_ASYNC("  invalid type!\n");
+                    return -1;
+                }                        
+            }
+            return 0;
+        }
+
         PRINTF_ASYNC("  Unknown sub command found\r\n");
         return -1;
 

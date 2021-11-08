@@ -42,6 +42,8 @@ namespace activity {
         module::Navigator& nav = module::Navigator::getInstance();
         nav.setNavMode(ENavMode::MODE_SELECT);
         nav.setNavSubMode(ENavSubMode::STANDBY);
+
+        _turnFcled(_mode, false);
     }
 
     void ModeSelectActivity::onFinish() {
@@ -85,7 +87,7 @@ namespace activity {
         else{
             _mode = dp_msg.dial_pos_l;
 
-            if(dp_msg.dial_pos_r  == 4 && dp_msg.same_pos_time_r > 0.5f) {
+            if(dp_msg.dial_pos_r  == 4 && dp_msg.same_pos_time_r > 0.1f) {
                 return ELoopStatus::FINISH;
             }
 

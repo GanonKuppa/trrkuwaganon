@@ -14,9 +14,9 @@ namespace activity {
 
     class BaseActivity {
       public:
-        void start(std::unique_ptr<Intent> intent) {
+        void start(Intent intent) {
             _lower_limit_loop_msec = 1;
-            _intent = std::move(intent);            
+            _intent = intent;
             
             PRINTF_ASYNC("\n");
             PRINTF_ASYNC("--- %s start ---\n", getModeName().c_str());
@@ -41,7 +41,12 @@ namespace activity {
         }
 
         void start() {
-            start(nullptr);
+            Intent intent = Intent();
+            start(intent);
+        }
+
+        Intent getIntent(){
+            return _intent;
         }
 
         virtual ~BaseActivity() {};
@@ -58,7 +63,7 @@ namespace activity {
         virtual void onFinish() = 0;
 
         uint32_t _lower_limit_loop_msec;
-        std::unique_ptr<Intent> _intent;
+        Intent _intent;
 
     };
 

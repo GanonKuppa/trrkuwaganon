@@ -48,12 +48,16 @@ namespace module {
         NavStateMsg nav_msg;
         copyMsg(msg_id::NAV_STATE, &nav_msg);
 
+        float duty_limit = ParameterManager::getInstance().duty_limit;
+
         if(out_msg.ctrl_mode == ECtrlMode::DIRECT_DUTY_SET || nav_msg.mode == ENavMode::DEBUG){
             // do nothing
         }
         else if(out_msg.ctrl_mode == ECtrlMode::PSEUDO_DIAL){
-            setMaxVoltageDutyL(out_msg.duty_l);
-            setMaxVoltageDutyR(out_msg.duty_r);
+            float duty_l = std::clamp<float>(out_msg.duty_l, -duty_limit, duty_limit);
+            float duty_r = std::clamp<float>(out_msg.duty_r, -duty_limit, duty_limit);
+            setMaxVoltageDutyL(duty_l);
+            setMaxVoltageDutyR(duty_r);
         }
         else if(out_msg.ctrl_mode == ECtrlMode::VEHICLE){
 /*
@@ -70,12 +74,16 @@ namespace module {
 
             }
 */
-            setNormalizedDutyL(out_msg.duty_l);
-            setNormalizedDutyR(out_msg.duty_r);
+            float duty_l = std::clamp<float>(out_msg.duty_l, -duty_limit, duty_limit);
+            float duty_r = std::clamp<float>(out_msg.duty_r, -duty_limit, duty_limit);
+            setNormalizedDutyL(duty_l);
+            setNormalizedDutyR(duty_r);
         }
         else{
-            setNormalizedDutyL(out_msg.duty_l);
-            setNormalizedDutyR(out_msg.duty_r);
+            float duty_l = std::clamp<float>(out_msg.duty_l, -duty_limit, duty_limit);
+            float duty_r = std::clamp<float>(out_msg.duty_r, -duty_limit, duty_limit);
+            setNormalizedDutyL(duty_l);
+            setNormalizedDutyR(duty_r);
         }
     }
 
@@ -259,12 +267,20 @@ namespace module {
         ParameterManager& pm = ParameterManager::getInstance();
 
     	if(duty > 0.0f){
-            _duty_l_normed = duty * pm.duty_coef_left_p + pm.duty_offset_left_p;
-            setMaxVoltageDutyL(_duty_l_normed);
+            _duty_l_normed = duty;
+            float max_voltage_duty = duty * pm.duty_coef_left_p + pm.duty_offset_left_p;
+            if(std::fabs(max_voltage_duty) < pm.duty_offset_left_p){
+                max_voltage_duty = 0.0f;
+            }
+            setMaxVoltageDutyL(max_voltage_duty);
         }
         else if(duty < 0.0f){
-            _duty_l_normed = duty * pm.duty_coef_left_m - pm.duty_offset_left_m;
-            setMaxVoltageDutyL(_duty_l_normed);
+            _duty_l_normed = duty;
+            float max_voltage_duty = duty * pm.duty_coef_left_m - pm.duty_offset_left_m;
+            if(std::fabs(max_voltage_duty) < pm.duty_offset_left_m){
+                max_voltage_duty = 0.0f;
+            }            
+            setMaxVoltageDutyL(max_voltage_duty);
         }else{
             _duty_l_normed = 0.0f;
             setDutyL(0.0f);

@@ -90,7 +90,7 @@ class PidfController {
 
     void setSaturation(float saturation_){
         saturation = saturation_;
-        if(saturation > 0.0f){
+        if(saturation > 0.0f &&  saturation_enable){
             u_k0 = std::clamp<float>(u_k0, -std::fabs(saturation), std::fabs(saturation));
             u_k1 = std::clamp<float>(u_k1, -std::fabs(saturation), std::fabs(saturation));
         }

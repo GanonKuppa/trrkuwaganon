@@ -273,10 +273,10 @@ namespace module {
         13	0.11
         10	0.12
         */
-        constexpr float a = 0.2055639f;
-        constexpr float b = -0.2315361f;
+        constexpr float a = -0.01705773f;
+        constexpr float b = 0.15377920f;
         float x = std::max(ad, 1.0f);
-        return a * pow(x, b);
+        return a * std::log(x) + b;
     }
 
     float  WallSensor::_aheadDistR(float ad){
@@ -288,10 +288,10 @@ namespace module {
         8	0.08
         7	0.09
         */
-        constexpr float a = 0.1292767f;
-        constexpr float b = -0.2094679f;
+        constexpr float a = -0.01282417f;
+        constexpr float b = 0.10934711f;
         float x = std::max(ad, 1.0f);
-        return a * pow(x, b);
+        return a * std::log(x) + b;
     }
 
     float  WallSensor::_aheadDist(float dist_al, float dist_ar){
@@ -312,10 +312,10 @@ namespace module {
         16	0.05
         7	0.06
         */
-        constexpr float a = 0.1048264f;
-        constexpr float b = -0.2601528f;
+        constexpr float a = -0.0093275f;
+        constexpr float b = 0.0770684f;
         float x = std::max(ad, 1.0f);
-        return a * pow(x, b);
+        return a * std::log(x) + b;
 
     }
 
@@ -326,10 +326,10 @@ namespace module {
         76	0.04
         22	0.05
         */
-        constexpr float a = 0.1041857f;
-        constexpr float b = -0.2269366;
+        constexpr float a = -0.0074383f;
+        constexpr float b = 0.0725859f;
         float x = std::max(ad, 1.0f);
-        return a * pow(x, b);
+        return a * std::log(x) + b;
     }
 
 

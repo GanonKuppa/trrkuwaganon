@@ -213,7 +213,7 @@ namespace module {
         msg.z = _v_z;
 
         msg.v_xy_body_for_odom = _v_xy_body_for_odom;
-        msg.v_xy_body_for_odom = _v_xy_body_for_ctrl;
+        msg.v_xy_body_for_ctrl = _v_xy_body_for_ctrl;
 
         msg.a_body_x = _a_body_x;
         msg.a_body_y = _a_body_y;

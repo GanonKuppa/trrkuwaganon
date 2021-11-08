@@ -70,9 +70,10 @@ void timerInterrupt0() {
         module::ImuDriver::getInstance().cycle0();
         module::WheelOdometry::getInstance().cycle0();
         module::PositionEstimator::getInstance().cycle0();
+        module::ControlMixer::getInstance().cycle0();
         module::BatteryMonitor::getInstance().cycle0();
         module::PowerTransmission::getInstance().cycle0();
-        module::Shell::getInstance().cycle1();
+        module::Shell::getInstance().cycle0();
 
         uint32_t end_usec = hal::getElapsedUsec();        
         hal::setSlot0Time(end_usec - start_usec);
@@ -89,6 +90,7 @@ void timerInterrupt0() {
     // スロット2
     if (int_tick_count % 4 == 2) {
         module::WallSensor::getInstance().cycle0();
+        module::Shell::getInstance().cycle1();
         module::PseudoDial::getInstance().cycle0();
         module::Navigator::getInstance().cycle2();
         module::Shell::getInstance().cycle1();
@@ -181,7 +183,7 @@ void object_init() {
     module::SeManager::getInstance();
     module::Shell::getInstance();
     module::Suction::getInstance().setDeltaT(0.00025f);
-    module::TrajectoryCommander::getInstance();
+    module::TrajectoryCommander::getInstance().setDeltaT(0.001f);
     module::TrajectoryInitializer::getInstance();
     module::WallSensor::getInstance();    
     module::WheelOdometry::getInstance().setDeltaT(0.001f);    

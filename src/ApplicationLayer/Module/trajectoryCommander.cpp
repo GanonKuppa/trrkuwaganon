@@ -1,5 +1,9 @@
 #include "trajectoryCommander.h"
 
+// Lib
+#include "ntlibc.h"
+#include "debugLog.h"
+
 // Msg
 #include "msgBroker.h"
 #include "ctrlSetpointMsg.h"
@@ -8,21 +12,8 @@ namespace module {
 
     TrajectoryCommander::TrajectoryCommander() :
     _x(0.045f),
-    _v_x(0.0f),
-    _a_x(0.0f),
     _y(0.045f),
-    _v_y(0.0f),
-    _a_y(0.0f),
-    _v_xy_body(0.0f),
-    _a_xy_body(0.0f),
     _yaw(90.0f * 3.14159265f / 180.0f),
-    _yawrate(0.0f),
-    _yawacc(0.0f),
-    _beta(0.0f),
-    _beta_dot(0.0f),
-    _traj_type(ETrajType::NONE),
-    _turn_type(ETurnType::NONE),
-    _turn_dir(ETurnDir::NO_TURN),
     _lock_guard(false)    
     {
         setModuleName("TrajectoryCommander");
@@ -46,32 +37,37 @@ namespace module {
     void TrajectoryCommander::reset(float x, float y, float yaw){
         clear();
         _x = x;
-        _v_x = 0.0f;
-        _a_x = 0.0f;
         _y = y;
-        _v_y = 0.0f;
-        _a_y = 0.0f;
-        _v_xy_body = 0.0f;        
-        _a_xy_body = 0.0f;
         _yaw = yaw;
-        _yawrate = 0.0f;
-        _yawacc = 0.0f;
-        _beta = 0.0f;
-        _beta_dot = 0.0f;
     }
 
     void TrajectoryCommander::update0(){
         if(_lock_guard) return;
         
         if(!_traj_queue.empty()){
+
+            _traj_queue.front()->update();
+
             if(_traj_queue.front()->isEnd()){
                 _x = _traj_queue.front()->getEndX();
                 _y = _traj_queue.front()->getEndY();
                 _yaw = _traj_queue.front()->getEndYaw();
                 _traj_queue.pop_front();
+                if(!_traj_queue.empty()){
+                    _traj_queue.front()->setInitPos(_x, _y, _yaw);
+                }
             }
         }        
         _publish();
+    }
+
+    void TrajectoryCommander::debug(){
+        constexpr float RAD2DEG = 180.0f / 3.14159265f;
+        PRINTF_ASYNC("  -- trajectoryCommander Val --\n");
+        PRINTF_ASYNC("  x              : %f\n", _x);
+        PRINTF_ASYNC("  y              : %f\n", _y);
+        PRINTF_ASYNC("  yaw            : %f\n", _yaw * RAD2DEG);        
+        PRINTF_ASYNC("  traj_queue num : %d\n", _traj_queue.size());
     }
 
     void TrajectoryCommander::_publish(){        
@@ -98,11 +94,14 @@ namespace module {
         else{
             _traj_queue.front()->publish();
         }
-
-
     }
 
     int usrcmd_trajectoryCommander(int argc, char **argv){
+        if (ntlibc_strcmp(argv[1], "status") == 0) {
+            TrajectoryCommander::getInstance().debug();
+            return 0;
+        }
+
         return 0;
     }
 }

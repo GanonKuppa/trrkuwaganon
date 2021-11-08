@@ -22,20 +22,20 @@ namespace activity{
     }
 
     void SubModeSelectActivity::onStart(){
-        if(_intent->uint8_t_param.count("SUB_MODE_NUM") == 1) {
-            _mode_num = _intent->uint8_t_param["SUB_MODE_NUM"];
+        if(_intent.uint8_t_param.count("SUB_MODE_NUM") == 1) {
+            _mode_num = _intent.uint8_t_param["SUB_MODE_NUM"];
         } else {
             _mode_num = 8;
         }
 
-        if(_intent->float_param.count("LED_ON_SEC") == 1) {
-            _led_on_sec = _intent->float_param["LED_ON_SEC"];
+        if(_intent.float_param.count("LED_ON_SEC") == 1) {
+            _led_on_sec = _intent.float_param["LED_ON_SEC"];
         } else {
             _led_on_sec = 0.25f;
         }
 
-        if(_intent->float_param.count("LED_OFF_SEC") == 1) {
-            _led_off_sec = _intent->float_param["LED_OFF_SEC"];
+        if(_intent.float_param.count("LED_OFF_SEC") == 1) {
+            _led_off_sec = _intent.float_param["LED_OFF_SEC"];
         } else {
             _led_off_sec = 0.25f;
         }
@@ -59,8 +59,9 @@ namespace activity{
         pd.reset();
         pd.setEnable(false);
 
-        _intent->uint8_t_param["SUB_MODE"] = _mode;
+        _intent.uint8_t_param["SUB_MODE"] = _mode;
         PRINTF_ASYNC("sub mode select finish. submode = %d\n",_mode);
+        module::LedController::getInstance().turnFcled(0, 0, 0);
     }
 
 
@@ -97,7 +98,7 @@ namespace activity{
         else{
             _mode = dp_msg.dial_pos_l;
 
-            if( (dp_msg.dial_pos_r  == 4 && dp_msg.same_pos_time_r > 0.5f ) || ws_msg.on_wall_ahead_time > 0.5f) {
+            if( (dp_msg.dial_pos_r  == 4 && dp_msg.same_pos_time_r > 0.1f ) || ws_msg.on_wall_ahead_time > 1.0f) {
                 return ELoopStatus::FINISH;
             }
 

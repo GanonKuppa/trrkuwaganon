@@ -3,6 +3,8 @@
 #include <cmath>
 
 // Lib
+#include "debugLog.h"
+#include "ntlibc.h"
 #include "pidController.h"
 
 // Msg
@@ -50,10 +52,24 @@ namespace module{
 
     void ControlMixer::update0(){
         _msgUpdate();
-        _updateControllerParam();        
+        _updateControllerParam();
         _updateController();
-        _publish();
+        if(_nav_msg.mode == ENavMode::STANDBY || _nav_msg.mode == ENavMode::FASTEST || _nav_msg.mode == ENavMode::SEARCH){
+            _publish();
+        }
     }
+
+    void ControlMixer::debug(){
+        PRINTF_ASYNC("  duty_r     : %f\n", _duty_r);
+        PRINTF_ASYNC("  duty_l     : %f\n", _duty_l);
+        PRINTF_ASYNC("  duty_r_v   : %f\n", _duty_r_v);
+        PRINTF_ASYNC("  duty_l_v   : %f\n", _duty_l_v);
+        PRINTF_ASYNC("  duty_r_yaw : %f\n", _duty_r_yaw);
+        PRINTF_ASYNC("  duty_l_yaw : %f\n", _duty_l_yaw);
+        PRINTF_ASYNC("  traj_type  : %s\n", trajType2Str(_traj_type).c_str());
+        PRINTF_ASYNC("  turn_type  : %s\n", turnType2Str(_turn_type).c_str());
+    }
+
 
     void ControlMixer::_msgUpdate(){
         copyMsg(msg_id::CTRL_SETPOINT, &_setp_msg);
@@ -140,6 +156,16 @@ namespace module{
     }
 
     void ControlMixer::_updateController(){
+        if(_nav_msg.mode != ENavMode::STANDBY && _nav_msg.mode != ENavMode::FASTEST && _nav_msg.mode != ENavMode::SEARCH){
+            _v_pidf.reset();
+            _yawrate_pidf.reset();
+            _yaw_pidf.reset();
+            _wall_pidf.reset();
+            _wall_diag_pidf.reset();
+
+            return;
+        }        
+        
         ParameterManager& pm = ParameterManager::getInstance();
         
         _setp_v_xy_body = _setp_msg.v_xy_body;
@@ -147,8 +173,8 @@ namespace module{
         _setp_yawrate = _setp_msg.yawrate;
 
         // 超信知 or 停止制御後は制御量をリセットする
-        if( (_traj_type != _traj_type_pre &&
-            (_traj_type_pre == ETrajType::STOP || _traj_type_pre == ETrajType::SPINTURN))
+        if( _traj_type != _traj_type_pre &&
+            (_traj_type_pre == ETrajType::STOP || _traj_type_pre == ETrajType::SPINTURN)
         ) {
             _v_pidf.reset();
             _yawrate_pidf.reset();
@@ -253,7 +279,7 @@ namespace module{
             duty_yawrate_saturation = pm.yawrate_saturation_offset_duty;
         }
 
-        // 速度、加速度saturation
+        // 速度、角速度saturation
         if(_traj_type == ETrajType::STOP || _traj_type == ETrajType::SPINTURN) {
             // do nothing
         }else{
@@ -311,15 +337,23 @@ namespace module{
         pid_msg.setp_v_xy_body = _setp_v_xy_body;
         pid_msg.setp_yaw = _setp_yaw;
         pid_msg.setp_yawrate = _setp_yawrate;
+
+        publishMsg(msg_id::ACTUATOR_OUTPUT, &out_msg);
+        publishMsg(msg_id::PID_CONTROL_VAL, &pid_msg);
     }
 
     float ControlMixer::_sign(float val){
         if(val > 0.0f) return 1.0f;
-        else if(val < 0.0f) return -1.0;
+        else if(val < 0.0f) return -1.0f;
         else return 0.0f;
     }
 
     int usrcmd_controlMixer(int argc, char **argv){
+        if (ntlibc_strcmp(argv[1], "status") == 0) {
+            ControlMixer::getInstance().debug();
+            return 0;
+        }        
+        
         return 0;
     };
 }

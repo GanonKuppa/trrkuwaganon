@@ -58,10 +58,10 @@ namespace module {
             "x_setp,"
             "y_setp,"
             "a_setp,"
-            "ang_v_traj,"
-            "ang_v_setp,"
-            "ang_traj,"
-            "ang_setp,"
+            "yawrate_traj,"
+            "yawrate_setp,"
+            "yaw_traj,"
+            "yaw_setp,"
     #if FULL_PARAM
             "d_la,"
             "d_l,"
@@ -90,7 +90,7 @@ namespace module {
                         "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f,"
                         "%f, %f, %f, %f, %f, %f, %f, %f, %f,"
                         "%f, %f, %f, %f, %f, %f, %f,"
-                        "%f, %f, %f,\n",
+                        "%f, %f, %f, %f\n",
                         _log_data[i][0],
                         _log_data[i][1], _log_data[i][2],_log_data[i][3],_log_data[i][4],_log_data[i][5],
                         _log_data[i][6], _log_data[i][7],_log_data[i][8],_log_data[i][9],_log_data[i][10],
@@ -100,11 +100,11 @@ namespace module {
                         _log_data[i][26], _log_data[i][27],_log_data[i][28],_log_data[i][29],_log_data[i][30],
                         _log_data[i][31], _log_data[i][32]                
             );
-            hal::waitmsec(10);
+            hal::waitmsec(5);
     #else
             PRINTF_ASYNC( "%f," 
                         "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f,"
-                        "%f, %f, %f, %f, %f, %f, %f, %f, %f,"
+                        "%f, %f, %f, %f, %f, %f, %f, %f, %f"
                         "\n",
                         _log_data[i][0],
                         _log_data[i][1], _log_data[i][2],_log_data[i][3],_log_data[i][4],_log_data[i][5],
@@ -193,19 +193,19 @@ namespace module {
             _log_data[_data_num][16] = ctrl_msg.y / 0.09f;
             _log_data[_data_num][17] = ctrl_msg.a_xy_body;
             _log_data[_data_num][18] = ctrl_msg.yawrate * RAD2DEG;
-            _log_data[_data_num][19] = pid_msg.setp_v_xy_body;
+            _log_data[_data_num][19] = pid_msg.setp_yawrate * RAD2DEG;
             _log_data[_data_num][20] = ctrl_msg.yaw * RAD2DEG;
             _log_data[_data_num][21] = pid_msg.setp_yaw * RAD2DEG;
     #if FULL_PARAM
-            _log_data[_data_num][22] = ws_msg.ahead_dist_l;
-            _log_data[_data_num][23] = ws_msg.dist_l
+            _log_data[_data_num][22] = ws_msg.dist_al;
+            _log_data[_data_num][23] = ws_msg.dist_l;
             _log_data[_data_num][24] = ws_msg.dist_r;
-            _log_data[_data_num][25] = ws_msg.ahead_dist_r;
+            _log_data[_data_num][25] = ws_msg.dist_ar;
             _log_data[_data_num][26] = (float)ws_msg.is_ahead_l;
             _log_data[_data_num][27] = (float)ws_msg.is_left;
-            _log_data[_data_num][28] = (float)ws.is_right;
-            _log_data[_data_num][29] = (float)ws.is_ahead_r;
-            _log_data[_data_num][30] = bat_msg.veoltage;
+            _log_data[_data_num][28] = (float)ws_msg.is_right;
+            _log_data[_data_num][29] = (float)ws_msg.is_ahead_r;
+            _log_data[_data_num][30] = bat_msg.voltage;
             _log_data[_data_num][31] = aout_msg.duty_l;
             _log_data[_data_num][32] = aout_msg.duty_r;
     #endif

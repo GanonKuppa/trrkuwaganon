@@ -5,7 +5,7 @@
 // Object
 #include "maze.h"
 
-#define FULL_PARAM 0
+#define FULL_PARAM 1
 
 namespace module {
     class Logger : public BaseModule<Logger> {
