@@ -15,7 +15,7 @@ namespace module {
         void printHeadder();
         void print();
         void debug();
-        void start(uint8_t skip_mod = 0);
+        void start();
         void end();
         void update();
 

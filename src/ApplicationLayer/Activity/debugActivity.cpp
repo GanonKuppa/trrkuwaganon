@@ -65,7 +65,7 @@ namespace activity{
         //SpinTurnFactory::push(-180.0f * DEG2RAD, yawrate_max, yawacc);
         StopFactory::push(2.0f);
         
-        module::Logger::getInstance().start(10);
+        module::Logger::getInstance().start();
         PRINTF_ASYNC("TRAJ PUSH END\n");
         hal::waitmsec(100);
     }

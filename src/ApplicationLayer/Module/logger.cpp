@@ -19,6 +19,7 @@
 #include "wallSensorMsg.h"
 #include "vehicleAttitudeMsg.h"
 #include "vehiclePositionMsg.h"
+#include "parameterManager.h"
 
 #if FULL_PARAM
 static float _log_data[1200][33];
@@ -128,11 +129,10 @@ namespace module {
     }
 
 
-    void Logger::start(uint8_t skip_mod){
+    void Logger::start(){
         _data_num = 0;
         _logging = true;
-        _start_time_ms = hal::getElapsedMsec() ;
-        _skip_mod = skip_mod;
+        _start_time_ms = hal::getElapsedMsec() ;        
     }
 
 
@@ -141,7 +141,9 @@ namespace module {
     }
 
     void Logger::update3(){
-        static uint32_t count = 0;
+        _skip_mod = ParameterManager::getInstance().logger_skip_mod;
+
+        static uint32_t count = 0;        
         count ++;
         if( !(_skip_mod == 1 || _skip_mod == 0)){
             if( (count % _skip_mod) != 0) return;
@@ -228,7 +230,9 @@ namespace module {
             else if(argc == 3){
                 std::string num_str(argv[2]);
                 int32_t num = std::stoi(num_str);
-                Logger::getInstance().start(num);
+
+                ParameterManager::getInstance().write<uint8_t>("logger_skip_mod", (uint8_t)num);
+                Logger::getInstance().start();
                 return 0;
             }            
         }

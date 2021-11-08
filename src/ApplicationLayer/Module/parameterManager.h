@@ -57,6 +57,7 @@ namespace module {
         uint8_t goal_x; //13
         uint8_t goal_y; //14
         float search_limit_time_sec; //15
+        uint8_t logger_skip_mod; //16
 
         float duty_coef_left_p; //30
         float duty_offset_left_p; //31
