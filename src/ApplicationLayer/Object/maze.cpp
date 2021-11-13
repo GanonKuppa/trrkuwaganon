@@ -91,28 +91,28 @@ void Maze::initReached() {
 }
 
 
-bool Maze::isReached(uint16_t x, uint16_t y) {
+bool Maze::isReached(uint8_t x, uint8_t y) {
     bool reach;
     if( 0<=x && x<=31 && 0<=y && y<=31) reach =(reached[x] >> y) & 0x00000001;
     else reach = 1;
     return reach;
 }
 
-void Maze::writeReached(uint16_t x, uint16_t y, bool reached_) {
+void Maze::writeReached(uint8_t x, uint8_t y, bool reached_) {
     if( 0<=x && x<=31 && 0<=y && y<=31) {
         if(reached_ == true) reached[x] |= (0x01 << y);
         else reached[x] &= reached[x] &= ~(0x01 << y);
     }
 }
 
-bool Maze::isNoEntry(uint16_t x, uint16_t y) {
+bool Maze::isNoEntry(uint8_t x, uint8_t y) {
     bool is_no_entry;
     if( 0<=x && x<=31 && 0<=y && y<=31) is_no_entry = (no_entry[x] >> y) & 0x00000001;
     else is_no_entry = 1;
     return is_no_entry;
 }
 
-void Maze::writeNoEntry(uint16_t x, uint16_t y, bool no_entry_) {
+void Maze::writeNoEntry(uint8_t x, uint8_t y, bool no_entry_) {
     if( 0<=x && x<=31 && 0<=y && y<=31) {
         if(no_entry_ == true) no_entry[x] |= (0x01 << y);
         else no_entry[x] &= no_entry[x] &= ~(0x01 << y);
@@ -131,7 +131,7 @@ void Maze::writeNoEntryAllTrue() {
     }
 }
 
-Wall Maze::readWall(uint16_t x, uint16_t y) {
+Wall Maze::readWall(uint8_t x, uint8_t y) {
     Wall wall;
     //壁情報の配列番号に変換
     int8_t v_left = x-1;
@@ -151,7 +151,7 @@ Wall Maze::readWall(uint16_t x, uint16_t y) {
     return wall;
 };
 
-bool Maze::existAWall(uint16_t x, uint16_t y, EAzimuth dir ) {
+bool Maze::existAWall(uint8_t x, uint8_t y, EAzimuth dir ) {
     Wall wall = readWall(x, y);
     if(dir == EAzimuth::E) return wall.E && wall.EF;
     else if(dir == EAzimuth::N) return wall.N && wall.NF;
@@ -160,7 +160,7 @@ bool Maze::existAWall(uint16_t x, uint16_t y, EAzimuth dir ) {
     else return false;
 }
 
-bool Maze::existRWall(uint16_t x, uint16_t y, EAzimuth dir) {
+bool Maze::existRWall(uint8_t x, uint8_t y, EAzimuth dir) {
     Wall wall = readWall(x, y);
     if(dir == EAzimuth::E) return wall.S && wall.SF;
     else if(dir == EAzimuth::N) return wall.E && wall.EF;
@@ -169,7 +169,7 @@ bool Maze::existRWall(uint16_t x, uint16_t y, EAzimuth dir) {
     else return false;
 }
 
-bool Maze::existLWall(uint16_t x, uint16_t y, EAzimuth dir) {
+bool Maze::existLWall(uint8_t x, uint8_t y, EAzimuth dir) {
     Wall wall = readWall(x, y);
     if(dir == EAzimuth::E) return wall.N && wall.NF;
     else if(dir == EAzimuth::N) return wall.W && wall.WF;
@@ -178,7 +178,7 @@ bool Maze::existLWall(uint16_t x, uint16_t y, EAzimuth dir) {
     else return false;
 }
 
-bool Maze::watchedRWall(uint16_t x, uint16_t y, EAzimuth dir) {
+bool Maze::watchedRWall(uint8_t x, uint8_t y, EAzimuth dir) {
     Wall wall = readWall(x, y);
     if(dir == EAzimuth::E) return wall.SF;
     else if(dir == EAzimuth::N) return wall.EF;
@@ -187,7 +187,7 @@ bool Maze::watchedRWall(uint16_t x, uint16_t y, EAzimuth dir) {
     else return false;
 }
 
-bool Maze::watchedLWall(uint16_t x, uint16_t y, EAzimuth dir) {
+bool Maze::watchedLWall(uint8_t x, uint8_t y, EAzimuth dir) {
     Wall wall = readWall(x, y);
     if(dir == EAzimuth::E) return wall.NF;
     else if(dir == EAzimuth::N) return wall.WF;
@@ -196,7 +196,7 @@ bool Maze::watchedLWall(uint16_t x, uint16_t y, EAzimuth dir) {
     else return false;
 }
 
-bool Maze::isExistPath(uint16_t x, uint16_t y) {
+bool Maze::isExistPath(uint8_t x, uint8_t y) {
     if(p_map[x][y] == 0xffff) return false;
     else return true;
 }
@@ -210,7 +210,7 @@ int8_t Maze::calcRotTimes(EAzimuth dest_dir, EAzimuth my_dir) {
 }
 
 
-void Maze::writeAheadWall(uint16_t x, uint16_t y, EAzimuth dir, bool ahead) {
+void Maze::writeAheadWall(uint8_t x, uint8_t y, EAzimuth dir, bool ahead) {
     PRINTF_ASYNC("  Ahead: %d\n", ahead );
     Wall wall = readWall(x, y);
     if(dir == EAzimuth::E) wall.E = ahead;
@@ -220,7 +220,7 @@ void Maze::writeAheadWall(uint16_t x, uint16_t y, EAzimuth dir, bool ahead) {
     writeWall(x, y, wall);
 }
 
-void Maze::writeWall(uint16_t x, uint16_t y, Wall wall) {
+void Maze::writeWall(uint8_t x, uint8_t y, Wall wall) {
     //壁情報の配列番号に変換
     int8_t v_left = x-1;
     int8_t v_right = x;
@@ -245,7 +245,7 @@ void Maze::writeWall(uint16_t x, uint16_t y, Wall wall) {
     }
 }
 
-void Maze::writeWall(uint16_t x, uint16_t y, EAzimuth dir, bool l, bool a, bool r) {
+void Maze::writeWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool a, bool r) {
     Wall wall = readWall(x,y);
     switch(dir) {
         case EAzimuth::E:  //まうすは東向き
@@ -276,7 +276,7 @@ void Maze::writeWall(uint16_t x, uint16_t y, EAzimuth dir, bool l, bool a, bool 
     writeWall(x, y, wall);
 }
 
-void Maze::writeWall(uint16_t x, uint16_t y, EAzimuth dir, WallSensorMsg& ws_msg) {
+void Maze::writeWall(uint8_t x, uint8_t y, EAzimuth dir, WallSensorMsg& ws_msg) {
     bool l = ws_msg.is_left;
     bool a = ws_msg.is_ahead;
     bool r = ws_msg.is_right;
@@ -286,7 +286,7 @@ void Maze::writeWall(uint16_t x, uint16_t y, EAzimuth dir, WallSensorMsg& ws_msg
 // return 1:  探索済みの区画に来て、迷路情報と現在の壁情報が一致
 // return 0:  未探索の区画に現在の壁情報を書き込み
 // return -1: 探索済みの区画に来たが、現在の迷路情報と現在の壁情報が矛盾
-int8_t Maze::updateWall(uint16_t x, uint16_t y, EAzimuth dir, WallSensorMsg& ws_msg) {
+int8_t Maze::updateWall(uint8_t x, uint8_t y, EAzimuth dir, WallSensorMsg& ws_msg) {
     if(x == 0 && y == 0) {
         writeReached(x, y, true);
         Wall wall;
@@ -298,7 +298,7 @@ int8_t Maze::updateWall(uint16_t x, uint16_t y, EAzimuth dir, WallSensorMsg& ws_
     }
 
     /////////////探索済み区画に来た時//////////////////
-    if(isReached(x,y) == true) {
+    if(isReached(x,y)) {
         switch(dir) {
             case EAzimuth::E:
                 if(readWall(x,y).E != ws_msg.is_ahead ||
@@ -332,7 +332,7 @@ int8_t Maze::updateWall(uint16_t x, uint16_t y, EAzimuth dir, WallSensorMsg& ws_
     } //end else
 }
 
-int8_t Maze::updateWall(uint16_t x, uint16_t y, EAzimuth dir, bool l, bool a, bool r) {
+int8_t Maze::updateWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool a, bool r) {
     if(x==0 && y==0) {
         writeReached(x,y,true);
         Wall wall;
@@ -354,7 +354,7 @@ void Maze::updateStartSectionWall() {
     writeWall(0,0, wall);
 }
 
-EAzimuth Maze::getMinDirection(uint16_t x, uint16_t y, EAzimuth dir) {
+EAzimuth Maze::getMinDirection(uint8_t x, uint8_t y, EAzimuth dir) {
     uint16_t potential_E = 0xffff;
     uint16_t potential_N = 0xffff;
     uint16_t potential_W = 0xffff;
@@ -395,7 +395,7 @@ EAzimuth Maze::getMinDirection(uint16_t x, uint16_t y, EAzimuth dir) {
 }
 
 
-EAzimuth Maze::getUnknownDirection(uint16_t x, uint16_t y, EAzimuth dir) {
+EAzimuth Maze::getUnknownDirection(uint8_t x, uint8_t y, EAzimuth dir) {
     uint8_t ran_judge_E = 0;
     uint8_t ran_judge_N = 0;
     uint8_t ran_judge_W = 0;
@@ -440,7 +440,7 @@ EAzimuth Maze::getUnknownDirection(uint16_t x, uint16_t y, EAzimuth dir) {
 }
 
 
-EAzimuth Maze::getSearchDirection(uint16_t x, uint16_t y, EAzimuth dir) {
+EAzimuth Maze::getSearchDirection(uint8_t x, uint8_t y, EAzimuth dir) {
     EAzimuth min_dir = getMinDirection(x, y, dir);
     EAzimuth unknown_dir = getUnknownDirection(x, y, dir);
     
@@ -450,7 +450,7 @@ EAzimuth Maze::getSearchDirection(uint16_t x, uint16_t y, EAzimuth dir) {
     else return (EAzimuth)min_dir;
 }
 
-EAzimuth Maze::getSearchDirection2(uint16_t x, uint16_t y, EAzimuth dir) {
+EAzimuth Maze::getSearchDirection2(uint8_t x, uint8_t y, EAzimuth dir) {
     EAzimuth min_dir = getMinDirection(x, y, dir);
     EAzimuth unknown_dir = getUnknownDirection(x, y, dir);
 
@@ -459,8 +459,8 @@ EAzimuth Maze::getSearchDirection2(uint16_t x, uint16_t y, EAzimuth dir) {
     else return min_dir;
 }
 
-void Maze::makeSearchMap(uint16_t x, uint16_t y) {
-    std::queue<std::pair<uint16_t, uint16_t>> que;            
+void Maze::makeSearchMap(uint8_t x, uint8_t y) {
+    std::queue<std::pair<uint8_t, uint8_t>> que;            
 
     //歩数マップの初期化
     for(uint8_t i=0; i<32; i++) {
@@ -471,33 +471,45 @@ void Maze::makeSearchMap(uint16_t x, uint16_t y) {
     p_map[x][y] = 0; //目的地のポテンシャルは0
 
     que.push(std::make_pair(x, y));
-    while(que.empty() == false) {
+    while(!que.empty()) {
         x = que.front().first;
         y = que.front().second;
-        Wall wall = readWall(x, y);
         que.pop();
-        if( (wall.E == 0) && (x != 31) && (p_map[x+1][y] == 0xffff) ) {
-            p_map[x+1][y] = p_map[x][y] + 1;
-            que.push(std::make_pair(x+1,y));
+
+        // wall_E
+        if((x != 31) && p_map[x+1][y] == 0xffff) {
+            if( ((walls_vertical[x] >>y )& 1) == 0){
+                p_map[x+1][y] = p_map[x][y] + 1;
+                que.push(std::make_pair(x+1,y));
+            }
         }
-        if( (wall.N == 0 ) && (y != 31) && (p_map[x][y+1] == 0xffff) ) {
-            p_map[x][y+1] = p_map[x][y] + 1;
-            que.push(std::make_pair(x,y+1));
+        // wall_N
+        if((y != 31) && p_map[x][y+1] == 0xffff) {
+            if( ((walls_horizontal[y]  >>x )& 1) == 0){
+                p_map[x][y+1] = p_map[x][y] + 1;
+                que.push(std::make_pair(x,y+1));
+            }
         }
-        if( (wall.W == 0) && (x != 0) && (p_map[x-1][y] == 0xffff) ) {
-            p_map[x-1][y] = p_map[x][y] + 1;
-            que.push(std::make_pair(x-1,y));
+        // wall_W
+        if((x !=  0) && p_map[x-1][y] == 0xffff) {
+            if( ((walls_vertical[x-1]  >>y )& 1) == 0){
+                p_map[x-1][y] = p_map[x][y] + 1;
+                que.push(std::make_pair(x-1,y));
+            }
         }
-        if( (wall.S == 0) && (y != 0) && (p_map[x][y-1] == 0xffff) ) {
-            p_map[x][y-1] = p_map[x][y] + 1;
-            que.push(std::make_pair(x,y-1));
+        // wall_S
+        if((y !=  0) && p_map[x][y-1] == 0xffff) {
+            if( ((walls_horizontal[y-1]>>x )& 1) == 0){
+                p_map[x][y-1] = p_map[x][y] + 1;
+                que.push(std::make_pair(x,y-1));
+            }
         }
     }
 
 }
 
-void Maze::makeRandomFastestMap(uint16_t x, uint16_t y) {
-    std::deque<std::pair<uint16_t, uint16_t>> que;
+void Maze::makeRandomFastestMap(uint8_t x, uint8_t y) {
+    std::deque<std::pair<uint8_t, uint8_t>> que;
     //srand((unsigned int)time(NULL));
     //歩数マップの初期化
     for(uint8_t i=0; i<32; i++) {
@@ -534,9 +546,9 @@ void Maze::makeRandomFastestMap(uint16_t x, uint16_t y) {
 }
 
 
-void Maze::makeFastestMap(uint16_t x, uint16_t y) {
+void Maze::makeFastestMap(uint8_t x, uint8_t y) {
 
-    std::deque<std::pair<uint16_t, uint16_t>> que;
+    std::deque<std::pair<uint8_t, uint8_t>> que;
 
     //歩数マップの初期化
     for(uint8_t i=0; i<32; i++) {
@@ -572,8 +584,8 @@ void Maze::makeFastestMap(uint16_t x, uint16_t y) {
 
 }
 
-void Maze::makeRandomNoEntryMaskMap(uint16_t x, uint16_t y) {
-    std::deque<std::pair<uint16_t, uint16_t>> que;
+void Maze::makeRandomNoEntryMaskMap(uint8_t x, uint8_t y) {
+    std::deque<std::pair<uint8_t, uint8_t>> que;
     //srand((unsigned int)time(NULL));
     //歩数マップの初期化
     for(uint8_t i=0; i<32; i++) {
@@ -587,7 +599,7 @@ void Maze::makeRandomNoEntryMaskMap(uint16_t x, uint16_t y) {
     while(que.empty() == false) {
         x = que.front().first;
         y = que.front().second;
-        Wall wall = readWall((uint16_t)(que.front().first), (uint16_t)(que.front().second));
+        Wall wall = readWall((uint8_t)(que.front().first), (uint8_t)(que.front().second));
         que.pop_front();
         if( (wall.E == 0) && !isNoEntry(x+1,y) &&(wall.EF == 1) && (x != 31) && (p_map[x+1][y] == 0xffff) ) {
             p_map[x+1][y] = p_map[x][y] + 1 + _xor32() % 10;

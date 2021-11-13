@@ -101,7 +101,7 @@ namespace module {
                         _log_data[i][26], _log_data[i][27],_log_data[i][28],_log_data[i][29],_log_data[i][30],
                         _log_data[i][31], _log_data[i][32]                
             );
-            hal::waitmsec(5);
+            hal::waitmsec(4);
     #else
             PRINTF_ASYNC( "%f," 
                         "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f,"
@@ -114,7 +114,7 @@ namespace module {
                         _log_data[i][16], _log_data[i][17],_log_data[i][18],_log_data[i][19],_log_data[i][20],
                         _log_data[i][21], _log_data[i][22]
             );
-            hal::waitmsec(5);
+            hal::waitmsec(4);
     #endif
         }
     }

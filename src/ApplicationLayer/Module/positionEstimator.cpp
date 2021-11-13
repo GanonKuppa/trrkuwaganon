@@ -208,9 +208,9 @@ namespace module {
         msg.v_xy_body_enc = _v_xy_body_ave;
         msg.v_xy_body_acc = _v_xy_body_acc;
 
-        msg.x = _v_x;
-        msg.y = _v_y;
-        msg.z = _v_z;
+        msg.v_x = _v_x;
+        msg.v_y = _v_y;
+        msg.v_z = _v_z;
 
         msg.v_xy_body_for_odom = _v_xy_body_for_odom;
         msg.v_xy_body_for_ctrl = _v_xy_body_for_ctrl;

@@ -2,9 +2,21 @@
 
 #include <cmath>
 
+
+// Lib
+#include "ntlibc.h"
+#include "debugLog.h"
+
+// Hal
+#include "hal_timer.h"
+
 // Msg
 #include "msgBroker.h"
 #include "vehiclePositionMsg.h"
+
+// Module
+#include "parameterManager.h"
+
 
 namespace module{
 
@@ -36,6 +48,25 @@ namespace module{
         // フェールセーフ判定
         _is_failsafe = _isFailsafe();
 
+        // 迷路の壁の更新
+        bool pre_in_read_wall_area = _in_read_wall_area;
+        _in_read_wall_area = false;//_inReadWallArea();
+        if(_in_read_wall_area && !pre_in_read_wall_area){
+            uint8_t x_next = _x_cur;
+            uint8_t y_next = _y_cur;
+            if (_azimuth == EAzimuth::E) x_next++;
+            else if (_azimuth == EAzimuth::N) y_next++;
+            else if (_azimuth == EAzimuth::W) x_next--;
+            else if (_azimuth == EAzimuth::S) y_next--;
+            if(!_maze.isReached(x_next, y_next)){
+                //_maze.updateWall(x_next, y_next, _azimuth, _ws_msg);
+                // CMD_QUEUEにsearchMapの更新を入れる
+                // CMD_QUEUEに次の区画へ向かう動作を入れる              
+            }            
+        }
+
+        //
+
         _publish();    
     }
 
@@ -44,7 +75,11 @@ namespace module{
     }
 
     void Navigator::_updateParam(){
-    	WallSensorMsg ws_msg;
+    	ParameterManager& pm = ParameterManager::getInstance();
+        _x_goal = pm.goal_x;
+        _y_goal = pm.goal_y;        
+        
+        WallSensorMsg ws_msg;
     	copyMsg(msg_id::WALL_SENSOR, &ws_msg);
     	_dist_r = ws_msg.dist_r;
 		_dist_l = ws_msg.dist_l;
@@ -70,6 +105,9 @@ namespace module{
         msg.azimuth = _azimuth;
         msg.is_failsafe = _is_failsafe;
         publishMsg(msg_id::NAV_STATE, &msg);
+    }
+
+    void _updateWall(){
     }
 
     void Navigator::setNavMode(ENavMode mode){
@@ -177,12 +215,37 @@ namespace module{
         }
     }
 
+/*
+    bool Navigator:: _inReadWallArea(float read_wall_offset = 0.001f){
+        float fmod_x = fmodf(_x, 0.09f);
+        float fmod_y = fmodf(_y, 0.09f);
 
+        if(_azimuth == EAzimuth::E) return (fmod_x >= 0.09f - read_wall_offset);    
+        else if(_azimuth == EAzimuth::N) return (fmod_y >= 0.09f - read_wall_offset);        
+        else if(_azimuth == EAzimuth::W) return (fmod_x <= read_wall_offset);            
+        else if(_azimuth == EAzimuth::S) return (fmod_y <= read_wall_offset);
+        else return false;        
+    }
+*/
 
+    void Navigator::testPmap(){
+        PRINTF_ASYNC("  -- test update potential map --\n");
+        uint32_t start_time = hal::getElapsedUsec();
+        _maze.makeSearchMap(29, 29);
+        uint32_t elapsed_time = hal::getElapsedUsec() - start_time;
+        PRINTF_ASYNC("  elapsed time : %d [us]\n", elapsed_time);
+    }
 
 
     int usrcmd_navigator(int argc, char **argv){
-        return 0;
+        if (ntlibc_strcmp(argv[1], "test_pmap") == 0) {
+            Navigator::getInstance().testPmap();
+            return 0;
+        }
+
+    
+        PRINTF_ASYNC("  Unknown sub command found\r\n");
+        return -1;        
     }
 
 }

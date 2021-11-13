@@ -13,13 +13,29 @@ namespace module {
       public:
         void update2();
         void setNavMode(ENavMode mode);
-        void setNavSubMode(ENavSubMode sub_mode);
-        Maze _maze;
+        void setNavSubMode(ENavSubMode sub_mode);        
+        
+        void updateSearchMap();
+        void testPmap();
+        
 
+        Maze& getMazeRef();
       private:      
         friend class BaseModule<Navigator>;
         Navigator();        
         
+        enum class ENavCommand : uint8_t{
+            DO_FIRST_MOVE = 0,            
+            GO_FORWARD,
+            GO_LEFT,
+            GO_RIGHT,
+            GO_CENTER,
+            DO_UTURN,
+            UPDATE_POTENTIAL_MAP                    
+        };
+
+
+        Maze _maze;
         ENavMode _mode;
         ENavSubMode _sub_mode;
         bool _armed;
@@ -44,11 +60,14 @@ namespace module {
 
         EAzimuth _azimuth;
         bool _is_failsafe;
+        bool _in_read_wall_area;
         float _x;
         float _y;
 
         void _updateParam();
         void _publish();
+        bool _inReadWallArea();
+        void updateWall();
 
         bool _existRWall(float x, float y, EAzimuth azimuth);
         bool _existLWall(float x, float y, EAzimuth azimuth);

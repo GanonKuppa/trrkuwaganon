@@ -37,47 +37,47 @@ class Maze {
     void initWall();
     void initReached();
 
-    bool isReached(uint16_t x, uint16_t y);
-    void writeReached(uint16_t x, uint16_t y, bool reached_);
+    bool isReached(uint8_t x, uint8_t y);
+    void writeReached(uint8_t x, uint8_t y, bool reached_);
     
-    bool isNoEntry(uint16_t x, uint16_t y);
-    void writeNoEntry(uint16_t x, uint16_t y, bool no_entry_);
+    bool isNoEntry(uint8_t x, uint8_t y);
+    void writeNoEntry(uint8_t x, uint8_t y, bool no_entry_);
     void writeNoEntryAllFalse();
     void writeNoEntryAllTrue();
     
 
-    Wall readWall(uint16_t x, uint16_t y);
+    Wall readWall(uint8_t x, uint8_t y);
     
-    bool existAWall(uint16_t x, uint16_t y, EAzimuth dir);
-    bool existRWall(uint16_t x, uint16_t y, EAzimuth dir);
-    bool existLWall(uint16_t x, uint16_t y, EAzimuth dir);
+    bool existAWall(uint8_t x, uint8_t y, EAzimuth dir);
+    bool existRWall(uint8_t x, uint8_t y, EAzimuth dir);
+    bool existLWall(uint8_t x, uint8_t y, EAzimuth dir);
 
-    bool watchedRWall(uint16_t x, uint16_t y, EAzimuth dir);    
-    bool watchedLWall(uint16_t x, uint16_t y, EAzimuth dir);
+    bool watchedRWall(uint8_t x, uint8_t y, EAzimuth dir);    
+    bool watchedLWall(uint8_t x, uint8_t y, EAzimuth dir);
 
-    bool isExistPath(uint16_t x, uint16_t y);
+    bool isExistPath(uint8_t x, uint8_t y);
 
     int8_t calcRotTimes(EAzimuth dest_dir, EAzimuth my_dir);
 
-    void writeAheadWall(uint16_t x, uint16_t y, EAzimuth dir, bool ahead);
-    void writeWall(uint16_t x, uint16_t y, Wall wall);
-    void writeWall(uint16_t x, uint16_t y, EAzimuth dir, bool l, bool a, bool r);
-    void writeWall(uint16_t x, uint16_t y, EAzimuth dir, WallSensorMsg& ws_msg);
+    void writeAheadWall(uint8_t x, uint8_t y, EAzimuth dir, bool ahead);
+    void writeWall(uint8_t x, uint8_t y, Wall wall);
+    void writeWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool a, bool r);
+    void writeWall(uint8_t x, uint8_t y, EAzimuth dir, WallSensorMsg& ws_msg);
     
-    int8_t updateWall(uint16_t x, uint16_t y, EAzimuth dir, WallSensorMsg& ws_msg);
-    int8_t updateWall(uint16_t x, uint16_t y, EAzimuth dir, bool l, bool a, bool r);
+    int8_t updateWall(uint8_t x, uint8_t y, EAzimuth dir, WallSensorMsg& ws_msg);
+    int8_t updateWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool a, bool r);
     void updateStartSectionWall();
 
-    EAzimuth getMinDirection(uint16_t x, uint16_t y, EAzimuth dir);
-    EAzimuth getUnknownDirection(uint16_t x, uint16_t y, EAzimuth dir);
+    EAzimuth getMinDirection(uint8_t x, uint8_t y, EAzimuth dir);
+    EAzimuth getUnknownDirection(uint8_t x, uint8_t y, EAzimuth dir);
 
-    EAzimuth getSearchDirection(uint16_t x, uint16_t y, EAzimuth dir);    
-    EAzimuth getSearchDirection2(uint16_t x, uint16_t y, EAzimuth dir);
+    EAzimuth getSearchDirection(uint8_t x, uint8_t y, EAzimuth dir);    
+    EAzimuth getSearchDirection2(uint8_t x, uint8_t y, EAzimuth dir);
     
-    void makeSearchMap(uint16_t x, uint16_t y);
-    void makeRandomFastestMap(uint16_t x, uint16_t y);
-    void makeFastestMap(uint16_t x, uint16_t y);
-    void makeRandomNoEntryMaskMap(uint16_t x, uint16_t y);
+    void makeSearchMap(uint8_t x, uint8_t y);
+    void makeRandomFastestMap(uint8_t x, uint8_t y);
+    void makeFastestMap(uint8_t x, uint8_t y);
+    void makeRandomNoEntryMaskMap(uint8_t x, uint8_t y);
 
     void watchPotentialMap(void);
 

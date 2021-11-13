@@ -33,8 +33,8 @@ namespace module {
         registration<uint8_t>(13, goal_x, "goal_x"); //13
         registration<uint8_t>(14, goal_y, "goal_y"); //14
         registration<float>(15, search_limit_time_sec, "search_limit_time_sec"); //15
-        registration<uint8_t>(16, logger_skip_mod, "logger_skip_mod");  //16
-        ;//17
+        registration<uint8_t>(16, logger_skip_mod, "logger_skip_mod"); //16
+        registration<float>(17, wall2mouse_center_dist, "wall2mouse_center_dist"); //17
         ;//18
         ;//19
         ;//20
