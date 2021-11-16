@@ -18,12 +18,12 @@ namespace module {
         void startNavigation();
         void endNavigation();
         void update1();
-        
+        void updateInMainLoop();
+        Maze& getMazeRef();        
         void updateSearchMap();
+        
         void testPmap();
         
-
-        Maze& getMazeRef();
       private:
         friend class BaseModule<Navigator>;
         Navigator();
@@ -34,31 +34,27 @@ namespace module {
         bool _lock_guard;
         std::deque<ENavCommand> _nav_cmd_queue;
         bool _navigating;
-        bool _armed;
-        int8_t _x_cur;
-        int8_t _y_cur;
-
-        int8_t _x_next;
-        int8_t _y_next;
+        bool _done_outward;        
         
-        int8_t _x_start;
-        int8_t _y_start;
-
-        int8_t _x_goal;
-        int8_t _y_goal;
+        uint8_t _x_cur;
+        uint8_t _y_cur;
         
+        uint8_t _x_dest;
+        uint8_t _y_dest;
+
+        uint8_t _x_goal;
+        uint8_t _y_goal;
+                
         bool _r_wall_enable;
         bool _l_wall_enable;
         
-        float _dist_r;
-        float _dist_l;
-        float _dist_a;
-
         EAzimuth _azimuth;
         bool _is_failsafe;
         bool _in_read_wall_area;
+        WallSensorMsg _ws_msg;
         float _x;
         float _y;
+        float _yaw;
 
         void _updateParam();
         void _publish();

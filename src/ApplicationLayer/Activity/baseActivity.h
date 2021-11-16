@@ -15,7 +15,7 @@ namespace activity {
     class BaseActivity {
       public:
         void start(Intent intent) {
-            _lower_limit_loop_msec = 1;
+            _lower_limit_loop_usec = 500;
             _intent = intent;
             
             PRINTF_ASYNC("\n");
@@ -24,14 +24,16 @@ namespace activity {
             onStart();
             
             while(1) {
-                uint32_t start_msec = hal::getElapsedMsec();
+                uint64_t start_usec = hal::getElapsedUsec();
                 module::Shell::getInstance().cycleInMainLoop();
+                module::Navigator::getInstance().cycleInMainLoop();
+                
                 scheduler::doTask();
                 if(loop() == ELoopStatus::FINISH) break;
-                uint32_t end_msec = hal::getElapsedMsec();
-                uint32_t elapsed_msec = end_msec - start_msec;
-                int32_t wait_msec = _lower_limit_loop_msec - elapsed_msec;
-                if(wait_msec > 0) hal::waitmsec(wait_msec);
+                uint64_t end_usec = hal::getElapsedUsec();
+                uint64_t elapsed_usec = end_usec - start_usec;
+                int64_t wait_usec = _lower_limit_loop_usec - elapsed_usec;
+                if(wait_usec > 0) hal::waitusec(wait_usec);
             };
 
             PRINTF_ASYNC("--- %s end ---\n", getModeName().c_str());
@@ -60,7 +62,7 @@ namespace activity {
         virtual void onStart() = 0;
         virtual void onFinish() = 0;
 
-        uint32_t _lower_limit_loop_msec;
+        uint32_t _lower_limit_loop_usec;
         Intent _intent;
 
     };

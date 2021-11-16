@@ -6,16 +6,12 @@
 
 
 class NavStateMsg : public BaseMsg {
-  public:
-    bool armed = false;                           // [bool]
+  public:    
     bool navigating = false;                      // [bool]
     ENavMode mode = ENavMode::STANDBY;            // [enum]
     ENavSubMode sub_mode = ENavSubMode::STANDBY;  // [enum]    
-    int8_t x_cur = 0;                             // [coor]
-    int8_t y_cur = 0;                             // [coor]
-
-    int8_t x_next = 0;                            // [coor]
-    int8_t y_next = 0;                            // [coor]
+    uint8_t x_cur = 0;                            // [coor]
+    uint8_t y_cur = 0;                            // [coor]
 
     EAzimuth azimuth = EAzimuth::N;               // [enum]
     bool r_wall_enable = false;                   // [bool]
