@@ -30,6 +30,6 @@ namespace module{
     }
 
     int usrcmd_suction(int argc, char **argv){
-
+        return 0;
     }
 }

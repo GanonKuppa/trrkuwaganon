@@ -123,11 +123,11 @@ namespace module {
         _ang_v_f_int[2] = 0.0f;
 
         for (uint16_t i = 0; i < num; i++) {            
-            uint32_t start_usec = hal::getElapsedUsec();
+            uint64_t start_usec = hal::getElapsedUsec();
             PRINTF_ASYNC("%.3f, %f, %f, %f, %f, %f, %f\n", time, _ang_v_f[0], _ang_v_f[1], _ang_v_f[2], _ang_v_f_int[0], _ang_v_f_int[1], _ang_v_f_int[2]);
             time += 0.1;
             while(1){
-                uint32_t end_usec = hal::getElapsedUsec();
+                uint64_t end_usec = hal::getElapsedUsec();
                 if(end_usec - start_usec > 100000) break;
             }
         }

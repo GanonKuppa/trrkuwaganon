@@ -24,16 +24,14 @@ namespace activity {
             onStart();
             
             while(1) {
-                hal::startTimeuCount_sub();
                 uint32_t start_msec = hal::getElapsedMsec();
-                module::Shell::getInstance().cycle2();
+                module::Shell::getInstance().cycleInMainLoop();
                 scheduler::doTask();
                 if(loop() == ELoopStatus::FINISH) break;
                 uint32_t end_msec = hal::getElapsedMsec();
                 uint32_t elapsed_msec = end_msec - start_msec;
                 int32_t wait_msec = _lower_limit_loop_msec - elapsed_msec;
                 if(wait_msec > 0) hal::waitmsec(wait_msec);
-                hal::endTimeuCount_sub();
             };
 
             PRINTF_ASYNC("--- %s end ---\n", getModeName().c_str());

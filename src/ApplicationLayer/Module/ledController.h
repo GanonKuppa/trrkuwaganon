@@ -8,7 +8,7 @@
 namespace module {
     class LedController : public BaseModule<LedController> {
       public:
-        void update0();
+        void update1();
         void turnFcled(bool r, bool g, bool b);
         void flashFcled(bool r, bool g, bool b, float on_time, float off_time);
         uint8_t getFcledState();

@@ -57,12 +57,13 @@ void timerInterrupt0() {
     //__builtin_rx_setpsw('I'); 多重割り込み受付
 
     static uint64_t int_tick_count = 0;
-    uint32_t start_usec = hal::getElapsedUsec();
+    //uint64_t start_clock_count = hal::getElapsedClockCount();
+    hal::hrtStartTimer();
 
     // 毎回行う処理
     {        
-        module::Shell::getInstance().cycle0();
-        module::Heater::getInstance().cycle0();
+        module::Shell::getInstance().cycleEvery();
+        module::Heater::getInstance().cycleEvery();
     }
     // スロット0
     if (int_tick_count % 4 == 0) {
@@ -73,42 +74,32 @@ void timerInterrupt0() {
         module::ControlMixer::getInstance().cycle0();
         module::BatteryMonitor::getInstance().cycle0();
         module::PowerTransmission::getInstance().cycle0();
-        module::Shell::getInstance().cycle0();
-
-        uint32_t end_usec = hal::getElapsedUsec();        
-        hal::setSlot0Time(end_usec - start_usec);
+        module::Shell::getInstance().cycle0();        
+        hal::setSlot0Time(hal::hrtGetElapsedUsec());
     }
     // スロット1
     if (int_tick_count % 4 == 1) {
-        module::LedController::getInstance().cycle0();
+        module::LedController::getInstance().cycle1();
         module::Shell::getInstance().cycle1();
-
-        uint32_t end_usec = hal::getElapsedUsec();
-        hal::setSlot1Time(end_usec - start_usec);
-        
+        module::Navigator::getInstance().cycle1();
+        hal::setSlot1Time(hal::hrtGetElapsedUsec());
     }
     // スロット2
     if (int_tick_count % 4 == 2) {
-        module::WallSensor::getInstance().cycle0();
-        module::Shell::getInstance().cycle1();
-        module::PseudoDial::getInstance().cycle0();
-        module::Navigator::getInstance().cycle2();
-        module::Shell::getInstance().cycle1();
-
-        uint32_t end_usec = hal::getElapsedUsec();
-        hal::setSlot2Time(end_usec - start_usec);
+        module::WallSensor::getInstance().cycle2();
+        module::PseudoDial::getInstance().cycle2();        
+        module::Shell::getInstance().cycle2();        
+        hal::setSlot2Time(hal::hrtGetElapsedUsec());
     }
     // スロット3
     if (int_tick_count % 4 == 3) {        
-        module::WallSensor::getInstance().cycle1();        
-        module::Shell::getInstance().cycle1();
+        module::WallSensor::getInstance().cycle3();
         module::Logger::getInstance().cycle3();
-
-        uint32_t end_usec = hal::getElapsedUsec();
-        hal::setSlot3Time(end_usec - start_usec);
+        module::Shell::getInstance().cycle3();        
+        hal::setSlot3Time(hal::hrtGetElapsedUsec());
     }
 
-    
+    hal::hrtStopTimer();
     int_tick_count++;
 }
 

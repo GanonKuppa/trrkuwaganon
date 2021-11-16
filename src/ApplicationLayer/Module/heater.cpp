@@ -43,7 +43,7 @@ namespace module{
         pm.write<float>("heater_target_temp", temp);
     }    
 
-    void Heater::update0(){
+    void Heater::updateEvery(){
     	ParameterManager& pm = ParameterManager::getInstance();
         
         ImuMsg imu_msg;
@@ -89,13 +89,13 @@ namespace module{
         PRINTF_ASYNC("time[sec], temp[degC], duty, duty_p, duty_i\n");
 
         for (uint16_t i = 0; i < num; i++) {            
-            uint32_t start_usec = hal::getElapsedUsec();
+            uint64_t start_usec = hal::getElapsedUsec();
             float duty_p = _pidf.getPVal();
     		float duty_i = _pidf.getIVal();
             PRINTF_ASYNC("%.3f, %f, %f, %f, %f\n", time, _temp, _duty, duty_p, duty_i);
             time += 0.25f;
             while(1){
-                uint32_t end_usec = hal::getElapsedUsec();
+                uint64_t end_usec = hal::getElapsedUsec();
                 if(end_usec - start_usec > 250000) break;
             }
         }

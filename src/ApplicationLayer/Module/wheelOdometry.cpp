@@ -140,7 +140,7 @@ namespace module {
     }
 
     void WheelOdometry::evalAng(float duty){
-        uint32_t num = 400;
+        constexpr uint32_t num = 400;
         float ang_r_list[num];
         float ang_l_list[num];
 
@@ -156,9 +156,9 @@ namespace module {
         for (uint16_t i = 0; i < num; i++) {            
             ang_r_list[i] = _ang_r_deg;
             ang_l_list[i] = _ang_l_deg;
-            uint32_t start_usec = hal::getElapsedUsec();            
+            uint64_t start_usec = hal::getElapsedUsec();            
             while(1){
-                uint32_t end_usec = hal::getElapsedUsec();
+                uint64_t end_usec = hal::getElapsedUsec();
                 if(end_usec - start_usec > 10000) break;
             }
         }
@@ -172,7 +172,7 @@ namespace module {
     }
 
     void WheelOdometry::evalVelocity(float duty){
-        uint32_t num = 400;
+        constexpr uint32_t num = 400;
         float v_r_list[num];
         float v_l_list[num];
 
@@ -188,9 +188,9 @@ namespace module {
         for (uint16_t i = 0; i < num; i++) {            
             v_r_list[i] = _v_r;
             v_l_list[i] = _v_l;
-            uint32_t start_usec = hal::getElapsedUsec();            
+            uint64_t start_usec = hal::getElapsedUsec();            
             while(1){
-                uint32_t end_usec = hal::getElapsedUsec();
+                uint64_t end_usec = hal::getElapsedUsec();
                 if(end_usec - start_usec > 10000) break;
             }
         }

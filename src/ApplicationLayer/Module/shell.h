@@ -7,9 +7,12 @@ namespace module {
 
     class Shell : public BaseModule<Shell> {
       public:
+        void updateEvery();
         void update0();
         void update1();
         void update2();
+        void update3();
+        void updateInMainLoop();
       private:
         friend class BaseModule<Shell>;
 

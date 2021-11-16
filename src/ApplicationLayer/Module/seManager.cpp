@@ -61,7 +61,7 @@ namespace module{
     }
 
     int usrcmd_seManager(int argc, char **argv){
-
+        return 0;
     }
 
 }

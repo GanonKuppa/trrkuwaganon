@@ -63,7 +63,7 @@ namespace module {
 
     
     
-    void WallSensor::update0(){
+    void WallSensor::update2(){
         if(!_enable){
             _turnLed(0, 0, 0, 0);
             return;
@@ -71,17 +71,17 @@ namespace module {
         _updateOffVal(1, 0, 1, 0);
 
         _turnLed(1, 0, 0, 0);
-        hal::waitusec_sub(LED_ON_USEC);
+        hal::waitusec(LED_ON_USEC);
         _updateOnVal(1, 0, 0, 0);
 
         _turnLed(0, 0, 1, 0);
-        hal::waitusec_sub(LED_ON_USEC);
+        hal::waitusec(LED_ON_USEC);
         _updateOnVal(0, 0, 1, 0);
 
         _turnLed(0, 0, 0, 0);
     }
 
-    void WallSensor::update1(){
+    void WallSensor::update3(){
         if(!_enable){
             _turnLed(0, 0, 0, 0);
             return;
@@ -90,11 +90,11 @@ namespace module {
 
 
         _turnLed(0, 1, 0, 0);
-        hal::waitusec_sub(LED_ON_USEC);
+        hal::waitusec(LED_ON_USEC);
         _updateOnVal(0, 1, 0, 0);
 
         _turnLed(0, 0, 0, 1);
-        hal::waitusec_sub(LED_ON_USEC);
+        hal::waitusec(LED_ON_USEC);
         _updateOnVal(0, 0, 0, 1);
 
         _turnLed(0, 0, 0, 0);

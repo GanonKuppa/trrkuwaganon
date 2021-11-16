@@ -1,6 +1,7 @@
 #pragma once
 
 #include "baseModule.h"
+#include <deque>
 
 // Msg
 #include "navStateMsg.h"
@@ -11,33 +12,28 @@
 namespace module {
     class Navigator : public BaseModule<Navigator> {
       public:
-        void update2();
+        
         void setNavMode(ENavMode mode);
-        void setNavSubMode(ENavSubMode sub_mode);        
+        void setNavSubMode(ENavSubMode sub_mode);
+        void startNavigation();
+        void endNavigation();
+        void update1();
         
         void updateSearchMap();
         void testPmap();
         
 
         Maze& getMazeRef();
-      private:      
+      private:
         friend class BaseModule<Navigator>;
-        Navigator();        
+        Navigator();
         
-        enum class ENavCommand : uint8_t{
-            DO_FIRST_MOVE = 0,            
-            GO_FORWARD,
-            GO_LEFT,
-            GO_RIGHT,
-            GO_CENTER,
-            DO_UTURN,
-            UPDATE_POTENTIAL_MAP                    
-        };
-
-
         Maze _maze;
         ENavMode _mode;
         ENavSubMode _sub_mode;
+        bool _lock_guard;
+        std::deque<ENavCommand> _nav_cmd_queue;
+        bool _navigating;
         bool _armed;
         int8_t _x_cur;
         int8_t _y_cur;

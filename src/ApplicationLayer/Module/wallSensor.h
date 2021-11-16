@@ -9,8 +9,8 @@
 namespace module {
     class WallSensor : public BaseModule<WallSensor> {
       public:
-      	void update0();
-        void update1();        
+      	void update2();
+        void update3();        
         void setEnable(bool en);
         void debug();
       private:

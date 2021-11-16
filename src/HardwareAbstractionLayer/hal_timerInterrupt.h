@@ -11,15 +11,15 @@ namespace hal {
     uint32_t endTimeuCountTimerInterrupt0();
     uint32_t getTimeuCountTimerInterrupt0();
 
-    void setSlot0Time(uint32_t usec);
-    void setSlot1Time(uint32_t usec);
-    void setSlot2Time(uint32_t usec);
-    void setSlot3Time(uint32_t usec);
+    void setSlot0Time(float usec);
+    void setSlot1Time(float usec);
+    void setSlot2Time(float usec);
+    void setSlot3Time(float usec);
 
-    uint32_t getSlot0Time();
-    uint32_t getSlot1Time();
-    uint32_t getSlot2Time();
-    uint32_t getSlot3Time();
+    float getSlot0Time();
+    float getSlot1Time();
+    float getSlot2Time();
+    float getSlot3Time();
 
 
     void initTimerInterrupt1();

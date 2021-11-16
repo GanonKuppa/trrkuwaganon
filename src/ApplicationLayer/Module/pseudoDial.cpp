@@ -25,7 +25,7 @@ namespace module{
         dial_r.setDeltaT(_delta_t);
     }
 
-    void PseudoDial::update0(){
+    void PseudoDial::update2(){
         NavStateMsg ns_msg;
         copyMsg(msg_id::NAV_STATE, &ns_msg);        
                 

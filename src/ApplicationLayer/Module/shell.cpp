@@ -130,16 +130,20 @@ int usrcmd_info(int argc, char **argv)
 
 int usrcmd_top(int argc, char **argv)
 {    
-    uint32_t slot0_time = hal::getSlot0Time();
-    uint32_t slot1_time = hal::getSlot1Time();
-    uint32_t slot2_time = hal::getSlot2Time();
-    uint32_t slot3_time = hal::getSlot3Time();
+    float slot0_time = hal::getSlot0Time();
+    float slot1_time = hal::getSlot1Time();
+    float slot2_time = hal::getSlot2Time();
+    float slot3_time = hal::getSlot3Time();
     PRINTF_ASYNC("\n");
     PRINTF_ASYNC("  --- timerInterrupt0 Slot Time 0, 1, 2, 3\n");
-    PRINTF_ASYNC("    %3d[us] %3d[us] %3d[us] %3d [us]\n",slot0_time, slot1_time, slot2_time, slot3_time);
+    PRINTF_ASYNC("      total = %6.2f[us]\n",slot0_time + slot1_time + slot2_time + slot3_time);
+    PRINTF_ASYNC("      %6.2f[us], %6.2f[us], %6.2f[us], %6.2f[us]\n",slot0_time, slot1_time, slot2_time, slot3_time);    
+
     PRINTF_ASYNC("\n");
 
-    PRINTF_ASYNC("  --- Modules Time update0, update1, update2, update3\n");
+    PRINTF_ASYNC("  --- Modules Time --- \n");
+    PRINTF_ASYNC("      update0   , update1   , update2   , update3   ,updateEvery, updateInMainLoop\n");
+    
     module::BatteryMonitor::getInstance().printCycleTime();
     hal::waitmsec(10);
     module::ControlMixer::getInstance().printCycleTime();
@@ -198,6 +202,11 @@ namespace module {
         ntshell_set_prompt(&nts, "trrkuwaganon>");
     };
 
+    void Shell::updateEvery(){
+        hal::sendDataUart1();
+        hal::recvDataUart1();
+        hal::sendDataUart1();
+    }
     void Shell::update0(){
         hal::sendDataUart1();
         hal::recvDataUart1();
@@ -211,6 +220,18 @@ namespace module {
     }
 
     void Shell::update2(){
+        hal::sendDataUart1();
+        hal::recvDataUart1();
+        hal::sendDataUart1();
+    }
+
+    void Shell::update3(){
+        hal::sendDataUart1();
+        hal::recvDataUart1();
+        hal::sendDataUart1();
+    }
+
+    void Shell::updateInMainLoop(){
         ntshell_execute(&nts);
     }
 

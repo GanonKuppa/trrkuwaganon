@@ -42,7 +42,7 @@ class DialR : public Dial{
 namespace module {
     class PseudoDial: public BaseModule<PseudoDial> {
       public:
-        void update0();
+        void update2();
         void debug();
         void setDivisionNum(uint8_t l_rum, uint8_t r_num);
         void setEnable(bool enable);

@@ -7,7 +7,7 @@
 
 namespace module {
     class TrajectoryCommander : public BaseModule<TrajectoryCommander>{
-      public: 
+      public:
         void update0();
         
         void push(std::unique_ptr<BaseTrajectory>&& traj);
@@ -16,7 +16,7 @@ namespace module {
         void debug();
 
 
-      private:                
+      private:
         friend class BaseModule<TrajectoryCommander>;
         TrajectoryCommander();
 
@@ -24,7 +24,7 @@ namespace module {
         float _y;
         float _yaw;
 
-        std::deque< std::unique_ptr<BaseTrajectory> > _traj_queue;        
+        std::deque< std::unique_ptr<BaseTrajectory> > _traj_queue;
         bool _lock_guard;
 
         void  _publish();

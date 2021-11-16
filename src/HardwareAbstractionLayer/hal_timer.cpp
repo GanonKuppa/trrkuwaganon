@@ -11,19 +11,27 @@ static std::chrono::system_clock::time_point start;
 #endif
 namespace hal {
     void initTimer() {
-#ifndef SILS
+#ifndef SILS        
         periferal_driver::initCMTW0();
         periferal_driver::initCMTW1();
+        periferal_driver::startCMTW();        
         periferal_driver::initTPU0();
 #else
         start = std::chrono::system_clock::now(); // 計測開始時間
 #endif
     }
 
-
     void waitClockCount(uint32_t cCount) {
 #ifndef SILS
         periferal_driver::waitClockCount(cCount);
+#endif
+    }
+
+    void waitnsec(uint32_t nsec) {
+#ifndef SILS
+        periferal_driver::waitnsec(nsec);
+#else
+        nanosleep(nsec);
 #endif
     }
 
@@ -43,74 +51,30 @@ namespace hal {
 #endif
     }
 
-    void startTimeuCount() {
+    uint64_t getElapsedClockCount() {
 #ifndef SILS
-        periferal_driver::startTimeuCount();
-#endif
-    }
-
-
-    uint32_t getTimeuCount(void) {
-#ifndef SILS
-        return periferal_driver::getTimeuCount();
+        return periferal_driver::getElapsedClockCount();
 #else
-        return 0;
+        std::chrono::system_clock::time_point end; // 型は auto で可
+        end = std::chrono::system_clock::now();  // 計測終了時間
+        double elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count();
+        return (uint64_t)elapsed;
 #endif
     }
 
-    uint32_t endTimeuCount() {
+    uint64_t getElapsedNsec() {
 #ifndef SILS
-        return periferal_driver::endTimeuCount();
+        return periferal_driver::getElapsedNsec();
 #else
-        return 0;
+        std::chrono::system_clock::time_point end; // 型は auto で可
+        end = std::chrono::system_clock::now();  // 計測終了時間
+        double elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count();
+        return (uint64_t)elapsed;
 #endif
     }
 
-    void waitClockCount_sub(uint32_t cCount) {
-#ifndef SILS
-        periferal_driver::waitClockCount_sub(cCount);
-#endif
-    }
 
-    void waitusec_sub(uint32_t usec) {
-#ifndef SILS
-        periferal_driver::waitusec_sub(usec);
-#else
-        waitusec(usec);
-#endif
-    }
-
-    void waitmsec_sub(uint32_t msec) {
-#ifndef SILS
-        periferal_driver::waitmsec_sub(msec);
-#else
-        waitmsec(msec);
-#endif
-    }
-
-    void startTimeuCount_sub() {
-#ifndef SILS
-        periferal_driver::startTimeuCount_sub();
-#endif
-    }
-
-    uint32_t getTimeuCount_sub(void) {
-#ifndef SILS
-        return periferal_driver::getTimeuCount_sub();
-#else
-        return 0;
-#endif
-    }
-
-    uint32_t endTimeuCount_sub() {
-#ifndef SILS
-        return periferal_driver::endTimeuCount_sub();
-#else
-        return 0;
-#endif
-    }
-
-    uint32_t getElapsedUsec() {
+    uint64_t getElapsedUsec() {
 #ifndef SILS
         return periferal_driver::getElapsedUsec();
 #else
@@ -120,8 +84,6 @@ namespace hal {
         return (uint32_t)elapsed;
 #endif
     }
-
-
 
     uint32_t getElapsedMsec() {
 #ifndef SILS
@@ -134,9 +96,50 @@ namespace hal {
 #endif
     }
 
-
     uint32_t getElapsedSec() {
-        return getElapsedMsec() / 1000;
+#ifndef SILS
+        return periferal_driver::getElapsedSec();
+#else
+        std::chrono::system_clock::time_point end; // 型は auto で可
+        end = std::chrono::system_clock::now();  // 計測終了時間
+        double elapsed = std::chrono::duration_cast<std::chrono::seconds>(end-start).count();
+        return (uint32_t)elapsed;
+#endif
+    }
+
+    float calcElapsedUsec(uint64_t clock_count){
+#ifndef SILS
+        return periferal_driver::calcElapsedUsec(clock_count);
+#else
+        std::chrono::system_clock::time_point end; // 型は auto で可
+        end = std::chrono::system_clock::now();  // 計測終了時間
+        double elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count();                
+        return elepased - double(clock_count);
+#endif
+    }
+
+    void hrtStartTimer(){
+#ifndef SILS
+        return periferal_driver::hrtStartTimer();
+#else
+
+#endif        
+    }
+
+    void hrtStopTimer(){
+#ifndef SILS
+        return periferal_driver::hrtStopTimer();
+#else
+
+#endif
+    }
+
+    float hrtGetElapsedUsec(float usec){
+#ifndef SILS
+        return periferal_driver::hrtGetElapsedUsec(usec);
+#else
+        return 0.0f;
+#endif
     }
 
 }

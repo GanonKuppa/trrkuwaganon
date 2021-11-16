@@ -32,7 +32,7 @@ namespace module {
         _led_b->setDeltaT(delta_t);
     }
 
-    void LedController::update0() {
+    void LedController::update1() {
         _led_r->update();
         _led_g->update();
         _led_b->update();
