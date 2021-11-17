@@ -9,6 +9,7 @@
 #include "debugLog.h"
 #include "oneshotTask.h"
 #include "shell.h"
+#include "navigator.h"
 
 namespace activity {
 

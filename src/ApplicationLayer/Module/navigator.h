@@ -5,6 +5,7 @@
 
 // Msg
 #include "navStateMsg.h"
+#include "wallSensorMsg.h"
 
 // Object
 #include "maze.h"
@@ -19,9 +20,7 @@ namespace module {
         void endNavigation();
         void update1();
         void updateInMainLoop();
-        Maze& getMazeRef();        
-        void updateSearchMap();
-        
+        Maze& getMazeRef();                   
         void testPmap();
         
       private:
@@ -38,6 +37,7 @@ namespace module {
         
         uint8_t _x_cur;
         uint8_t _y_cur;
+        EAzimuth _azimuth;
         
         uint8_t _x_dest;
         uint8_t _y_dest;
@@ -47,25 +47,36 @@ namespace module {
                 
         bool _r_wall_enable;
         bool _l_wall_enable;
-        
-        EAzimuth _azimuth;
+                
         bool _is_failsafe;
         bool _in_read_wall_area;
+        
         WallSensorMsg _ws_msg;
         float _x;
         float _y;
         float _yaw;
 
+        float _v;
+        float _a;
+        float _yawrate_max;
+        float _yawacc;        
+        float _wall2mouse_center_dist;
+
+        float _read_wall_offset1;
+        float _read_wall_offset2;
+
         void _updateParam();
-        void _publish();
-        bool _inReadWallArea();
-        void updateWall();
+        void _updateWallEnable();
+        void _updateDestination();
+        bool _isFailsafe();
+        bool _inReadWallArea(float offset1, float offset2);        
 
         bool _existRWall(float x, float y, EAzimuth azimuth);
         bool _existLWall(float x, float y, EAzimuth azimuth);
         bool _watchedPillar(float x, float y, EAzimuth azimuth);
-        bool _isFailsafe();
-
+        
+        void _publish();
+        const float DEG2RAD = 3.14159265f / 180.0f;
     };
 
     int usrcmd_navigator(int argc, char **argv);

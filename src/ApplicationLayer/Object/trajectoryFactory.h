@@ -30,5 +30,6 @@ class CurveFactory{
     static std::unique_ptr<BaseTrajectory> create(ETurnParamSet param_set , ETurnType turn_type, ETurnDir turn_dir);
     static void push(ETurnParamSet param_set , ETurnType turn_type, ETurnDir turn_dir);
     static void pushWithStraight(ETurnParamSet param_set , ETurnType turn_type, ETurnDir turn_dir);
+    static void pushWithStraight(ETurnParamSet param_set , ETurnType turn_type, ETurnDir turn_dir, float offset_pre, float offset_fol);
 };
 

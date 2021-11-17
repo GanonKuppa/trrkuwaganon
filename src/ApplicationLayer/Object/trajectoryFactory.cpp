@@ -108,3 +108,57 @@ void CurveFactory::pushWithStraight(ETurnParamSet param_set , ETurnType turn_typ
     module::TrajectoryCommander::getInstance().push(std::move(traj2));
     module::TrajectoryCommander::getInstance().push(std::move(traj3));
 }
+
+void CurveFactory::pushWithStraight(ETurnParamSet param_set , ETurnType turn_type, ETurnDir turn_dir, float offset_pre, float offset_fol){
+    float v = module::TrajectoryInitializer::getInstance().getV(param_set, turn_type);
+    float pre_dist = module::TrajectoryInitializer::getInstance().getPreDist(param_set, turn_type) + offset_pre;
+    float fol_dist = module::TrajectoryInitializer::getInstance().getFolDist(param_set, turn_type) + offset_fol;
+    ETurnType turn_type_pre;
+    ETurnType turn_type_fol;
+
+    switch (turn_type) {
+		case ETurnType::TURN_90:
+			turn_type_pre = ETurnType::STRAIGHT;
+			turn_type_fol = ETurnType::STRAIGHT;
+			break;
+		case ETurnType::TURN_L_90:
+            turn_type_pre = ETurnType::STRAIGHT;
+            turn_type_fol = ETurnType::STRAIGHT;
+            break;
+        case ETurnType::TURN_180:
+            turn_type_pre = ETurnType::STRAIGHT;
+            turn_type_fol = ETurnType::STRAIGHT;
+            break;
+        case ETurnType::TURN_S2D_45:
+            turn_type_pre = ETurnType::STRAIGHT;
+            turn_type_fol = ETurnType::DIAGONAL;
+            break;
+        case ETurnType::TURN_S2D_135:
+            turn_type_pre = ETurnType::STRAIGHT;
+            turn_type_fol = ETurnType::DIAGONAL;
+            break;
+        case ETurnType::TURN_D2S_45:
+            turn_type_pre = ETurnType::DIAGONAL;
+            turn_type_fol = ETurnType::STRAIGHT;
+            break;
+        case ETurnType::TURN_D2S_135:
+            turn_type_pre = ETurnType::DIAGONAL;
+            turn_type_fol = ETurnType::STRAIGHT;            
+            break;
+        case ETurnType::TURN_D_90:
+            turn_type_pre = ETurnType::DIAGONAL;
+            turn_type_fol = ETurnType::DIAGONAL;
+            break;
+        default:
+            turn_type_pre = ETurnType::STRAIGHT;
+            turn_type_fol = ETurnType::STRAIGHT;
+    }
+
+    auto traj1 = StraightFactory::create(turn_type_pre , pre_dist, v);
+    auto traj2 = CurveFactory::create(param_set , turn_type, turn_dir);
+    auto traj3 = StraightFactory::create(turn_type_fol , fol_dist, v);
+    module::TrajectoryCommander::getInstance().push(std::move(traj1));
+    module::TrajectoryCommander::getInstance().push(std::move(traj2));
+    module::TrajectoryCommander::getInstance().push(std::move(traj3));
+
+};
