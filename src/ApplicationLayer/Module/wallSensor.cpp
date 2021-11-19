@@ -107,8 +107,8 @@ namespace module {
         _dist_l = _distL((float)_left_q.at(0));
         _dist_r = _distR((float)_right_q.at(0));
 
-        _is_ahead_l = (_dist_al <= 0.115f); 
-        _is_ahead_r = (_dist_ar <= 0.09f);
+        _is_ahead_l = (_dist_al <= 0.095f); 
+        _is_ahead_r = (_dist_ar <= 0.095f);
         _is_ahead = (_is_ahead_l || _is_ahead_r);
         _is_left = (_dist_l <= 0.055f);
         _is_right = (_dist_r <= 0.055f);

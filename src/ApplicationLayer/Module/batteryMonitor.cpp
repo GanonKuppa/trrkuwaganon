@@ -65,8 +65,17 @@ namespace module {
         PRINTF_ASYNC("  ================\n");
         PRINTF_ASYNC("  now:%f \n", _voltage);
         PRINTF_ASYNC("  ave %f \n", _voltage_ave);
-
     }
+
+    void BatteryMonitor::evalBatteryLife(){
+        while(1){
+            BatteryInfoMsg bat_msg;
+            copyMsg(msg_id::BATTERY_INFO, &bat_msg);
+            float voltage = bat_msg.voltage;
+            hal::waitmsec(1000);
+            PRINTF_ASYNC("waitmsec| %f, %d, %d, %llu \n", voltage, hal::getElapsedSec(), hal::getElapsedMsec(), hal::getElapsedUsec());
+        }
+    };
 
     void BatteryMonitor::_publish(){
         BatteryInfoMsg msg;
@@ -79,6 +88,11 @@ namespace module {
     int usrcmd_batteryMonitor(int argc, char **argv){
         if (ntlibc_strcmp(argv[1], "status") == 0) {
             BatteryMonitor::getInstance().debug();
+            return 0;
+        }
+
+        if (ntlibc_strcmp(argv[1], "eval") == 0){
+            BatteryMonitor::getInstance().evalBatteryLife();
             return 0;
         }
 

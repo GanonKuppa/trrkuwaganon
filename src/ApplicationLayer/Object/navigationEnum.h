@@ -43,5 +43,5 @@ inline EAzimuth yaw2Azimuth(float yaw){
     else if(yaw_ang >=  45.0f && yaw_ang < 135.0f) return EAzimuth::N;
     else if(yaw_ang >= 135.0f && yaw_ang < 225.0f) return EAzimuth::W;
     else if(yaw_ang >= 225.0f && yaw_ang < 315.0f) return EAzimuth::S;
-    else EAzimuth::E;
+    else return EAzimuth::E;
 };

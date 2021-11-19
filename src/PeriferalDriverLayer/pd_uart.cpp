@@ -70,7 +70,8 @@ namespace periferal_driver {
         SCIFA9.SMR.BIT.CKS = 0;
         SCIFA9.SEMR.BIT.ABCS0 = 1;
         SCIFA9.SEMR.BIT.BGDM = 1;
-        SCIFA9.BRR = 6 - 1; //6-1:2Mbps    13-1:921600bps
+        SCIFA9.BRR = 4 - 1; //4-1:3MHz 6-1:2Mbps 13-1:921600bps
+
         SCIFA9.FCR.BIT.TTRG = 0b11;
 
         //受信設定
@@ -174,14 +175,15 @@ namespace periferal_driver {
 
         send_lock = true;
         uint8_t count = 0;
-        while (SCIFA9.FDR.BIT.T < 0x10 && count < 16) {
-            if (sendBuf.empty() == true){
+        while (SCIFA9.FDR.BIT.T < 0x10 && count < 32) {
+            if (sendBuf.empty()){
                 send_lock = false;
                 return;
             }
             SCIFA9.FTDR = sendBuf.front();
             sendBuf.pop_front();
-            count++;
+            while(SCIFA9.FDR.BIT.T == 0x10);
+            count++;            
         }
         send_lock = false;
     }

@@ -65,38 +65,41 @@ namespace periferal_driver {
     }
 
     void waitClockCount(uint32_t cCount) {        
-        uint64_t clock_count_start = (uint64_t)CMTW0.CMWCNT + ((uint64_t)(CMTW1.CMWCNT & 0xfc000000ull) << 6);
+        uint32_t clock_count_start = (uint64_t)CMTW0.CMWCNT;
         while (1) {
-            uint64_t clock_count_now = (uint64_t)CMTW0.CMWCNT + ((uint64_t)(CMTW1.CMWCNT & 0xfc000000ull) << 6);
-            uint64_t count_diff = clock_count_now - clock_count_start;
-            if ( count_diff >= cCount) break;
+            uint32_t clock_count_now = CMTW0.CMWCNT;
+            uint32_t diff = clock_count_now - clock_count_start;            
+            if ( diff >= cCount) break;
         }
     }
 
     void waitnsec(uint32_t nsec) {
-        uint64_t clock_count_start = CMTW0.CMWCNT + ((uint64_t)(CMTW1.CMWCNT & 0xfc000000ull) << 6);
+        uint32_t clock_count_start = CMTW0.CMWCNT;
         while (1) {
-            uint64_t clock_count_now = CMTW0.CMWCNT + ((uint64_t)(CMTW1.CMWCNT & 0xfc000000ull) << 6);
-            uint64_t elapsed_nsec = (clock_count_now - clock_count_start) / U_COUNT * 1000ull;
-            if ( elapsed_nsec >= nsec) break;
+            uint32_t clock_count_now = CMTW0.CMWCNT;
+            uint32_t diff = clock_count_now - clock_count_start;            
+            float elapsed_nsec = diff / (float)U_COUNT * 1000.0f;
+            if ( elapsed_nsec >= (float)nsec) break;
         }
     }
 
     void waitusec(uint32_t usec) {
-        uint64_t clock_count_start = CMTW0.CMWCNT + ((uint64_t)(CMTW1.CMWCNT & 0xfc000000ull) << 6);
+        uint32_t clock_count_start = CMTW0.CMWCNT;
         while (1) {
-            uint64_t clock_count_now = CMTW0.CMWCNT + ((uint64_t)(CMTW1.CMWCNT & 0xfc000000ull) << 6);
-            uint64_t elapsed_usec = (clock_count_now - clock_count_start) / U_COUNT;
-            if ( elapsed_usec >= usec) break;
+            uint32_t clock_count_now = CMTW0.CMWCNT;
+            uint32_t diff = clock_count_now - clock_count_start;            
+            float elapsed_usec = diff / (float)U_COUNT;
+            if ( elapsed_usec >= (float)usec) break;
         }
     }
 
     void waitmsec(uint32_t msec) {
-        uint64_t clock_count_start = (uint64_t)CMTW0.CMWCNT + ((uint64_t)(CMTW1.CMWCNT & 0xfc000000ull) << 6);
+        uint32_t clock_count_start = CMTW0.CMWCNT;
         while (1) {
-            uint64_t clock_count_now = (uint64_t)CMTW0.CMWCNT + ((uint64_t)(CMTW1.CMWCNT & 0xfc000000ull) << 6);
-            uint64_t elapsed_msec = (clock_count_now - clock_count_start) / M_COUNT;
-            if ( elapsed_msec >= msec) break;
+            uint32_t clock_count_now = CMTW0.CMWCNT;
+            uint32_t diff = clock_count_now - clock_count_start;            
+            float elapsed_msec = diff / (float)M_COUNT;
+            if ( elapsed_msec >= (float)msec) break;
         }
     }
 

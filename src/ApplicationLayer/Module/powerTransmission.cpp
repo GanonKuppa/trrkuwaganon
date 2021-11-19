@@ -76,6 +76,10 @@ namespace module {
 */
             float duty_l = std::clamp<float>(out_msg.duty_l, -duty_limit, duty_limit);
             float duty_r = std::clamp<float>(out_msg.duty_r, -duty_limit, duty_limit);
+            if(nav_msg.is_failsafe){
+                duty_l = 0.0f;
+                duty_r = 0.0f;
+            }            
             setNormalizedDutyL(duty_l);
             setNormalizedDutyR(duty_r);
         }

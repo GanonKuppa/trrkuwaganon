@@ -14,6 +14,7 @@
 #include "msgBroker.h"
 #include "vehiclePositionMsg.h"
 #include "vehicleAttitudeMsg.h"
+#include "ctrlSetPointMsg.h"
 
 // Module
 #include "parameterManager.h"
@@ -23,7 +24,7 @@
 namespace module{
 
     Navigator::Navigator() :
-        _mode(ENavMode::STANDBY),
+        _mode(ENavMode::MODE_SELECT),
         _sub_mode(ENavSubMode::STANDBY),
         _lock_guard(false),
         _navigating(false),
@@ -70,8 +71,10 @@ namespace module{
         
         _done_outward = false;
         _updateDestination();
+        _maze.updateStartSectionWall();
         _maze.makeSearchMap(_x_dest, _y_dest);
-        _navigating = true;        
+        _navigating = true;
+        _is_failsafe = false;
     }
 
     void Navigator::endNavigation(){
@@ -79,10 +82,14 @@ namespace module{
         _lock_guard = true;
         while(!_nav_cmd_queue.empty()) _nav_cmd_queue.pop_front();
         _navigating = false;
+        setNavMode(ENavMode::STANDBY);
+        setNavSubMode(ENavSubMode::STANDBY);
         _lock_guard = false;
     }
     
     void Navigator::update1(){
+        if(_lock_guard) return;
+
         // パラメータの更新
         _updateParam();
         
@@ -91,11 +98,16 @@ namespace module{
         
         // フェールセーフ判定
         _is_failsafe = _isFailsafe();
+        if(_is_failsafe){
+            _navigating = false;            
+        }
+
+
         
         // 現在区画の更新
         _x_cur = (uint8_t)(_x / 0.09f);
         _y_cur = (uint8_t)(_y / 0.09f);
-        _azimuth = yaw2Azimuth(_yaw);
+        _azimuth = yaw2Azimuth(_yaw_setp);
                     
         // 壁の更新エリアに入ったときの動作
         bool pre_in_read_wall_area = _in_read_wall_area;
@@ -106,18 +118,12 @@ namespace module{
                 _maze.updateWall(_x_cur, _y_cur, _azimuth, _ws_msg);
             }
 
-            if(_x_cur == _x_dest && _y_cur == _y_dest && _sub_mode == ENavSubMode::START2GOAL){
-                _lock_guard = true;
-                _nav_cmd_queue.push_back(ENavCommand::GO_CENTER);
-                _lock_guard = false;
-                
+            if(_x_cur == _x_dest && _y_cur == _y_dest && _sub_mode == ENavSubMode::START2GOAL){                
+                _nav_cmd_queue.push_back(ENavCommand::GO_CENTER);                                
                 _navigating = false;
             }
-            else if(_x_cur == _x_dest && _y_cur == _y_dest && _sub_mode == ENavSubMode::START2GOAL2START && _done_outward){
-                _lock_guard = true;
-                _nav_cmd_queue.push_back(ENavCommand::GO_CENTER);
-                _lock_guard = false;
-
+            else if(_x_cur == _x_dest && _y_cur == _y_dest && _sub_mode == ENavSubMode::START2GOAL2START && _done_outward){                
+                _nav_cmd_queue.push_back(ENavCommand::GO_CENTER);                
                 _navigating = false;
             }
             else{
@@ -138,12 +144,14 @@ namespace module{
         _publish();
     }
 
-    void Navigator::updateInMainLoop(){
-        while(_lock_guard) hal::waitusec(1);
+    void Navigator::updateInMainLoop(){        
         _lock_guard = true;
         if(!_nav_cmd_queue.empty()){
             ENavCommand cmd = _nav_cmd_queue.front();
-            if(cmd == ENavCommand::DO_FIRST_MOVE){                
+            _nav_cmd_queue.pop_front();
+            _lock_guard = false;
+            if(cmd == ENavCommand::DO_FIRST_MOVE){         
+                PRINTF_ASYNC("DO_FIRST_MOVE\n");
                 float target_dist = _wall2mouse_center_dist + 0.045f + _read_wall_offset2;
                 StraightFactory::push(ETurnType::STRAIGHT_CENTER, target_dist, 0.0, _v, _v, _a, _a);
             }
@@ -154,11 +162,11 @@ namespace module{
                     StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.09, _v);
                 } 
                 else if ( std::abs(rot_times) == 4) {                    
-                    StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.02f - _read_wall_offset2, _v, _v, 0.0f, _a, _a);
+                    StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.03f - _read_wall_offset2, _v, _v, 0.0f, _a, _a);
                     StopFactory::push(0.1f);
                     SpinTurnFactory::push(180.0f * DEG2RAD, _yawrate_max, _yawacc);
                     StopFactory::push(0.1f);
-                    StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.02f + _read_wall_offset2, 0.0f, _v, _v, _a, _a);
+                    StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.03f + _read_wall_offset2, 0.0f, _v, _v, _a, _a);
                 }
                 else if(rot_times == 2) {
                     CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_90, ETurnDir::CCW, -_read_wall_offset2 , _read_wall_offset2);
@@ -174,11 +182,9 @@ namespace module{
             }
             else if(cmd == ENavCommand::UPDATE_POTENTIAL_MAP){
                 _maze.makeSearchMap(_x_dest, _y_dest);
-            }            
-            _nav_cmd_queue.pop_front();
+            }                        
         }
-        
-        _lock_guard = false;
+        _lock_guard = false;       
 
     }
 
@@ -208,12 +214,18 @@ namespace module{
 
         VehiclePositionMsg pos_msg;
         VehicleAttitudeMsg att_msg;
+        CtrlSetpointMsg setp_msg;
         copyMsg(msg_id::VEHICLE_POSITION, &pos_msg);
         copyMsg(msg_id::VEHICLE_ATTITUDE, &att_msg);
+        copyMsg(msg_id::CTRL_SETPOINT, & setp_msg);
 
         _x = pos_msg.x;
         _y = pos_msg.y;
         _yaw = att_msg.yaw;
+
+        _x_setp = setp_msg.x;
+        _y_setp = setp_msg.y;
+        _yaw_setp = setp_msg.yaw;
     }
 
     void Navigator::_updateWallEnable(){
@@ -256,12 +268,15 @@ namespace module{
     }
 
     bool Navigator::_isFailsafe(){
+        if(std::fabs(_x - _x_setp) > 0.02f || std::fabs(_y - _y_setp) > 0.02f){
+            return true;
+        }
         return false;
     }
 
     bool Navigator::_inReadWallArea(float offset1, float offset2){
-        float fmod_x = fmodf(_x, 0.09f);
-        float fmod_y = fmodf(_y, 0.09f);
+        float fmod_x = fmodf(_x_setp, 0.09f);
+        float fmod_y = fmodf(_y_setp, 0.09f);
 
         if(_azimuth == EAzimuth::E) return (fmod_x >= offset1 && fmod_x <= offset2);    
         else if(_azimuth == EAzimuth::N) return (fmod_y >= offset1 && fmod_y <= offset2);

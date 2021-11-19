@@ -27,6 +27,7 @@ class Wall {
 
 class Maze {
   public:
+    Maze();
     uint32_t walls_vertical[31];
     uint32_t walls_horizontal[31];
     uint32_t reached[32];

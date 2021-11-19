@@ -10,6 +10,8 @@
 
 // Activity
 #include "activityFactory.h"
+
+// Module
 #include "trajectoryCommander.h"
 #include "parameterManager.h"
 #include "navigator.h"
@@ -21,7 +23,6 @@
 // Msg
 #include "msgBroker.h"
 #include "ctrlSetpointMsg.h"
-#include "batteryInfoMsg.h"
 
 // Obj
 #include "trajectoryFactory.h"
@@ -60,19 +61,7 @@ namespace activity{
         module::PositionEstimator::getInstance().reset(0.045f, 0.045f, 90.0f * DEG2RAD);
         
         if(mode == 1){
-            //StopFactory::push(20.0f);
-            while(1){
-                BatteryInfoMsg bat_msg;
-                copyMsg(msg_id::BATTERY_INFO, &bat_msg);
-                float voltage = bat_msg.voltage;
-                hal::waitmsec(1000);
-                PRINTF_ASYNC("waitmsec| %f, %d, %d, %llu \n", voltage, hal::getElapsedSec(), hal::getElapsedMsec(), hal::getElapsedUsec());
-                
-                copyMsg(msg_id::BATTERY_INFO, &bat_msg);
-                voltage = bat_msg.voltage;
-                hal::waitusec(1000 * 1000);
-                PRINTF_ASYNC("waitusec| %f, %d, %d, %llu \n", voltage, hal::getElapsedSec(), hal::getElapsedMsec(), hal::getElapsedUsec());
-            }
+            StopFactory::push(20.0f);
         }
         else if(mode == 2){
             float yawrate_max = pm.spin_yawrate_max * DEG2RAD;

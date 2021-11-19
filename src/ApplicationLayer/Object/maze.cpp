@@ -69,6 +69,10 @@ Wall::Wall(EAzimuth dir, bool l, bool a, bool r) {
     }
 }
 
+Maze::Maze(){
+    init();
+}
+
 
 void Maze::init() {
     initWall();

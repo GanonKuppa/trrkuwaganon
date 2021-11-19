@@ -79,9 +79,9 @@ void timerInterrupt0() {
     }
     // スロット1
     if (int_tick_count % 4 == 1) {
-        module::LedController::getInstance().cycle1();
-        module::Shell::getInstance().cycle1();
+        module::LedController::getInstance().cycle1();        
         module::Navigator::getInstance().cycle1();
+        module::Shell::getInstance().cycle1();
         hal::setSlot1Time(hal::hrtGetElapsedUsec());
     }
     // スロット2

@@ -214,7 +214,7 @@ void StraightTrajectory::update() {
 bool StraightTrajectory::isEnd() {
     VehiclePositionMsg pos_msg;
     copyMsg(msg_id::VEHICLE_POSITION, &pos_msg);
-    float res_dist = -1.0f;//_calcResidualDist(pos_msg.x, pos_msg.y);
+    float res_dist = -1;//_calcResidualDist(pos_msg.x, pos_msg.y);
 
     if (_cumulative_dist >= _target_dist && res_dist <= 0.0f) {
         _x = getEndX();

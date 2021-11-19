@@ -20,8 +20,8 @@ namespace module {
         void endNavigation();
         void update1();
         void updateInMainLoop();
-        Maze& getMazeRef();                   
-        void testPmap();
+        Maze& getMazeRef();              
+        void testPmap();        
         
       private:
         friend class BaseModule<Navigator>;
@@ -55,6 +55,11 @@ namespace module {
         float _x;
         float _y;
         float _yaw;
+
+        float _x_setp;
+        float _y_setp;
+        float _yaw_setp;
+
 
         float _v;
         float _a;
