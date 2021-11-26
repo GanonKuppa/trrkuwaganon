@@ -14,8 +14,9 @@ namespace module {
 
         void printHeadder();
         void print();
-        void debug();
-        void start();
+        void printPickleMsg();
+        void debug();        
+        void start();        
         void end();
         void update();
 
@@ -27,7 +28,7 @@ namespace module {
         uint32_t _start_time_ms;
         uint8_t  _skip_mod;
         #if FULL_PARAM        
-        const uint32_t _max_data_num = 1200;
+        const uint32_t _max_data_num = 1500;
         #else
         const uint32_t _max_data_num = 3000;
         #endif

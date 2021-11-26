@@ -22,7 +22,7 @@ namespace activity{
 
     RadioControlActivity::ELoopStatus RadioControlActivity::loop() {
 
-        return ELoopStatus::CONTINUE;
+        return ELoopStatus::FINISH;
     }
 }
 

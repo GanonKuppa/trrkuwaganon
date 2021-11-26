@@ -17,6 +17,7 @@ namespace module {
         friend class BaseModule<PositionEstimator>;
                 
         PositionEstimator();
+        void _onWallCenterCorrection();
         void _publish_vehicle_position();
         void _publish_vehicle_attitude();
         
@@ -65,6 +66,7 @@ namespace module {
 
         const float _afrer_curve_beta_expiration_time = 0.050f;
         float _beta_expiration_time;
+        float _on_wall_center_dist;
 
     };
 

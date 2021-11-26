@@ -22,7 +22,7 @@ namespace activity{
 
     FullAutoRunActivity::ELoopStatus FullAutoRunActivity::loop() {
 
-        return ELoopStatus::CONTINUE;
+        return ELoopStatus::FINISH;
     }
 }
 

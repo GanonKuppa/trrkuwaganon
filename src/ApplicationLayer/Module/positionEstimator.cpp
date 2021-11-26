@@ -14,6 +14,7 @@
 #include "wheelOdometryMsg.h"
 #include "vehicleAttitudeMsg.h"
 #include "vehiclePositionMsg.h"
+#include "wallSensorMsg.h"
 
 
 
@@ -46,7 +47,8 @@ namespace module {
 	_yawrate(0.0f),
 	_rollrate(0.0f),
 	_pitchrate(0.0f),
-	_beta_expiration_time(0.0f)    
+	_beta_expiration_time(0.0f),
+    _on_wall_center_dist(0.0f)
     {        
         setModuleName("PositionEstimator");
         
@@ -75,9 +77,11 @@ namespace module {
         ImuMsg imu_msg;
         WheelOdometryMsg wodo_msg;
         CtrlSetpointMsg ctrl_msg;
+        WallSensorMsg ws_msg;
         copyMsg(msg_id::IMU, &imu_msg);
         copyMsg(msg_id::WHEEL_ODOMETRY, &wodo_msg);
         copyMsg(msg_id::CTRL_SETPOINT, &ctrl_msg);
+        copyMsg(msg_id::WALL_SENSOR, &ws_msg);
 
         float yawrate_pre = _yawrate; // yawrateは今期に取得したものは今期のデータ
         float yaw_pre = _yaw;
@@ -124,8 +128,8 @@ namespace module {
         }
 
         // グローバル座標系速度算出
-        _v_x = _v_xy_body_for_odom * cosf(yaw_pre + beta_pre);
-        _v_y = _v_xy_body_for_odom * sinf(yaw_pre + beta_pre);
+        _v_x = _v_xy_body_for_odom * cosf(yaw_pre); // 一旦betaを0に
+        _v_y = _v_xy_body_for_odom * sinf(yaw_pre); // 
 
         // グローバル座標系位置算出
         _x += _delta_t * v_x_pre;
@@ -150,9 +154,52 @@ namespace module {
             _beta = 0.0f;
         }
 
+
+        // 壁中心判定
+        if((ctrl_msg.turn_type == ETurnType::STRAIGHT_CENTER || ctrl_msg.turn_type == ETurnType::STRAIGHT_CENTER) && 
+            ws_msg.is_on_wall_center &&
+            !ws_msg.is_ahead && 
+            _v_xy_body_for_odom > 0.1f && 
+            std::fabs(_yawrate) < 50.0f * DEG2RAD
+        ){
+            _on_wall_center_dist += _v_xy_body_for_odom * _delta_t;
+        }
+        else{
+            _on_wall_center_dist = 0.0f;
+        }
+
+        _onWallCenterCorrection();
+
         _publish_vehicle_position();
         _publish_vehicle_attitude();
     }
+
+    void PositionEstimator::_onWallCenterCorrection() {
+        float x_pre = _x;
+        float y_pre = _y;
+        float yaw_pre = _yaw;
+
+        float ang = _yaw * RAD2DEG;
+        if(_on_wall_center_dist > 0.06f) {            
+            if(ang >= 315.0 || ang < 45.0) {
+                _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;
+                _yaw = 0.0 * DEG2RAD;
+            } else if(ang >= 45.0 && ang < 135.0) {
+                _x = (uint8_t)(_x / 0.09f) * 0.09f + 0.09f/2.0f;
+                _yaw = 90.0f * DEG2RAD;
+            } else if(ang >= 135.0f && ang < 225.0f) {
+                _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;
+                _yaw = 180.0 * DEG2RAD;
+            } else if(ang >= 225.0f && ang < 315.0f) {
+                _x = (uint8_t)(_x / 0.09f) * 0.09f + 0.09f/2.0f;
+                _yaw = 270.0f * DEG2RAD;
+            }
+            _on_wall_center_dist = 0.0f;
+            PRINTF_PICKLE("ON_WALL_CENTER | x:%6.3f, x_pre:%6.3f, y:%6.3f, y_pre:%6.3f yaw:%6.3f, yaw_pre:%6.3f\n", _x, x_pre, _y, y_pre, _yaw*RAD2DEG, yaw_pre*RAD2DEG);
+        }
+    }
+
+
 
     void PositionEstimator::debug(){
         PRINTF_ASYNC(  "  ---\n");

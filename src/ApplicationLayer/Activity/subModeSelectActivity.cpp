@@ -40,16 +40,6 @@ namespace activity{
             _led_off_sec = 0.25f;
         }
 
-        module::LedController::getInstance().turnFcled(1,0,0);
-        hal::waitmsec(100);
-        module::LedController::getInstance().turnFcled(0,1,0);
-        hal::waitmsec(100);
-        module::LedController::getInstance().turnFcled(0,0,1);
-        hal::waitmsec(100);
-        module::LedController::getInstance().turnFcled(0,0,0);
-        hal::waitmsec(100);
-
-
         ModeSelectActivity::onStart();
     }
     

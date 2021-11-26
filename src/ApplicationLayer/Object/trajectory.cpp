@@ -209,14 +209,20 @@ void StraightTrajectory::update() {
         _v_xy_body = _v_min;
         _a_xy_body = 0.0f;
     }
+
+    if(_cumulative_dist >= _target_dist){
+        _x = getEndX();
+        _y = getEndY();
+        _yaw = getEndYaw();
+    }
 }
     
 bool StraightTrajectory::isEnd() {
     VehiclePositionMsg pos_msg;
     copyMsg(msg_id::VEHICLE_POSITION, &pos_msg);
-    float res_dist = -1;//_calcResidualDist(pos_msg.x, pos_msg.y);
+    float res_dist = _calcResidualDist(pos_msg.x, pos_msg.y);
 
-    if (_cumulative_dist >= _target_dist && res_dist <= 0.0f) {
+    if (_cumulative_dist >= _target_dist && res_dist <= 0.00025f) {
         _x = getEndX();
         _y = getEndY();
         _yaw = getEndYaw();
@@ -226,6 +232,15 @@ bool StraightTrajectory::isEnd() {
     }
 }
     
+float StraightTrajectory::_calcResidualDist(float x_esti, float y_esti){
+    float yaw = getEndYaw();
+    float x1 = getEndX();
+    float y1 = getEndY();
+    float dist = (x1 - x_esti) * cosf(yaw) + (y1 - y_esti) * sinf(yaw);
+    return dist;
+}
+
+
 //-- SpinTurnTrajectory    
 SpinTurnTrajectory::SpinTurnTrajectory(float target_cumulative_yaw, float abs_yawrate_max, float abs_yawacc) : 
     BaseTrajectory(){
@@ -241,7 +256,7 @@ SpinTurnTrajectory::SpinTurnTrajectory(float target_cumulative_yaw, float abs_ya
     _target_cumulative_yaw = target_cumulative_yaw;
     _abs_yawacc = abs_yawacc;
     _abs_yawrate_max = abs_yawrate_max;    
-    _abs_yawrate_min = 0.349f;  // 0.349rad = 20deg/sec    
+    _abs_yawrate_min = 0.5235f;  // 0.523599 rad = 30deg/sec    
 }
 
 float SpinTurnTrajectory::getEndX() {
@@ -262,8 +277,8 @@ void SpinTurnTrajectory::update() {
     
     float abs_yaw_bre = 0.0f;
     float abs_target_cumulative_yaw = std::fabs(_target_cumulative_yaw);
-    if(abs_target_cumulative_yaw > 0.174f){ // 0.174rad = 10deg, 0.0174*3.0 rad = 2deg
-        abs_target_cumulative_yaw -= 0.0174f * 2.0f;
+    if(abs_target_cumulative_yaw > 0.174f){ // 0.174rad = 10deg, 0.0174*1.0 rad = 1deg
+        abs_target_cumulative_yaw -= 0.0174f * 1.0f;
     }
 
 

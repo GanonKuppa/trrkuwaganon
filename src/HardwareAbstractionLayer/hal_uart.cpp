@@ -81,7 +81,7 @@ namespace hal {
 
         va_list ap;
         va_start(ap, fmt);
-        static char buffer[512];
+        static char buffer[1000];
         len = vsprintf(buffer, fmt, ap);
 
 #ifndef SILS
@@ -112,7 +112,39 @@ namespace hal {
     }
 
 
+    static std::deque<uint8_t> _pickleBuf;//塩漬け用データバッファ
+    static const int PICKLE_BUF_MAX = 4096 * 2;
+    static uint8_t _lock_guard_pickle = false;
 
+    void initPickle(){
+        //_pickleBuf.reserve(PICKLE_BUF_MAX);
+    }
 
+    int printfPickle(const char* fmt, ...){
+        int len = 0;
+
+        va_list ap;
+        va_start(ap, fmt);
+        static char buffer[512];
+        len = vsprintf(buffer, fmt, ap);
+        _lock_guard_pickle = true;
+        for (uint16_t i = 0; i < len; i++) {
+            if(_pickleBuf.size() < PICKLE_BUF_MAX){
+                _pickleBuf.push_back(buffer[i]);
+            }
+        }
+        _lock_guard_pickle = false;
+        va_end(ap);
+        return len;
+    }
+
+    int feedPickleWithPrintfAsync(){        
+        for(auto &c : _pickleBuf){            
+            periferal_driver::put1byteSCIFA9(c);
+            if(periferal_driver::getSCIFA9Bufsize() > 512){
+                while(periferal_driver::getSCIFA9Bufsize() > 256);
+            }
+        }
+    };
 
 }

@@ -22,7 +22,7 @@ namespace activity{
 
     DeleteMazeActivity::ELoopStatus DeleteMazeActivity::loop() {
 
-        return ELoopStatus::CONTINUE;
+        return ELoopStatus::FINISH;
     }
 }
 

@@ -21,6 +21,6 @@ namespace activity{
 
     CalibrateWallCenterActivity::ELoopStatus CalibrateWallCenterActivity::loop() {
 
-        return ELoopStatus::CONTINUE;
+        return ELoopStatus::FINISH;
     }
 }

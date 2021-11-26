@@ -12,7 +12,7 @@
     constexpr float SHAPE_FACTOR_D2S_45 = 4.0f;
     constexpr float SHAPE_FACTOR_D2S_135 = 4.0f;
 
-    constexpr float PATH_LENGTH_90 = 0.06f;
+    constexpr float PATH_LENGTH_90 = 0.055f;
     constexpr float PATH_LENGTH_L_90 = 0.11f;
     constexpr float PATH_LENGTH_180 = 0.1f;
     constexpr float PATH_LENGTH_S2D_45 = 0.04f;

@@ -17,6 +17,7 @@
 // Msg
 #include "msgBroker.h"
 #include "ctrlSetpointMsg.h"
+#include "navStateMsg.h"
 
 
 namespace activity{    
@@ -62,11 +63,17 @@ namespace activity{
     }
 
     SearchRunActivity::ELoopStatus SearchRunActivity::loop() {
+        CtrlSetpointMsg ctrl_msg;
         NavStateMsg nav_msg;
         copyMsg(msg_id::NAV_STATE, &nav_msg);
-        ELoopStatus loop_status = ELoopStatus::CONTINUE;  
+        ELoopStatus loop_status = ELoopStatus::CONTINUE;
         
-        if(!nav_msg.navigating || nav_msg.is_failsafe){
+        if(nav_msg.is_failsafe){
+            module::TrajectoryCommander::getInstance().clear();
+            loop_status = ELoopStatus::FINISH;
+        }
+
+        if(!nav_msg.navigating && ctrl_msg.traj_type == ETrajType::NONE){            
             loop_status = ELoopStatus::FINISH;
         }
 

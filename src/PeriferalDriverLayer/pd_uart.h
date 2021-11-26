@@ -11,6 +11,7 @@ namespace periferal_driver {
     void putnbyteSCI1(uint8_t* buf, uint16_t len);
 
     void initSCIFA9();
+    void put1byteSCIFA9(uint8_t c);
     void putnbyteSCIFA9(uint8_t* buf, uint16_t len);
     bool readnbyteSCIFA9(uint8_t* buf, uint16_t len);
     bool isEmptyRecvBufSCIFA9();

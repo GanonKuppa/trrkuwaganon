@@ -19,10 +19,12 @@
 #include "imuDriver.h"
 #include "logger.h"
 #include "intent.h"
+#include "ledController.h"
 
 // Msg
 #include "msgBroker.h"
 #include "ctrlSetpointMsg.h"
+#include "navStateMsg.h"
 
 // Obj
 #include "trajectoryFactory.h"
@@ -67,21 +69,21 @@ namespace activity{
             float yawrate_max = pm.spin_yawrate_max * DEG2RAD;
             float yawacc = pm.spin_yawacc * DEG2RAD;
             SpinTurnFactory::push(90.0f * DEG2RAD, yawrate_max, yawacc);
-            StopFactory::push(2.0f);
+            StopFactory::push(1.0f);
             SpinTurnFactory::push(-90.0f * DEG2RAD, yawrate_max, yawacc);
-            StopFactory::push(2.0f);
+            StopFactory::push(1.0f);
             SpinTurnFactory::push(90.0f * DEG2RAD, yawrate_max, yawacc);
-            StopFactory::push(2.0f);
+            StopFactory::push(1.0f);
             SpinTurnFactory::push(90.0f * DEG2RAD, yawrate_max, yawacc);
-            StopFactory::push(2.0f);
+            StopFactory::push(1.0f);
             SpinTurnFactory::push(180.0f * DEG2RAD, yawrate_max, yawacc);
-            StopFactory::push(2.0f);
+            StopFactory::push(0.5f);
             SpinTurnFactory::push(-180.0f * DEG2RAD, yawrate_max, yawacc);
-            StopFactory::push(2.0f);
+            StopFactory::push(0.5f);
             SpinTurnFactory::push(180.0f * DEG2RAD, yawrate_max, yawacc);
-            StopFactory::push(2.0f);
+            StopFactory::push(0.5f);
             SpinTurnFactory::push(180.0f * DEG2RAD, yawrate_max, yawacc);
-            StopFactory::push(2.0f);
+            StopFactory::push(0.5f);
         }
         else if(mode == 3){
             ETurnType turn_type;
@@ -170,7 +172,9 @@ namespace activity{
         }
         
         module::Logger::getInstance().start();        
+        module::LedController::getInstance().flashFcled(1,1,1, 0.5, 0.5);
         hal::waitmsec(100);
+        
     }
     
     
@@ -179,10 +183,16 @@ namespace activity{
 
     DebugActivity::ELoopStatus DebugActivity::loop() {
         CtrlSetpointMsg ctrl_msg;
+        NavStateMsg nav_msg;
+
         copyMsg(msg_id::CTRL_SETPOINT, &ctrl_msg);
-        ELoopStatus loop_status = ELoopStatus::CONTINUE;  
+        copyMsg(msg_id::NAV_STATE, &nav_msg);
+
+        ELoopStatus loop_status = ELoopStatus::CONTINUE;
+
         
-        if(ctrl_msg.traj_type == ETrajType::NONE){
+        if(ctrl_msg.traj_type == ETrajType::NONE || nav_msg.is_failsafe){
+            module::TrajectoryCommander::getInstance().clear();
             loop_status = ELoopStatus::FINISH;
         }
 

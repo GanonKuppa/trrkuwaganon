@@ -434,9 +434,16 @@ namespace module {
     int usrcmd_parameterManager(int argc, char **argv){
 
         if (ntlibc_strcmp(argv[1], "list") == 0) {
+            bool is_pid_enable_only = (argc == 3 && ntlibc_strcmp(argv[2], "pid_enable") == 0);
+            bool is_pid_gain_only = (argc == 3  && ntlibc_strcmp(argv[2], "pid_gain") == 0);
+            bool is_pid_saturation_only = (argc == 3  && ntlibc_strcmp(argv[2], "pid_saturation") == 0);
+            
             PRINTF_ASYNC("  # no  , type   , name_str        , val\n");                           
             auto &pm = ParameterManager::getInstance();
             for(int i=0;i<pm.valStrkeyMap.size();i++){
+                if(is_pid_enable_only &&  !(i >= 50 && i <= 66)) continue;
+                if(is_pid_gain_only && !(i >= 88 && i <= 125) ) continue;
+                if(is_pid_saturation_only && !(i >= 126 && i <= 137) ) continue;
 
                 uint16_t val_num = i;
                 std::string key_str = pm.valStrkeyMap[val_num];

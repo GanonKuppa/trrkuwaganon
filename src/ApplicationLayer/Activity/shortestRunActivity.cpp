@@ -22,7 +22,7 @@ namespace activity{
 
     ShortestRunActivity::ELoopStatus ShortestRunActivity::loop() {
 
-        return ELoopStatus::CONTINUE;
+        return ELoopStatus::FINISH;
     }
 }
 

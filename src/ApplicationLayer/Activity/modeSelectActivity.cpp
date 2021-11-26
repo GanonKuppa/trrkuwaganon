@@ -43,6 +43,16 @@ namespace activity {
         nav.setNavMode(ENavMode::MODE_SELECT);
         nav.setNavSubMode(ENavSubMode::STANDBY);
 
+        module::LedController::getInstance().turnFcled(1,0,0);
+        hal::waitmsec(100);
+        module::LedController::getInstance().turnFcled(0,1,0);
+        hal::waitmsec(100);
+        module::LedController::getInstance().turnFcled(0,0,1);
+        hal::waitmsec(100);
+        module::LedController::getInstance().turnFcled(0,0,0);
+        hal::waitmsec(100);
+
+
         _turnFcled(_mode, false);
     }
 

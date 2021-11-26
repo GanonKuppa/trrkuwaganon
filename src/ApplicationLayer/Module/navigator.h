@@ -6,6 +6,7 @@
 // Msg
 #include "navStateMsg.h"
 #include "wallSensorMsg.h"
+#include "actuatorOutputMsg.h"
 
 // Object
 #include "maze.h"
@@ -30,6 +31,7 @@ namespace module {
         Maze _maze;
         ENavMode _mode;
         ENavSubMode _sub_mode;
+        ECtrlMode _ctrl_mode;
         bool _lock_guard;
         std::deque<ENavCommand> _nav_cmd_queue;
         bool _navigating;
@@ -37,6 +39,8 @@ namespace module {
         
         uint8_t _x_cur;
         uint8_t _y_cur;
+        uint8_t _x_last;
+        uint8_t _y_last;
         EAzimuth _azimuth;
         
         uint8_t _x_dest;
@@ -47,7 +51,8 @@ namespace module {
                 
         bool _r_wall_enable;
         bool _l_wall_enable;
-                
+        
+        bool _is_actuator_error;
         bool _is_failsafe;
         bool _in_read_wall_area;
         
@@ -79,6 +84,7 @@ namespace module {
         bool _existRWall(float x, float y, EAzimuth azimuth);
         bool _existLWall(float x, float y, EAzimuth azimuth);
         bool _watchedPillar(float x, float y, EAzimuth azimuth);
+        void _printWall();
         
         void _publish();
         const float DEG2RAD = 3.14159265f / 180.0f;

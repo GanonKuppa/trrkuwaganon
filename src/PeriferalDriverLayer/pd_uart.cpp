@@ -96,6 +96,15 @@ namespace periferal_driver {
     static const int SEND_BUF_MAX = 2048;
     static const int RECV_BUF_MAX = 512;
 
+
+    /***********1byte送信関数*******************/
+    void put1byteSCIFA9(uint8_t c){
+        if(send_lock) return;
+        send_lock = true;
+        sendBuf.push_back(c);
+        send_lock = false;
+    }
+
     /***********nbyte送信関数*******************/
     void putnbyteSCIFA9(uint8_t* buf, uint16_t len) {
         if(send_lock) return;
@@ -144,7 +153,6 @@ namespace periferal_driver {
         recv_lock = false;
         return size;
     }
-
 
     /***********受信バッファの中身を取り出す関数******************/
     //この関数はタイマ割り込み関数内で周期的に呼び出すこと

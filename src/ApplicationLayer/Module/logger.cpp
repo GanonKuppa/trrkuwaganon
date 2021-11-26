@@ -1,9 +1,11 @@
 #include "logger.h"
 
 #include <string>
+#include <cmath>
 
 // Hal
 #include "hal_timer.h"
+#include "hal_uart.h"
 
 // Lib
 #include "debugLog.h"
@@ -22,10 +24,11 @@
 #include "parameterManager.h"
 
 #if FULL_PARAM
-static float _log_data[1200][33];
+static float _log_data[1500][40];
 #else
 static float _log_data[3000][22];
 #endif
+
 
 namespace module {
 
@@ -45,16 +48,15 @@ namespace module {
             "v_ave,"
             "v_comp,"
             "v_acc,"
-            "ang,"
-            "ang_v,"
-            "acc_cor_x,"
-            "acc_cor_y,"
+            "yaw,"
+            "yawrate,"
+            "acc_x,"
+            "acc_y,"
             "ws_l_raw,"
             "ws_r_raw,"
-            "x,"
-            "y,"
+            "X_cor,"
+            "y_cor,"
             "beta,"
-
             "v_setp,"
             "x_setp,"
             "y_setp,"
@@ -68,13 +70,20 @@ namespace module {
             "d_l,"
             "d_r,"
             "d_ra,"
-            "ws_la,"
-            "ws_l,"
-            "ws_r,"
-            "ws_ra,"
-            "voltage,"
-            "duty_l,"
-            "duty_r"
+            "v_p,"
+            "v_i,"
+            "v_d,"
+            "duty_v,"
+            "yawrate_p,"
+            "yawrate_i,"
+            "yawrate_d,"
+            "duty_yaw,"
+            "yaw_p,"
+            "yaw_i,"
+            "wall_p,"
+            "wall_i,"
+            "wall_d,"
+            "voltage"            
     #endif
                 "\n"
         );
@@ -91,7 +100,7 @@ namespace module {
                         "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f,"
                         "%f, %f, %f, %f, %f, %f, %f, %f, %f,"
                         "%f, %f, %f, %f, %f, %f, %f,"
-                        "%f, %f, %f, %f\n",
+                        "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n",
                         _log_data[i][0],
                         _log_data[i][1], _log_data[i][2],_log_data[i][3],_log_data[i][4],_log_data[i][5],
                         _log_data[i][6], _log_data[i][7],_log_data[i][8],_log_data[i][9],_log_data[i][10],
@@ -99,9 +108,10 @@ namespace module {
                         _log_data[i][16], _log_data[i][17],_log_data[i][18],_log_data[i][19],_log_data[i][20],
                         _log_data[i][21], _log_data[i][22],_log_data[i][23],_log_data[i][24],_log_data[i][25],
                         _log_data[i][26], _log_data[i][27],_log_data[i][28],_log_data[i][29],_log_data[i][30],
-                        _log_data[i][31], _log_data[i][32]                
+                        _log_data[i][31], _log_data[i][32],_log_data[i][33],_log_data[i][34],_log_data[i][35],_log_data[i][36],_log_data[i][37],_log_data[i][38],_log_data[i][39]
             );
             hal::waitmsec(1);
+
     #else
             PRINTF_ASYNC( "%f," 
                         "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f,"
@@ -117,6 +127,11 @@ namespace module {
             hal::waitmsec(1);
     #endif
         }
+    }
+
+    void Logger::printPickleMsg(){
+        PRINTF_ASYNC("----- logger pickle msg -----\n");
+        hal::feedPickleWithPrintfAsync();
     }
 
     void Logger::debug(){
@@ -203,13 +218,20 @@ namespace module {
             _log_data[_data_num][23] = ws_msg.dist_l;
             _log_data[_data_num][24] = ws_msg.dist_r;
             _log_data[_data_num][25] = ws_msg.dist_ar;
-            _log_data[_data_num][26] = (float)ws_msg.is_ahead_l;
-            _log_data[_data_num][27] = (float)ws_msg.is_left;
-            _log_data[_data_num][28] = (float)ws_msg.is_right;
-            _log_data[_data_num][29] = (float)ws_msg.is_ahead_r;
-            _log_data[_data_num][30] = bat_msg.voltage;
-            _log_data[_data_num][31] = aout_msg.duty_l;
-            _log_data[_data_num][32] = aout_msg.duty_r;
+            _log_data[_data_num][26] = pid_msg.v_p;
+            _log_data[_data_num][27] = pid_msg.v_i;
+            _log_data[_data_num][28] = pid_msg.v_d;
+            _log_data[_data_num][29] = std::fabs(aout_msg.duty_r_v);            
+            _log_data[_data_num][30] = pid_msg.yawrate_p;
+            _log_data[_data_num][31] = pid_msg.yawrate_i;
+            _log_data[_data_num][32] = pid_msg.yawrate_d;            
+            _log_data[_data_num][33] = std::fabs(aout_msg.duty_r_yaw);
+            _log_data[_data_num][34] = pid_msg.yaw_p;
+            _log_data[_data_num][35] = pid_msg.yaw_i;         
+            _log_data[_data_num][36] = pid_msg.wall_p;
+            _log_data[_data_num][37] = pid_msg.wall_i;
+            _log_data[_data_num][38] = pid_msg.wall_d;
+            _log_data[_data_num][39] = bat_msg.voltage;
     #endif
             _data_num++;
         }
@@ -246,6 +268,10 @@ namespace module {
             PRINTF_ASYNC("------------------------------------------\n");
             Logger::getInstance().print();
             return 0;
+        }
+
+        if (ntlibc_strcmp(argv[1], "pickle") == 0){
+            Logger::getInstance().printPickleMsg();
         }
 
         PRINTF_ASYNC("  Unknown sub command found\r\n");

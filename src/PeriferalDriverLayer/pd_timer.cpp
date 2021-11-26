@@ -109,7 +109,7 @@ namespace periferal_driver {
         return clock_count;
     }
     
-    uint64_t getElapsedNsec() {
+    uint64_t getElapsedNsec() {        
         uint32_t cmt1_masked = CMTW1.CMWCNT & 0xfc000000;
         uint64_t clock_count = (uint64_t)CMTW0.CMWCNT | ( (uint64_t)cmt1_masked << 6);
         return clock_count * 1000 / U_COUNT;
@@ -122,10 +122,15 @@ namespace periferal_driver {
     }
 
     uint32_t getElapsedMsec() {
-        uint32_t cmt1_masked = CMTW1.CMWCNT & 0xfc000000;
-        uint64_t clock_count = (uint64_t)CMTW0.CMWCNT | ( (uint64_t)cmt1_masked << 6);
-        uint64_t m_sec = clock_count / M_COUNT;
-        return (uint32_t)m_sec;
+        if(CMTW1.CMWCNT < 0xfc000000){
+            return (uint32_t)CMTW0.CMWCNT / M_COUNT;
+        }
+        else{
+            uint32_t cmt1_masked = CMTW1.CMWCNT & 0xfc000000;
+            uint64_t clock_count = (uint64_t)CMTW0.CMWCNT | ( (uint64_t)cmt1_masked << 6);
+            uint64_t m_sec = clock_count / M_COUNT;
+            return (uint32_t)m_sec;
+        }
     }
 
     uint32_t getElapsedSec() {

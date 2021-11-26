@@ -111,7 +111,7 @@ namespace module{
             _wall_pidf.set(pm.wall_p, pm.wall_i, pm.wall_d, pm.wall_f);
 
             // 斜めPIDFゲイン設定
-            _wall_pidf.set(pm.wall_diag_p, pm.wall_diag_i, pm.wall_diag_d, pm.wall_diag_f);
+            _wall_diag_pidf.set(pm.wall_diag_p, pm.wall_diag_i, pm.wall_diag_d, pm.wall_diag_f);
             
             // FB制御イネーブル設定
             _v_pidf.setEnable(pm.v_fb_enable);
@@ -136,8 +136,8 @@ namespace module{
 
             // サチュレーション値設定
                 //_v_pidfおよび_yawrate_pidfのサチュレーション値はupdateController()で設定
-            _yaw_pidf.setSaturation(pm.yaw_saturation_enable);
-            _wall_pidf.setSaturation(pm.wall_saturation_enable);
+            _yaw_pidf.setSaturation(pm.yaw_saturation);
+            _wall_pidf.setSaturation(pm.wall_saturation);
             _wall_diag_pidf.setSaturation(pm.wall_diag_saturation);
                         
             // 積分サチュレーションイネーブル設定
@@ -156,13 +156,12 @@ namespace module{
     }
 
     void ControlMixer::_updateController(){
-        if(_nav_msg.mode != ENavMode::STANDBY && _nav_msg.mode != ENavMode::FASTEST && _nav_msg.mode != ENavMode::SEARCH){
+        if(_nav_msg.mode == ENavMode::DEBUG || _setp_msg.traj_type == ETrajType::NONE){
             _v_pidf.reset();
             _yawrate_pidf.reset();
             _yaw_pidf.reset();
             _wall_pidf.reset();
             _wall_diag_pidf.reset();
-
             return;
         }        
         
@@ -184,21 +183,15 @@ namespace module{
         }
 
         // 壁制御
-        if(_turn_type == ETurnType::STRAIGHT_CENTER || _turn_type == ETurnType::STRAIGHT_CENTER_EDGE) {
-            
-            if(_nav_msg.mode == ENavMode::SEARCH || _nav_msg.mode == ENavMode::FASTEST){
-                _wall_pidf.update(_ws_msg.dist_r, _ws_msg.dist_l, _nav_msg.r_wall_enable, _nav_msg.l_wall_enable);
-            }
-            else if(_nav_msg.mode == ENavMode::STANDBY){
-                _wall_pidf.update(_ws_msg.dist_r, _ws_msg.dist_l, true, true);
-            }
-            
+        if(_turn_type == ETurnType::STRAIGHT_CENTER || _turn_type == ETurnType::STRAIGHT_CENTER_EDGE) {            
+            _wall_pidf.update(0.045f - _ws_msg.dist_r, 0.045f - _ws_msg.dist_l, _nav_msg.r_wall_enable, _nav_msg.l_wall_enable);
+            //_wall_pidf.update(0.045f - _ws_msg.dist_r, 0.045f - _ws_msg.dist_l, true, true);
             // 壁制御量は曲率とみなし, 速度をかけることで角速度に変換
             float v_now = _pos_msg.v_xy_body_for_ctrl;
-            if(v_now < 0.1f) v_now = 0.1f;            
+            if(v_now < 0.05f) v_now = 0.05f;            
             _setp_yawrate += v_now * _wall_pidf.getControlVal();
         }
-        else{
+        else{            
             _wall_pidf.reset();
         }
 
@@ -233,7 +226,7 @@ namespace module{
         if(_wall_pidf.engaged()){
             _yaw_pidf.reset();
         }
-        else{
+        else{            
             _yaw_pidf.update(_setp_yaw, _att_msg.yaw);
             _setp_yawrate += _yaw_pidf.getControlVal();
         }
@@ -296,7 +289,10 @@ namespace module{
         _duty_l = _duty_l_v + _duty_l_yaw;
 
         // 制御誤差の監視
-        if( std::fabs(_yawrate_pidf.getError()) > YAWRATE_ERROR_TH || std::fabs(_v_pidf.getError()) > std::fabs(V_ERROR_TH)){
+        if( std::fabs(_yawrate_pidf.getError()) > YAWRATE_ERROR_TH || 
+            std::fabs(_v_pidf.getError()) > V_ERROR_TH ||
+            std::fabs(_yaw_pidf.getError()) > YAW_ERROR_TH
+        ){
             _error_sec += _delta_t;
         }                
         else{

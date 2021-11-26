@@ -18,8 +18,12 @@ namespace hal {
     bool isEmptyRecvBufUart1();
     uint16_t getRecvBufUart1size();
 
-    int printfSync(const char* fmt, ...); //use Uart0
-    int printfAsync(const char* fmt, ...); //use Uart1
+    int printfSync(const char* fmt, ...); // output to Uart0
+    int printfAsync(const char* fmt, ...); // output to Uart1
+    
+    void initPickle();
+    int printfPickle(const char* fmt, ...); // output to RAM
+    int feedPickleWithPrintfAsync();
 }
 
 

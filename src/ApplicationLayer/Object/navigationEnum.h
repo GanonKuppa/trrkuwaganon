@@ -43,5 +43,13 @@ inline EAzimuth yaw2Azimuth(float yaw){
     else if(yaw_ang >=  45.0f && yaw_ang < 135.0f) return EAzimuth::N;
     else if(yaw_ang >= 135.0f && yaw_ang < 225.0f) return EAzimuth::W;
     else if(yaw_ang >= 225.0f && yaw_ang < 315.0f) return EAzimuth::S;
-    else return EAzimuth::E;
+    else return EAzimuth::POLE;
 };
+
+inline char azimuth2Char(EAzimuth azimuth){
+    if(azimuth == EAzimuth::E) return '>';
+    else if(azimuth == EAzimuth::N) return '^';
+    else if(azimuth == EAzimuth::W) return '<';
+    else if(azimuth == EAzimuth::S) return 'v';
+    else return 'o';
+}

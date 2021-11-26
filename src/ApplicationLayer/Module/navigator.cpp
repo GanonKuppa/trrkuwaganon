@@ -15,10 +15,12 @@
 #include "vehiclePositionMsg.h"
 #include "vehicleAttitudeMsg.h"
 #include "ctrlSetPointMsg.h"
+#include "actuatorOutputMsg.h"
 
 // Module
 #include "parameterManager.h"
 #include "trajectoryFactory.h"
+#include "ledController.h"
 
 
 namespace module{
@@ -26,11 +28,14 @@ namespace module{
     Navigator::Navigator() :
         _mode(ENavMode::MODE_SELECT),
         _sub_mode(ENavSubMode::STANDBY),
+        _ctrl_mode(ECtrlMode::DIRECT_DUTY_SET),
         _lock_guard(false),
         _navigating(false),
         _done_outward(false),
         _x_cur(0),
         _y_cur(0),
+        _x_last(255),
+        _y_last(255),
         _azimuth(EAzimuth::N),
         _x_dest(7),
         _y_dest(7),
@@ -38,6 +43,7 @@ namespace module{
         _y_goal(7),
         _r_wall_enable(false),
         _l_wall_enable(false),
+        _is_actuator_error(false),
         _is_failsafe(false),
         _in_read_wall_area(false),
         _x(0.045f),
@@ -48,8 +54,8 @@ namespace module{
         _yawrate_max(1000.0f * DEG2RAD),
         _yawacc(1000.0f * DEG2RAD),
         _wall2mouse_center_dist(0.0f),
-        _read_wall_offset1(0.001),
-        _read_wall_offset2(0.003)
+        _read_wall_offset1(0.0001),
+        _read_wall_offset2(0.0031)
     {
         setModuleName("Navigator");
     }
@@ -73,14 +79,17 @@ namespace module{
         _updateDestination();
         _maze.updateStartSectionWall();
         _maze.makeSearchMap(_x_dest, _y_dest);
-        _navigating = true;
         _is_failsafe = false;
+        _navigating = true;              
     }
 
     void Navigator::endNavigation(){
         if(_lock_guard) hal::waitusec(1);
         _lock_guard = true;
         while(!_nav_cmd_queue.empty()) _nav_cmd_queue.pop_front();
+        
+        _x_last = 255;
+        _y_last = 255;
         _navigating = false;
         setNavMode(ENavMode::STANDBY);
         setNavSubMode(ENavSubMode::STANDBY);
@@ -97,9 +106,15 @@ namespace module{
         _updateWallEnable();
         
         // フェールセーフ判定
+        bool is_failsafe_pre = _is_failsafe;
         _is_failsafe = _isFailsafe();
+        
         if(_is_failsafe){
             _navigating = false;            
+        }
+
+        if(!is_failsafe_pre && _is_failsafe){
+            PRINTF_PICKLE("!!!!FAILSAFE!!!!      | cor_setp:(%6.3f, %6.3f)| x_setp:%6.3f, x:%6.3f |y_setp %6.3f, y:%6.3f |aout_err:%d\n",_x_setp/0.09f,_y_setp/0.09f, _x_setp, _x, _y_setp, _y, _is_actuator_error);
         }
 
 
@@ -107,38 +122,48 @@ namespace module{
         // 現在区画の更新
         _x_cur = (uint8_t)(_x / 0.09f);
         _y_cur = (uint8_t)(_y / 0.09f);
-        _azimuth = yaw2Azimuth(_yaw_setp);
+        _azimuth = yaw2Azimuth(_yaw);
                     
         // 壁の更新エリアに入ったときの動作
         bool pre_in_read_wall_area = _in_read_wall_area;
         _in_read_wall_area = _inReadWallArea(_read_wall_offset1, _read_wall_offset2);
-        if(_in_read_wall_area && !pre_in_read_wall_area && _navigating){                
+        if(_in_read_wall_area && !pre_in_read_wall_area && 
+           !(_x_last == _x_cur && _y_last == _y_cur ) &&
+           _navigating
+        ){                            
+
             // 迷路の壁情報更新
-            if(!_maze.isReached(_x_cur, _y_cur)){
+            if(!_maze.isReached(_x_cur, _y_cur)){                               
+                PRINTF_PICKLE("UPDATE_WALL          | x_setp:%6.3f, y_setp:%6.3f | x:%6.3f, y:%6.3f | azimuth:%c\n",_x_setp/0.09f, _y_setp/0.09f, _x/0.09f, _y/0.09f, azimuth2Char(_azimuth));
+                PRINTF_PICKLE("  dist: %.3f, %.3f, %.3f, %.3f\n", _ws_msg.dist_al, _ws_msg.dist_l, _ws_msg.dist_r, _ws_msg.dist_ar);
                 _maze.updateWall(_x_cur, _y_cur, _azimuth, _ws_msg);
             }
 
-            if(_x_cur == _x_dest && _y_cur == _y_dest && _sub_mode == ENavSubMode::START2GOAL){                
+            if(_x_cur == _x_dest && _y_cur == _y_dest && 
+               (_sub_mode == ENavSubMode::START2GOAL ||
+                (_sub_mode == ENavSubMode::START2GOAL2START && _done_outward)
+               )
+            ){                
                 _nav_cmd_queue.push_back(ENavCommand::GO_CENTER);                                
                 _navigating = false;
             }
-            else if(_x_cur == _x_dest && _y_cur == _y_dest && _sub_mode == ENavSubMode::START2GOAL2START && _done_outward){                
-                _nav_cmd_queue.push_back(ENavCommand::GO_CENTER);                
-                _navigating = false;
-            }
             else{
+                if(_x_cur == _x_goal && _y_cur == _y_goal){
+                    _done_outward = true;
+                    module::LedController::getInstance().flashFcled(0, 1, 0, 0.5, 0.5);
+                }
+                // 目標区画の更新
+                _updateDestination();
+
+                _x_last = _y_cur;
+                _y_last = _x_cur;
                 _lock_guard = true;
                 _nav_cmd_queue.push_back(ENavCommand::UPDATE_POTENTIAL_MAP);                
                 _nav_cmd_queue.push_back(ENavCommand::GO_NEXT_SECTION);
                 _lock_guard = false;
 
-                if(_x_cur == _x_goal && _y_cur == _y_goal){
-                    _done_outward;
-                }
             }
         }
-        // 目標区画の更新
-        _updateDestination();
         
         // navStateMsgをpublish
         _publish();
@@ -150,38 +175,46 @@ namespace module{
             ENavCommand cmd = _nav_cmd_queue.front();
             _nav_cmd_queue.pop_front();
             _lock_guard = false;
-            if(cmd == ENavCommand::DO_FIRST_MOVE){         
-                PRINTF_ASYNC("DO_FIRST_MOVE\n");
+            if(cmd == ENavCommand::DO_FIRST_MOVE){    
+                module::LedController::getInstance().flashFcled(1, 0, 0, 0.5, 0.5);
                 float target_dist = _wall2mouse_center_dist + 0.045f + _read_wall_offset2;
                 StraightFactory::push(ETurnType::STRAIGHT_CENTER, target_dist, 0.0, _v, _v, _a, _a);
+                PRINTF_PICKLE("DO_FIRST_MOVE        | x_setp:%6.3f, y_setp:%6.3f | x:%6.3f, y:%6.3f\n",_x_setp/0.09f, _y_setp/0.09f, _x/0.09f, _y/0.09f);
             }
             else if(cmd == ENavCommand::GO_NEXT_SECTION){
                 EAzimuth dest_dir = _maze.getSearchDirection2(_x_cur, _y_cur, _azimuth);
+                EAzimuth min_dir = _maze.getMinDirection(_x_cur, _y_cur, _azimuth);
+                EAzimuth unknown_dir = _maze.getUnknownDirection(_x_cur, _y_cur, _azimuth);
                 int8_t rot_times = _maze.calcRotTimes(dest_dir, _azimuth);
                 if(rot_times == 0) {
                     StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.09, _v);
                 } 
-                else if ( std::abs(rot_times) == 4) {                    
-                    StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.03f - _read_wall_offset2, _v, _v, 0.0f, _a, _a);
+                else if (std::abs(rot_times) == 4) {                    
+                    StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2, _v, _v, 0.0f, _a, _a);
                     StopFactory::push(0.1f);
                     SpinTurnFactory::push(180.0f * DEG2RAD, _yawrate_max, _yawacc);
                     StopFactory::push(0.1f);
-                    StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.03f + _read_wall_offset2, 0.0f, _v, _v, _a, _a);
+                    StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f + _read_wall_offset2, 0.0f, _v, _v, _a, _a);
                 }
                 else if(rot_times == 2) {
                     CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_90, ETurnDir::CCW, -_read_wall_offset2 , _read_wall_offset2);
                 }
                 else if(rot_times == -2){
                     CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_90, ETurnDir::CW, -_read_wall_offset2 , _read_wall_offset2);
-                }                        
+                }
+                PRINTF_PICKLE("GO_NEXT_SECTION      | x_setp:%6.3f, y_setp:%6.3f | x:%6.3f, y:%6.3f\n",_x_setp/0.09f, _y_setp/0.09f, _x/0.09f, _y/0.09f);
+                PRINTF_PICKLE("  dest_dir:%c, azimuth:%c, rot_times:%d\n",azimuth2Char(dest_dir), azimuth2Char(_azimuth), rot_times);
+                PRINTF_PICKLE("  min_dir :%c, unknown:%c\n", azimuth2Char(min_dir), azimuth2Char(unknown_dir));
+                _printWall();
             }            
             else if(cmd == ENavCommand::GO_CENTER){
-                float target_dist = _wall2mouse_center_dist + 0.045f + _read_wall_offset2;
+                float target_dist = 0.045f - _read_wall_offset2;
                 StraightFactory::push(ETurnType::STRAIGHT_CENTER, target_dist, _v, _v, 0.0f, _a, _a);
                 StopFactory::push(1.0f);
             }
             else if(cmd == ENavCommand::UPDATE_POTENTIAL_MAP){
                 _maze.makeSearchMap(_x_dest, _y_dest);
+                PRINTF_PICKLE("UPDATE_POTENTIAL_MAP | x_setp:%6.3f, y_setp:%6.3f | x:%6.3f, y:%6.3f\n",_x_setp/0.09f, _y_setp/0.09f, _x/0.09f, _y/0.09f);
             }                        
         }
         _lock_guard = false;       
@@ -215,9 +248,11 @@ namespace module{
         VehiclePositionMsg pos_msg;
         VehicleAttitudeMsg att_msg;
         CtrlSetpointMsg setp_msg;
+        ActuatorOutputMsg aout_msg;
         copyMsg(msg_id::VEHICLE_POSITION, &pos_msg);
         copyMsg(msg_id::VEHICLE_ATTITUDE, &att_msg);
-        copyMsg(msg_id::CTRL_SETPOINT, & setp_msg);
+        copyMsg(msg_id::CTRL_SETPOINT, &setp_msg);
+        copyMsg(msg_id::ACTUATOR_OUTPUT, &aout_msg);
 
         _x = pos_msg.x;
         _y = pos_msg.y;
@@ -226,14 +261,24 @@ namespace module{
         _x_setp = setp_msg.x;
         _y_setp = setp_msg.y;
         _yaw_setp = setp_msg.yaw;
+
+        _is_actuator_error = aout_msg.is_error;
+        _ctrl_mode = aout_msg.ctrl_mode;
     }
 
     void Navigator::_updateWallEnable(){
         // 迷路の壁が現在の位置から見えるかの判定
-        _r_wall_enable = _existLWall(_x, _y, _azimuth);
-        _l_wall_enable = _existRWall(_x, _y, _azimuth);            
+        if(_mode == ENavMode::SEARCH || _mode == ENavMode::FASTEST){
+            _r_wall_enable = _existRWall(_x, _y, _azimuth) && _ws_msg.is_right_ctrl;
+            _l_wall_enable = _existLWall(_x, _y, _azimuth) && _ws_msg.is_left_ctrl;
+        }
+        else{
+            _r_wall_enable = _ws_msg.is_right_ctrl;
+            _l_wall_enable = _ws_msg.is_left_ctrl;
+        }
+        
         // 前壁が近すぎる場合は壁制御を禁止
-        if(_ws_msg.dist_a < 0.08f){
+        if(_ws_msg.dist_a < 0.06f){
             _r_wall_enable = false;
             _l_wall_enable = false;
         }
@@ -268,15 +313,17 @@ namespace module{
     }
 
     bool Navigator::_isFailsafe(){
-        if(std::fabs(_x - _x_setp) > 0.02f || std::fabs(_y - _y_setp) > 0.02f){
-            return true;
-        }
-        return false;
+        return (_ctrl_mode == ECtrlMode::VEHICLE &&
+           (std::fabs(_x - _x_setp) > 0.02f || 
+            std::fabs(_y - _y_setp) > 0.02f //||
+            //_is_actuator_error
+           )
+        );
     }
 
     bool Navigator::_inReadWallArea(float offset1, float offset2){
-        float fmod_x = fmodf(_x_setp, 0.09f);
-        float fmod_y = fmodf(_y_setp, 0.09f);
+        float fmod_x = fmodf(_x, 0.09f);
+        float fmod_y = fmodf(_y, 0.09f);
 
         if(_azimuth == EAzimuth::E) return (fmod_x >= offset1 && fmod_x <= offset2);    
         else if(_azimuth == EAzimuth::N) return (fmod_y >= offset1 && fmod_y <= offset2);
@@ -381,6 +428,35 @@ namespace module{
         }
     }
 
+    void Navigator::_printWall(){
+        Wall wall = _maze.readWall(_x_cur, _y_cur);
+        char wall_e = (wall.E == 1 ? '|' : ' ');
+        char wall_n = (wall.N == 1 ? '-' : ' ');
+        char wall_w = (wall.W == 1 ? '|' : ' ');
+        char wall_s = (wall.S == 1 ? '-' : ' ');
+        uint16_t p_e = 0xffff;
+        uint16_t p_n = 0xffff;
+        uint16_t p_w = 0xffff;
+        uint16_t p_s = 0xffff;
+        if(wall.E == 0 && wall.EF == 1 && _x_cur != 31) p_e = _maze.p_map[_x_cur+1][_y_cur];
+        if(wall.N == 0 && wall.NF == 1 && _y_cur != 31) p_n = _maze.p_map[_x_cur][_y_cur+1];
+        if(wall.W == 0 && wall.WF == 1 && _x_cur != 0) p_w = _maze.p_map[_x_cur-1][_y_cur];
+        if(wall.S == 0 && wall.SF == 1 && _y_cur != 0) p_s = _maze.p_map[_x_cur][_y_cur-1];
+        char r_e = (_maze.isReached(_x_cur+1, _y_cur)   == 1 ? 'R' : 'N');
+        char r_n = (_maze.isReached(_x_cur  , _y_cur+1) == 1 ? 'R' : 'N');
+        char r_w = (_maze.isReached(_x_cur-1, _y_cur)   == 1 ? 'R' : 'N');
+        char r_s = (_maze.isReached(_x_cur  , _y_cur-1) == 1 ? 'R' : 'N');
+
+        PRINTF_PICKLE("\n");
+        PRINTF_PICKLE("   (%2d, %2d)\n", _x_cur, _y_cur);
+        PRINTF_PICKLE("         %c%-5d \n", r_n, p_n);
+        PRINTF_PICKLE("          + %c +\n", wall_n);
+        PRINTF_PICKLE("   %c%-5d %c %c %c %c%-5d\n", r_w, p_w, wall_w, azimuth2Char(_azimuth), wall_e, r_e, p_e);
+        PRINTF_PICKLE("          + %c +  \n", wall_s);
+        PRINTF_PICKLE("         %c%-5d  \n\n", r_s, p_s);
+    }
+
+
     void Navigator::_publish(){
         NavStateMsg msg;            
         msg.navigating = _navigating;
@@ -389,6 +465,8 @@ namespace module{
         msg.x_cur = _x_cur;
         msg.y_cur = _y_cur;
         msg.azimuth = _azimuth;
+        msg.r_wall_enable = _r_wall_enable;
+        msg.l_wall_enable = _l_wall_enable;
         msg.is_failsafe = _is_failsafe;
         publishMsg(msg_id::NAV_STATE, &msg);
     }

@@ -107,11 +107,11 @@ namespace module {
         _dist_l = _distL((float)_left_q.at(0));
         _dist_r = _distR((float)_right_q.at(0));
 
-        _is_ahead_l = (_dist_al <= 0.095f); 
-        _is_ahead_r = (_dist_ar <= 0.095f);
+        _is_ahead_l = (_dist_al <= 0.125f); 
+        _is_ahead_r = (_dist_ar <= 0.125f);
         _is_ahead = (_is_ahead_l || _is_ahead_r);
-        _is_left = (_dist_l <= 0.055f);
-        _is_right = (_dist_r <= 0.055f);
+        _is_left = (_dist_l <= 0.0575f);
+        _is_right = (_dist_r <= 0.0575f);
         _is_left_ctrl = _is_left;
         _is_right_ctrl = _is_right;
         _is_contact_wall = (_dist_al < 0.04) && (_dist_ar < 0.04);
@@ -263,39 +263,33 @@ namespace module {
 
     float  WallSensor::_aheadDistL(float ad){
         /*
-        935	0.04
-        460	0.05
-        235	0.06
-        120	0.07
-        64	0.08
-        38	0.09
-        21	0.1
-        13	0.11
-        10	0.12
+        //20211123 @自宅
+        1486  0.045
+        175	  0.09
+        43	  0.135
         */
-        constexpr float a = -0.01705773f;
-        constexpr float b = 0.15377920f;
+        constexpr float a =  -0.0250449f;
+        constexpr float b =   0.2254917f;
         float x = std::max(ad, 1.0f);
         return a * std::log(x) + b;
     }
 
     float  WallSensor::_aheadDistR(float ad){
         /*
-        255	0.04
-        105	0.05
-        38	0.06
-        18	0.07
-        8	0.08
-        7	0.09
+        //20211123 @自宅
+        556	0.045
+        66	0.09
+        13	0.135
+
         */
-        constexpr float a = -0.01282417f;
-        constexpr float b = 0.10934711f;
+        constexpr float a = -0.0238185f;
+        constexpr float b = 0.1938118;
         float x = std::max(ad, 1.0f);
         return a * std::log(x) + b;
     }
 
     float  WallSensor::_aheadDist(float dist_al, float dist_ar){
-        if(dist_al < 0.08f && dist_ar < 0.08f){
+        if(dist_al < 0.1f && dist_ar < 0.1f){
             return (dist_al + dist_ar) * 0.5f;
         }
         else{
@@ -306,14 +300,13 @@ namespace module {
 
     float WallSensor::_distL(float ad){
         /*
-        564	0.02
-        97	0.03
-        38	0.04
-        16	0.05
-        7	0.06
+        //20211123@自宅
+        105	 0.045
+        1363 0.022
+        21	 0.068
         */
-        constexpr float a = -0.0093275f;
-        constexpr float b = 0.0770684f;
+        constexpr float a = -0.0108347f;
+        constexpr float b = 0.0988697f;
         float x = std::max(ad, 1.0f);
         return a * std::log(x) + b;
 
@@ -321,13 +314,13 @@ namespace module {
 
     float  WallSensor::_distR(float ad){
         /*
-        1237	0.02
-        290	0.03
-        76	0.04
-        22	0.05
+        //20211123@自宅
+        193	 0.045
+        2664 0.022
+        40	 0.068
         */
-        constexpr float a = -0.0074383f;
-        constexpr float b = 0.0725859f;
+        constexpr float a = -0.0107316f;
+        constexpr float b = 0.1052369f;
         float x = std::max(ad, 1.0f);
         return a * std::log(x) + b;
     }

@@ -7,173 +7,177 @@
 
 class PidfController {
   public:
-    PidfController() {
-        Kp = 0.0;
-        Ki = 0.0;
-        Kd = 0.0;
-        F = 0.0;
-        reset();
-        enable = true;
-
-        integral_saturation_enable = true;
-        integral_saturation = -1.0f;
-    
-        saturation_enable = true;
-        saturation = -1.0f;
+    PidfController() :
+    _Kp(0.0f),
+    _Ki(0.0f),
+    _Kd(0.0f),
+    _F(0.0f),
+    _e_p0(0.0f),
+    _e_i0(0.0f),
+    _e_d0(0.0f),
+    _u_k0(0.0f),
+    _e_p1(0.0f),
+    _e_i1(0.0f),
+    _e_d1(0.0f),
+    _u_k1(0.0f),
+    _enable(true),
+    _integral_saturation_enable(true),
+    _integral_saturation(-1.0f),
+    _saturation_enable(true),
+    _saturation(-1.0f),
+    _delta_t(0.001f)
+    {
+        
     }
 
     virtual void update(float target, float observed_val){
-        if(!enable) return;
-        
-        e_p0 = target - observed_val;
-        if(integral_saturation_enable && integral_saturation > 0.0f){
-            e_i0 = std::clamp<float>(e_p0 + e_i1, -std::fabs(integral_saturation), std::fabs(integral_saturation));
-        }
-        else {
-            e_i0 = e_p0 + e_i1;
-        }
+        if(!_enable) return;
+                
+        float error = target - observed_val;
+        _updateController(error);
+    }    
 
-        e_d0 = F * e_d1 + (1.0f - F) * (e_p0 - e_p1);
-
-        if(saturation_enable && saturation > 0.0f){
-            u_k0 = std::clamp<float>(Kp * e_p0 + Ki * e_i0 + Kd * e_d0, -std::fabs(saturation), std::fabs(saturation));
-        }
-        else{
-            u_k0 = Kp * e_p0 + Ki * e_i0 + Kd * e_d0;
-        }
-
-        e_p1 = e_p0;
-        e_i1 = e_i0;
-        e_d1 = e_d0;
-        u_k1 = u_k0;            
-    }
-
-    virtual float getControlVal(){
-        if(enable) return u_k0;
+    float getControlVal(){
+        if(_enable) return _u_k0;
         else return 0.0f;
     }
 
     float getPVal(){
-        return Kp * e_p0;
+        return _Kp * _e_p0;
     }
 
     float getIVal(){
-        return Ki * e_i0;
+        return _Ki * _e_i0;
     }
 
     float getDVal(){
-        return Kd * e_d0;
+        return _Kd * _e_d0;
     }
 
-    void set(float Kp_, float Ki_, float Kd_, float F_) {
-        Kp = Kp_;
-        Ki = Ki_;
-        Kd = Kd_;
-        F = F_;
+    void set(float Kp, float Ki, float Kd, float F) {
+        _Kp = Kp;
+        _Ki = Ki;
+        _Kd = Kd;
+        _F = F;
     }
 
-    void setIntegralSaturation(float int_saturation) {
-        integral_saturation = int_saturation;
-        if(integral_saturation > 0.0f){
-            e_i0 = std::clamp<float>(e_i0, -std::fabs(int_saturation), std::fabs(int_saturation));
-            e_i1 = std::clamp<float>(e_i0, -std::fabs(int_saturation), std::fabs(int_saturation));
+    void setIntegralSaturation(float integral_saturation) {
+        _integral_saturation = integral_saturation;
+        if(_integral_saturation_enable && _integral_saturation > 0.0f && _Ki > 0.0f){
+            _e_i0 = std::clamp<float>(_e_i0, -std::fabs(_integral_saturation)/_Ki, std::fabs(_integral_saturation)/_Ki);
+            _e_i1 = std::clamp<float>(_e_i0, -std::fabs(_integral_saturation)/_Ki, std::fabs(_integral_saturation)/_Ki);
         }
     }
 
-    void setEnable(bool enable_) {
-        enable = enable_;
+    void setEnable(bool enable) {
+        _enable = enable;
     }
 
-    void setSaturationEnable(bool saturation_enable_) {
-        saturation_enable = saturation_enable_;
+    void setSaturationEnable(bool saturation_enable) {
+        _saturation_enable = saturation_enable;
     }
 
-    void setSaturation(float saturation_){
-        saturation = saturation_;
-        if(saturation > 0.0f &&  saturation_enable){
-            u_k0 = std::clamp<float>(u_k0, -std::fabs(saturation), std::fabs(saturation));
-            u_k1 = std::clamp<float>(u_k1, -std::fabs(saturation), std::fabs(saturation));
+    void setSaturation(float saturation){
+        _saturation = saturation;
+        if(_saturation > 0.0f &&  _saturation_enable){
+            _u_k0 = std::clamp<float>(_u_k0, -std::fabs(_saturation), std::fabs(_saturation));
+            _u_k1 = std::clamp<float>(_u_k1, -std::fabs(_saturation), std::fabs(_saturation));
         }
     }
 
-    void setIntegralSaturationEnable(bool enable_){
-        integral_saturation_enable = enable_;
+    void setIntegralSaturationEnable(bool enable){
+        _integral_saturation_enable = enable;
+    }
+
+    void setDeltaT(float delta_t){
+        _delta_t;
     }
 
     float getError(){
-        return e_p0;
+        return _e_p0;
     }
 
-    virtual void reset() {
-        e_p0 = 0.0f;
-        e_i0 = 0.0f;
-        e_d0 = 0.0f;
-        u_k0 = 0.0f;
-        e_p1 = 0.0f;
-        e_i1 = 0.0f;
-        e_d1 = 0.0f;
-        u_k1 = 0.0f;
+    void reset() {
+        _e_p0 = 0.0f;
+        _e_i0 = 0.0f;
+        _e_d0 = 0.0f;
+        _u_k0 = 0.0f;
+        _e_p1 = 0.0f;
+        _e_i1 = 0.0f;
+        _e_d1 = 0.0f;
+        _u_k1 = 0.0f;
     }
 
     bool engaged(){
-        if (std::fabs(u_k0) < FLT_EPSILON) return false;
+        if (std::fabs(_u_k0) < FLT_EPSILON) return false;
         else return true;
     }
 
-
-
   protected:
-    float Kp;
-    float Ki;
-    float Kd;
-    float F;
-    float e_p0;
-    float e_i0;
-    float e_d0;
-    float u_k0;
-    float e_p1;
-    float e_i1;
-    float e_d1;
-    float u_k1;
+    float _Kp;
+    float _Ki;
+    float _Kd;
+    float _F;
+    float _e_p0;
+    float _e_i0;
+    float _e_d0;
+    float _u_k0;
+    float _e_p1;
+    float _e_i1;
+    float _e_d1;
+    float _u_k1;
     
-    bool enable;
+    bool _enable;
 
-    bool integral_saturation_enable;
-    float integral_saturation;
+    bool _integral_saturation_enable;
+    float _integral_saturation;
     
-    bool saturation_enable;
-    float saturation;
+    bool _saturation_enable;
+    float _saturation;
+    
+    float _delta_t;
 
+    void _updateController(float error){
+        _e_p0 = error;
+        if(_integral_saturation_enable && _integral_saturation > 0.0f && _Ki > 0.0f){
+            _e_i0 = std::clamp<float>(_e_p0 * _delta_t + _e_i1, -std::fabs(_integral_saturation) / _Ki, std::fabs(_integral_saturation) / _Ki);
+        }
+        else {
+            _e_i0 = _e_p0 * _delta_t + _e_i1;
+        }
+
+        _e_d0 = _F * _e_d1 + (1.0f - _F) * (_e_p0 - _e_p1) / _delta_t;
+
+        if(_saturation_enable && _saturation > 0.0f){
+            _u_k0 = std::clamp<float>(_Kp * _e_p0 + _Ki * _e_i0 + _Kd * _e_d0, -std::fabs(_saturation), std::fabs(_saturation));
+        }
+        else{
+            _u_k0 = _Kp * _e_p0 + _Ki * _e_i0 + _Kd * _e_d0;
+        }
+
+        _e_p1 = _e_p0;
+        _e_i1 = _e_i0;
+        _e_d1 = _e_d0;
+        _u_k1 = _u_k0;
+
+    }
 };
 
 class AngPidfController : public PidfController {
   public:
+    AngPidfController() : 
+    PidfController()
+    {
 
-    virtual void update(float target, float observed_val) {
-        if(!enable) return;
+    }
+
+    void update(float target, float observed_val) {
+        if(!_enable) return;
         
         float ang_diff = target - observed_val;
         while(ang_diff >  PI) ang_diff -= 2.0f * PI;
         while(ang_diff < -PI) ang_diff += 2.0f * PI;
-        e_p0 = ang_diff;
-
-        
-        if(integral_saturation_enable){
-            e_i0 = std::clamp<float>(e_p0 + e_i1, -std::fabs(integral_saturation), std::fabs(integral_saturation));
-        }
-        else {
-            e_i0 = e_p0 + e_i1;
-        }
-
-        e_d0 = F * e_d1 + (1.0f - F) * (e_p0 - e_p1);
-    
-        u_k0 = std::clamp<float>(Kp * e_p0 + Ki * e_i0 + Kd * e_d0, -std::fabs(saturation), std::fabs(saturation));
-
-        e_p1 = e_p0;
-        e_i1 = e_i0;
-        e_d1 = e_d0;
-        u_k1 = u_k0;
-
+        _updateController(ang_diff);
     };
   private:
     const float PI = 3.141592653589f;
@@ -183,65 +187,26 @@ class AngPidfController : public PidfController {
 class WallPidfController : public PidfController {
   public:
 
+    WallPidfController() : 
+    PidfController()
+    {
+
+    }    
+
     void update(float center_dist_r, float center_dist_l, bool is_r_enable, bool is_l_enable) {
+        if(!_enable) return;
+
         if(!is_r_enable && !is_l_enable) {
             reset();
             return;
         }
-             
-        e_r0 =   10000.0f * center_dist_r;
-        e_l0 = - 10000.0f * center_dist_l;
-
-
         float error = 0.0f;   
-        if(is_r_enable && is_l_enable) error = (float)(e_r0 + e_l0) / 2.0f;
-        else if(is_r_enable) error = (float)(e_r0);
-        else if(is_l_enable) error = (float)(e_l0);
-        else error = 0.0f;
-
-        e_p0 = error;
-
         
-        if(integral_saturation_enable){
-            e_i0 = (e_p0 + e_i1, -std::fabs(integral_saturation), std::fabs(integral_saturation));
-        }
-        else {
-            e_i0 = e_p0 + e_i1;
-        }
-
-        e_d0 = F * e_d1 + (1.0f - F) * (e_p0 - e_p1);
-    
-        u_k0 = std::clamp<float>(Kp * e_p0 + Ki * e_i0 + Kd * e_d0, -std::fabs(saturation), std::fabs(saturation));        
-
-        e_p1 = e_p0;
-        e_i1 = e_i0;
-        e_d1 = e_d0;
-        u_k1 = u_k0;
-
+        if(is_r_enable && is_l_enable) error = (center_dist_r - center_dist_l) / 2.0f;
+        else if(is_r_enable) error = center_dist_r;
+        else if(is_l_enable) error = - center_dist_l;
+        else error = 0.0f;
+        _updateController(error);
     };
-    
-
-    void reset(){
-        e_r0 = 0;
-        e_l0 = 0;
-        e_r1 = 0;
-        e_l1 = 0;
-
-    }
-
-    WallPidfController():
-    e_r0(0),
-    e_l0(0),
-    e_r1(0),
-    e_l1(0)
-    {
-
-    }
-    
-  private:
-    int16_t e_r0;
-    int16_t e_l0;
-    int16_t e_r1;
-    int16_t e_l1;
     
 };
