@@ -43,11 +43,7 @@ namespace module{
     _is_error(false)
     {
         setModuleName("ControlMixer");
-        _wall_pidf.reset();
-        _wall_diag_pidf.reset();
-        _yaw_pidf.reset();
-        _yawrate_pidf.reset();
-        _v_pidf.reset();
+        _resetController();
     }
 
     void ControlMixer::update0(){
@@ -58,6 +54,17 @@ namespace module{
             _publish();
         }
     }
+
+    void ControlMixer::setDeltaT(float delta_t){
+        _delta_t = delta_t;
+        _wall_pidf.setDeltaT(delta_t);
+        _wall_diag_pidf.setDeltaT(delta_t);
+        _yaw_pidf.setDeltaT(delta_t);
+        _yawrate_pidf.setDeltaT(delta_t);
+        _v_pidf.setDeltaT(delta_t);
+        _wall_dist_pidf.setDeltaT(delta_t);
+        _wall_diff_pidf.setDeltaT(delta_t);
+    };
 
     void ControlMixer::debug(){
         PRINTF_ASYNC("  duty_r     : %f\n", _duty_r);
@@ -85,85 +92,96 @@ namespace module{
     }
 
     void ControlMixer::_updateControllerParam(){
-            ParameterManager& pm = ParameterManager::getInstance();
+        ParameterManager& pm = ParameterManager::getInstance();
 
-            // 速度, 角速度, 角度PIDFゲイン設定
-            if(_traj_type == ETrajType::STOP || _traj_type == ETrajType::SPINTURN) {
-                _v_pidf.set(pm.spin_v_p, pm.spin_v_i, pm.spin_v_d, pm.spin_v_f);
-                _yawrate_pidf.set(pm.spin_yawrate_p, pm.spin_yawrate_i, pm.spin_yawrate_d, pm.spin_yawrate_f);
-                _yaw_pidf.set(pm.spin_yaw_p, pm.spin_yaw_i, 0.0f, 0.0f);
+        // 速度, 角速度, 角度PIDFゲイン設定
+        if(_traj_type == ETrajType::STOP || _traj_type == ETrajType::SPINTURN) {
+            _v_pidf.set(pm.spin_v_p, pm.spin_v_i, pm.spin_v_d, pm.spin_v_f);
+            _yawrate_pidf.set(pm.spin_yawrate_p, pm.spin_yawrate_i, pm.spin_yawrate_d, pm.spin_yawrate_f);
+            _yaw_pidf.set(pm.spin_yaw_p, pm.spin_yaw_i, 0.0f, 0.0f);
 
-            } else if(_nav_msg.mode == ENavMode::FASTEST) {
-                _v_pidf.set(pm.fast_v_p, pm.fast_v_i, pm.fast_v_d, pm.fast_v_f);
-                _yawrate_pidf.set(pm.fast_yawrate_p, pm.fast_yawrate_i, pm.fast_yawrate_d, pm.fast_yawrate_f);
-                _yaw_pidf.set(pm.fast_yaw_p, pm.fast_yaw_i, 0.0f, 0.0f);
-            } else if(_nav_msg.mode == ENavMode::SEARCH) {
-                _v_pidf.set(pm.search_v_p, pm.search_v_i, pm.search_v_d, pm.search_v_f);
-                _yawrate_pidf.set(pm.search_yawrate_p, pm.search_yawrate_i, pm.search_yawrate_d, pm.search_yawrate_f);
-                _yaw_pidf.set(pm.search_yaw_p, pm.search_yaw_i, 0.0f, 0.0f);
-            } else {
-                _v_pidf.set(pm.search_v_p, pm.search_v_i, pm.search_v_d, pm.search_v_f);
-                _yawrate_pidf.set(pm.search_yawrate_p, pm.search_yawrate_i, pm.search_yawrate_d, pm.search_yawrate_f);
-                _yaw_pidf.set(pm.search_yaw_p, pm.search_yaw_i, 0.0f, 0.0f);
-            }
-            
-            // 壁PIDFゲイン設定
-            _wall_pidf.set(pm.wall_p, pm.wall_i, pm.wall_d, pm.wall_f);
+        } else if(_nav_msg.mode == ENavMode::FASTEST) {
+            _v_pidf.set(pm.fast_v_p, pm.fast_v_i, pm.fast_v_d, pm.fast_v_f);
+            _yawrate_pidf.set(pm.fast_yawrate_p, pm.fast_yawrate_i, pm.fast_yawrate_d, pm.fast_yawrate_f);
+            _yaw_pidf.set(pm.fast_yaw_p, pm.fast_yaw_i, 0.0f, 0.0f);
+        } else if(_nav_msg.mode == ENavMode::SEARCH) {
+            _v_pidf.set(pm.search_v_p, pm.search_v_i, pm.search_v_d, pm.search_v_f);
+            _yawrate_pidf.set(pm.search_yawrate_p, pm.search_yawrate_i, pm.search_yawrate_d, pm.search_yawrate_f);
+            _yaw_pidf.set(pm.search_yaw_p, pm.search_yaw_i, 0.0f, 0.0f);
+        } else {
+            _v_pidf.set(pm.search_v_p, pm.search_v_i, pm.search_v_d, pm.search_v_f);
+            _yawrate_pidf.set(pm.search_yawrate_p, pm.search_yawrate_i, pm.search_yawrate_d, pm.search_yawrate_f);
+            _yaw_pidf.set(pm.search_yaw_p, pm.search_yaw_i, 0.0f, 0.0f);
+        }
+        
+        // 壁PIDFゲイン設定
+        _wall_pidf.set(pm.wall_p, pm.wall_i, pm.wall_d, pm.wall_f);
 
-            // 斜めPIDFゲイン設定
-            _wall_diag_pidf.set(pm.wall_diag_p, pm.wall_diag_i, pm.wall_diag_d, pm.wall_diag_f);
-            
-            // FB制御イネーブル設定
-            _v_pidf.setEnable(pm.v_fb_enable);
-            _yawrate_pidf.setEnable(pm.yawrate_fb_enable);
-            _yaw_pidf.setEnable(pm.yaw_fb_enable);
-            _wall_pidf.setEnable(pm.wall_fb_enable);
-            _wall_diag_pidf.setEnable(pm.wall_diag_fb_enable);
+        // 斜めPIDFゲイン設定
+        _wall_diag_pidf.set(pm.wall_diag_p, pm.wall_diag_i, pm.wall_diag_d, pm.wall_diag_f);
+        
+        // FB制御イネーブル設定
+        _v_pidf.setEnable(pm.v_fb_enable);
+        _yawrate_pidf.setEnable(pm.yawrate_fb_enable);
+        _yaw_pidf.setEnable(pm.yaw_fb_enable);
+        _wall_pidf.setEnable(pm.wall_fb_enable);
+        _wall_diag_pidf.setEnable(pm.wall_diag_fb_enable);
 
-            // サチュレーションenable設定
-            if(_traj_type == ETrajType::STOP || _traj_type == ETrajType::SPINTURN) {
-                _v_pidf.setSaturationEnable(false);
-                _yawrate_pidf.setSaturationEnable(false);                
-            }
-            else{
-                _v_pidf.setSaturationEnable(pm.v_saturation_enable);
-                _yawrate_pidf.setSaturationEnable(pm.yawrate_saturation_enable);
-            }
-            
-            _yaw_pidf.setSaturationEnable(pm.yaw_saturation_enable);
-            _wall_pidf.setSaturationEnable(pm.wall_saturation_enable);
-            _wall_diag_pidf.setSaturationEnable(pm.wall_diag_saturation_enable);
+        // サチュレーションenable設定
+        if(_traj_type == ETrajType::STOP || _traj_type == ETrajType::SPINTURN) {
+            _v_pidf.setSaturationEnable(false);
+            _yawrate_pidf.setSaturationEnable(false);                
+        }
+        else{
+            _v_pidf.setSaturationEnable(pm.v_saturation_enable);
+            _yawrate_pidf.setSaturationEnable(pm.yawrate_saturation_enable);
+        }
+        
+        _yaw_pidf.setSaturationEnable(pm.yaw_saturation_enable);
+        _wall_pidf.setSaturationEnable(pm.wall_saturation_enable);
+        _wall_diag_pidf.setSaturationEnable(pm.wall_diag_saturation_enable);
 
-            // サチュレーション値設定
-                //_v_pidfおよび_yawrate_pidfのサチュレーション値はupdateController()で設定
-            _yaw_pidf.setSaturation(pm.yaw_saturation);
-            _wall_pidf.setSaturation(pm.wall_saturation);
-            _wall_diag_pidf.setSaturation(pm.wall_diag_saturation);
-                        
-            // 積分サチュレーションイネーブル設定
-            _v_pidf.setIntegralSaturationEnable(pm.v_i_saturation_enable);
-            _yawrate_pidf.setIntegralSaturationEnable(pm.yawrate_i_saturation_enable);
-            _yaw_pidf.setIntegralSaturationEnable(pm.yaw_i_saturation_enable);
-            _wall_pidf.setIntegralSaturationEnable(pm.wall_i_saturation_enable);
-            _wall_diag_pidf.setIntegralSaturationEnable(pm.wall_diag_i_saturation_enable);
-            
-            // 積分サチュレーション値設定
-            _v_pidf.setIntegralSaturation(pm.v_i_saturation);
-            _yawrate_pidf.setIntegralSaturation(pm.yawrate_i_saturation);
-            _yaw_pidf.setIntegralSaturation(pm.yaw_i_saturation);
-            _wall_pidf.setIntegralSaturation(pm.wall_i_saturation);
-            _wall_diag_pidf.setIntegralSaturation(pm.wall_diag_i_saturation);
+        // サチュレーション値設定
+            //_v_pidfおよび_yawrate_pidfのサチュレーション値はupdateController()で設定
+        _yaw_pidf.setSaturation(pm.yaw_saturation);
+        _wall_pidf.setSaturation(pm.wall_saturation);
+        _wall_diag_pidf.setSaturation(pm.wall_diag_saturation);
+                    
+        // 積分サチュレーションイネーブル設定
+        _v_pidf.setIntegralSaturationEnable(pm.v_i_saturation_enable);
+        _yawrate_pidf.setIntegralSaturationEnable(pm.yawrate_i_saturation_enable);
+        _yaw_pidf.setIntegralSaturationEnable(pm.yaw_i_saturation_enable);
+        _wall_pidf.setIntegralSaturationEnable(pm.wall_i_saturation_enable);
+        _wall_diag_pidf.setIntegralSaturationEnable(pm.wall_diag_i_saturation_enable);
+        
+        // 積分サチュレーション値設定
+        _v_pidf.setIntegralSaturation(pm.v_i_saturation);
+        _yawrate_pidf.setIntegralSaturation(pm.yawrate_i_saturation);
+        _yaw_pidf.setIntegralSaturation(pm.yaw_i_saturation);
+        _wall_pidf.setIntegralSaturation(pm.wall_i_saturation);
+        _wall_diag_pidf.setIntegralSaturation(pm.wall_diag_i_saturation);
+
+        // 前壁補正用制御器設定
+        constexpr float DEG2RAD = 180.0f/3.14159265f;
+        _wall_dist_pidf.setEnable(true);
+        _wall_dist_pidf.setIntegralSaturationEnable(true);
+        _wall_dist_pidf.setSaturationEnable(true);
+        _wall_dist_pidf.set(pm.wall_dist_p, pm.wall_dist_i, 0.0f, 0.0f);
+        _wall_dist_pidf.setSaturation(0.3f);
+        _wall_dist_pidf.setIntegralSaturation(0.15f);
+        _wall_diff_pidf.setEnable(true);
+        _wall_diff_pidf.setIntegralSaturationEnable(true);
+        _wall_diff_pidf.setSaturationEnable(true);
+        _wall_diff_pidf.setSaturation(360.0f * DEG2RAD);
+        _wall_diff_pidf.setIntegralSaturation(45.0f * DEG2RAD);
+        _wall_diff_pidf.set(pm.wall_diff_p, pm.wall_diff_i, 0.0f, 0.0f);
     }
 
     void ControlMixer::_updateController(){
         if(_nav_msg.mode == ENavMode::DEBUG || _setp_msg.traj_type == ETrajType::NONE){
-            _v_pidf.reset();
-            _yawrate_pidf.reset();
-            _yaw_pidf.reset();
-            _wall_pidf.reset();
-            _wall_diag_pidf.reset();
+            _resetController();
             return;
-        }        
+        }
         
         ParameterManager& pm = ParameterManager::getInstance();
         
@@ -175,11 +193,7 @@ namespace module{
         if( _traj_type != _traj_type_pre &&
             (_traj_type_pre == ETrajType::STOP || _traj_type_pre == ETrajType::SPINTURN)
         ) {
-            _v_pidf.reset();
-            _yawrate_pidf.reset();
-            _yaw_pidf.reset();
-            _wall_pidf.reset();
-            _wall_diag_pidf.reset();
+            _resetController();
         }
 
         // 壁制御
@@ -222,14 +236,33 @@ namespace module{
             _wall_diag_pidf.reset();
         }
 
+        // 前壁姿勢位置補正
+        if(_turn_type == ETurnType::AHEAD_WALL_CORRECTION){
+            float dist_setp = 0.045f;
+            float diff_setp = 0.0f;    
+            float wall_dist = _ws_msg.dist_a;
+            float wall_diff = _ws_msg.dist_l - _ws_msg.dist_r;
+
+            _wall_dist_pidf.update(dist_setp, wall_dist); // 速度目標値
+            _wall_diff_pidf.update(diff_setp, wall_diff); // 角速度目標値
+            _setp_v_xy_body = -_wall_dist_pidf.getControlVal();
+            //_setp_yawrate = _wall_diff_pidf.getControlVal();
+        }
+        else{
+            _wall_dist_pidf.reset();
+            _wall_diff_pidf.reset();
+        }
+
         // 角度制御
-        if(_wall_pidf.engaged()){
+        if(_wall_pidf.engaged()){//|| _turn_type == ETurnType::AHEAD_WALL_CORRECTION){
             _yaw_pidf.reset();
         }
         else{            
             _yaw_pidf.update(_setp_yaw, _att_msg.yaw);
             _setp_yawrate += _yaw_pidf.getControlVal();
         }
+
+
 
         // 速度, 角速度制御量更新
         _v_pidf.update(_setp_v_xy_body, _pos_msg.v_xy_body_for_ctrl);
@@ -300,6 +333,17 @@ namespace module{
         }            
         _is_error = (_error_sec > ERROR_TIME_TH);
     }
+
+    void ControlMixer::_resetController(){
+        _wall_pidf.reset();
+        _wall_diag_pidf.reset();
+        _yaw_pidf.reset();
+        _yawrate_pidf.reset();
+        _v_pidf.reset();        
+        _wall_dist_pidf.reset();
+        _wall_diff_pidf.reset();
+    }
+
 
     void ControlMixer::_publish(){
         ActuatorOutputMsg out_msg;

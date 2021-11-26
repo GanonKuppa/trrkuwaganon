@@ -20,6 +20,7 @@ namespace periferal_driver {
         CMT0.CMCOR = 1500 - 1; // 1500:250usec 6000:1msec
 
         IR(CMT0,CMI0)=0; //割り込みステータフラグをクリア
+        CMT0.CMCNT = 0;
 
     }
 

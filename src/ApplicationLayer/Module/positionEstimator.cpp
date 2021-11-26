@@ -47,6 +47,7 @@ namespace module {
 	_yawrate(0.0f),
 	_rollrate(0.0f),
 	_pitchrate(0.0f),
+    _turn_type(ETurnType::NONE),
 	_beta_expiration_time(0.0f),
     _on_wall_center_dist(0.0f)
     {        
@@ -87,11 +88,14 @@ namespace module {
         float yaw_pre = _yaw;
         float v_x_pre = _v_x;
         float v_y_pre = _v_y;
-        float v_xy_body_for_odom_pre = v_xy_body_for_odom_pre; //エンコーダ計測速度は今期に取得できるものが前期のデータ
+        float v_xy_body_for_odom_pre = _v_xy_body_for_odom; //エンコーダ計測速度は今期に取得できるものが前期のデータ
         float a_body_x_pre = _a_body_x;
         float a_body_y_pre = _a_body_y;
         float a_body_z_pre = _a_body_z;
         float beta_pre = _beta;
+        ETurnType turn_type_pre = _turn_type;
+
+        _turn_type = ctrl_msg.turn_type;
 
         _a_body_x = imu_msg.acc_x;
         _a_body_y = imu_msg.acc_y;
@@ -156,7 +160,7 @@ namespace module {
 
 
         // 壁中心判定
-        if((ctrl_msg.turn_type == ETurnType::STRAIGHT_CENTER || ctrl_msg.turn_type == ETurnType::STRAIGHT_CENTER) && 
+        if((_turn_type == ETurnType::STRAIGHT_CENTER || _turn_type == ETurnType::STRAIGHT_CENTER) && 
             ws_msg.is_on_wall_center &&
             !ws_msg.is_ahead && 
             _v_xy_body_for_odom > 0.1f && 
@@ -166,6 +170,11 @@ namespace module {
         }
         else{
             _on_wall_center_dist = 0.0f;
+        }
+
+        // 前壁補正時に位置, 方位を強制書き換え
+        if(turn_type_pre == ETurnType::AHEAD_WALL_CORRECTION && _turn_type != ETurnType::AHEAD_WALL_CORRECTION){
+            _aheadWallCorrection();
         }
 
         _onWallCenterCorrection();
@@ -197,6 +206,29 @@ namespace module {
             _on_wall_center_dist = 0.0f;
             PRINTF_PICKLE("ON_WALL_CENTER | x:%6.3f, x_pre:%6.3f, y:%6.3f, y_pre:%6.3f yaw:%6.3f, yaw_pre:%6.3f\n", _x, x_pre, _y, y_pre, _yaw*RAD2DEG, yaw_pre*RAD2DEG);
         }
+    }
+
+    void PositionEstimator::_aheadWallCorrection() {
+        float x_pre = _x;
+        float y_pre = _y;
+        float yaw_pre = _yaw;
+
+        float ang = _yaw * RAD2DEG;
+        if(ang >= 315.0 || ang < 45.0) {
+            _x = (uint8_t)(_x / 0.09f) * 0.09f + 0.09f/2.0f;
+            //_yaw = 0.0 * DEG2RAD;
+        } else if(ang >= 45.0 && ang < 135.0) {
+            _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;
+            //_yaw = 90.0f * DEG2RAD;
+        } else if(ang >= 135.0f && ang < 225.0f) {
+            _x = (uint8_t)(_x / 0.09f) * 0.09f + 0.09f/2.0f;
+            //_yaw = 180.0 * DEG2RAD;
+        } else if(ang >= 225.0f && ang < 315.0f) {
+            _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;
+            //_yaw = 270.0f * DEG2RAD;
+        }
+        _on_wall_center_dist = 0.0f;
+        PRINTF_PICKLE("AHEAD_WALL_CORRECTION | x:%6.3f, x_pre:%6.3f, y:%6.3f, y_pre:%6.3f yaw:%6.3f, yaw_pre:%6.3f\n", _x, x_pre, _y, y_pre, _yaw*RAD2DEG, yaw_pre*RAD2DEG);
     }
 
 

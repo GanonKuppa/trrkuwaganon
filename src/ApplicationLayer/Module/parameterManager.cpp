@@ -207,10 +207,10 @@ namespace module {
         registration<float>(187, dial_i_limit, "dial_i_limit"); //187
         registration<float>(188, dial_limit, "dial_limit"); //188
         registration<float>(189, cp_coef, "cp_coef"); // 189
-        ;//190
-        ;//191
-        ;//192
-        ;//193
+        registration<float>(190, wall_dist_p, "wall_dist_p");//190
+        registration<float>(191, wall_dist_i, "wall_dist_i");//191
+        registration<float>(192, wall_diff_p, "wall_diff_p");//192
+        registration<float>(193, wall_diff_i, "wall_diff_i");//193
         ;//194
         ;//195
         ;//196

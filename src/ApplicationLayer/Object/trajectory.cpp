@@ -3,9 +3,10 @@
 #include <math.h>
 
 // Msg
-#include "vehiclePositionMsg.h"
-#include "ctrlSetpointMsg.h"
 #include "msgBroker.h"
+#include "vehiclePositionMsg.h"
+#include "vehicleAttitudeMsg.h"
+#include "ctrlSetpointMsg.h"
 
 // Mod
 #include "trajectoryInitializer.h"
@@ -317,7 +318,8 @@ bool SpinTurnTrajectory::isEnd() {
 }
 
 //-- StopTrajectory
-StopTrajectory::StopTrajectory(float stop_time){
+StopTrajectory::StopTrajectory(float stop_time) :
+    BaseTrajectory(){
     _traj_type = ETrajType::STOP;
     _turn_type = ETurnType::STOP;
     _turn_dir = ETurnDir::NO_TURN;
@@ -453,3 +455,97 @@ bool CurveTrajectory::isEnd(){
         return false;
     }    
 }
+
+//-- AheadWallCorrection
+AheadWallCorrectionTrajectory::AheadWallCorrectionTrajectory(float stop_time) :
+    BaseTrajectory(){
+    _traj_type = ETrajType::AHEAD_WALL_CORRECTION;
+    _turn_type = ETurnType::AHEAD_WALL_CORRECTION;
+    _turn_dir = ETurnDir::NO_TURN;
+    _stop_time = stop_time;
+    _calm_time = stop_time;
+}
+
+AheadWallCorrectionTrajectory::AheadWallCorrectionTrajectory(float stop_time, float x, float y, float yaw) : 
+    BaseTrajectory(){
+    _x = x;
+    _y = y;
+    _yaw = yaw;
+    _x_0 = x;
+    _y_0 = y;
+    _yaw_0 = yaw;
+    _traj_type = ETrajType::AHEAD_WALL_CORRECTION;
+    _turn_type = ETurnType::AHEAD_WALL_CORRECTION;
+    _turn_dir = ETurnDir::NO_TURN;
+    _stop_time = stop_time;
+    _calm_time = stop_time;
+}
+
+AheadWallCorrectionTrajectory::AheadWallCorrectionTrajectory(float stop_time, float calm_time) :
+    BaseTrajectory(){
+    _traj_type = ETrajType::AHEAD_WALL_CORRECTION;
+    _turn_type = ETurnType::AHEAD_WALL_CORRECTION;
+    _turn_dir = ETurnDir::NO_TURN;
+    _stop_time = stop_time;
+    _calm_time = calm_time;
+    _cumulative_calm_t = 0.0f;
+}
+
+AheadWallCorrectionTrajectory::AheadWallCorrectionTrajectory(float stop_time, float calm_time, float x, float y, float yaw) : 
+    BaseTrajectory(){
+    _x = x;
+    _y = y;
+    _yaw = yaw;
+    _x_0 = x;
+    _y_0 = y;
+    _yaw_0 = yaw;
+    _traj_type = ETrajType::AHEAD_WALL_CORRECTION;
+    _turn_type = ETurnType::AHEAD_WALL_CORRECTION;
+    _turn_dir = ETurnDir::NO_TURN;
+    _stop_time = stop_time;
+    _calm_time = calm_time;
+    _cumulative_calm_t = 0.0f;
+}
+
+float AheadWallCorrectionTrajectory::getEndX() {
+    return _x_0;
+}
+
+float AheadWallCorrectionTrajectory::getEndY() {
+    return _y_0;
+}
+
+float AheadWallCorrectionTrajectory::getEndYaw() {
+    return _yaw_0;
+}
+
+float AheadWallCorrectionTrajectory::getNecessaryTime(){
+    return _stop_time;
+};
+
+
+void AheadWallCorrectionTrajectory::update() {
+    _cumulative_t += _delta_t;
+    VehiclePositionMsg pos_msg;
+    VehicleAttitudeMsg att_msg;
+    copyMsg(msg_id::VEHICLE_POSITION, &pos_msg);
+    copyMsg(msg_id::VEHICLE_ATTITUDE, &att_msg);
+
+
+    // 0.001745 * 10 = 1.0deg/sec;
+    if(std::fabs(pos_msg.v_xy_body_for_odom) < 0.05f && std::fabs(att_msg.yawrate) < 0.001745f * 10.0f) _cumulative_calm_t += _delta_t;
+    else _cumulative_calm_t = 0.0f;
+}
+
+bool AheadWallCorrectionTrajectory::isEnd() {
+    if(_cumulative_t >= _stop_time || _cumulative_calm_t >= _calm_time){
+        _x = getEndX();
+        _y = getEndY();
+        _yaw = getEndYaw();
+        return true;
+    }else{
+        return false;
+    }
+}
+
+

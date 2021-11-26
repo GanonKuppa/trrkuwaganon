@@ -44,6 +44,7 @@ namespace module {
       public:
         void update2();
         void debug();
+        void setDeltaT(float delta_t);
         void setDivisionNum(uint8_t l_rum, uint8_t r_num);
         void setEnable(bool enable);
         void reset();
@@ -51,8 +52,8 @@ namespace module {
         friend class BaseModule<PseudoDial>;
         PseudoDial();
 
-        DialL dial_l;
-        DialR dial_r;
+        DialL _dial_l;
+        DialR _dial_r;
         void _publish_dial_position();
         void _publish_actuator_output();
         

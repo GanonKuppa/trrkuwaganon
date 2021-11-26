@@ -17,6 +17,7 @@ namespace module {
     class ControlMixer : public BaseModule<ControlMixer> {
       public:  
         void update0();
+        void setDeltaT(float delta_t);
         void debug();
       private:
         friend class BaseModule<ControlMixer>;
@@ -26,6 +27,8 @@ namespace module {
         AngPidfController _yaw_pidf;
         PidfController _yawrate_pidf;
         PidfController _v_pidf;
+        PidfController _wall_dist_pidf;
+        PidfController _wall_diff_pidf;
 
         CtrlSetpointMsg _setp_msg;
         NavStateMsg _nav_msg;
@@ -70,6 +73,7 @@ namespace module {
         ControlMixer();
 
         void _updateControllerParam();
+        void _resetController();
         void _msgUpdate();
         void _updateController();
         void _publish();

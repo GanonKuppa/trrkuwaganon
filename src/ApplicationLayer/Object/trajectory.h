@@ -128,3 +128,26 @@ class CurveTrajectory : public BaseTrajectory {
     float _yawrate_pre;
     ETurnParamSet _param_set;
 };
+
+class AheadWallCorrectionTrajectory : public BaseTrajectory {
+  public:
+    AheadWallCorrectionTrajectory(float stop_time);
+    AheadWallCorrectionTrajectory(float stop_time, float x, float y, float yaw);
+    AheadWallCorrectionTrajectory(float stop_time, float calm_time);
+    AheadWallCorrectionTrajectory(float stop_time, float calm_time, float x, float y, float yaw);
+
+
+    virtual float getEndX();
+    virtual float getEndY();
+    virtual float getEndYaw();
+    virtual float getNecessaryTime();
+
+    virtual void update();
+    virtual bool isEnd();
+
+    virtual ~AheadWallCorrectionTrajectory() {}
+  private:
+    float _stop_time;
+    float _calm_time;
+    float _cumulative_calm_t;
+};

@@ -162,3 +162,24 @@ void CurveFactory::pushWithStraight(ETurnParamSet param_set , ETurnType turn_typ
     module::TrajectoryCommander::getInstance().push(std::move(traj3));
 
 };
+
+// AheadWallCorrectionFactory
+std::unique_ptr<BaseTrajectory> AheadWallCorrectionFactory::create(float stop_time){
+    std::unique_ptr<BaseTrajectory> traj = std::make_unique<AheadWallCorrectionTrajectory>(stop_time);
+    return traj;
+}
+
+std::unique_ptr<BaseTrajectory> AheadWallCorrectionFactory::create(float stop_time, float calm_time){
+    std::unique_ptr<BaseTrajectory> traj = std::make_unique<AheadWallCorrectionTrajectory>(stop_time, calm_time);
+    return traj;
+}
+
+void AheadWallCorrectionFactory::push(float stop_time){
+    auto traj = create(stop_time);
+    module::TrajectoryCommander::getInstance().push(std::move(traj));
+}
+
+void AheadWallCorrectionFactory::push(float stop_time, float calm_time){
+    auto traj = create(stop_time, calm_time);
+    module::TrajectoryCommander::getInstance().push(std::move(traj));
+}

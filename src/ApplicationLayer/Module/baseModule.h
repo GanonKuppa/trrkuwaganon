@@ -20,7 +20,7 @@ namespace module {
         
         void cycleEvery(){
             float start_usec = hal::hrtGetElapsedUsec();
-            update0();
+            updateEvery();
             _cycle_time_every_us = hal::hrtGetElapsedUsec(start_usec);
         }
 

@@ -168,7 +168,7 @@ namespace activity{
             StopFactory::push(2.0f);
         }
         else if(mode == 7){
-            
+            AheadWallCorrectionFactory::push(30.0f);
         }
         
         module::Logger::getInstance().start();        

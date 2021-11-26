@@ -7,6 +7,7 @@
 #include "navStateMsg.h"
 #include "wallSensorMsg.h"
 #include "actuatorOutputMsg.h"
+#include "ctrlSetPointMsg.h"
 
 // Object
 #include "maze.h"
@@ -22,7 +23,8 @@ namespace module {
         void update1();
         void updateInMainLoop();
         Maze& getMazeRef();              
-        void testPmap();        
+        void testPmap();
+        void printMaze();        
         
       private:
         friend class BaseModule<Navigator>;
@@ -64,6 +66,7 @@ namespace module {
         float _x_setp;
         float _y_setp;
         float _yaw_setp;
+        ETurnType _turn_type;
 
 
         float _v;

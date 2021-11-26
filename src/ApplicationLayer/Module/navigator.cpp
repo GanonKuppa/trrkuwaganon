@@ -1,7 +1,7 @@
 #include "navigator.h"
 
 #include <cmath>
-
+#include <string>
 
 // Lib
 #include "ntlibc.h"
@@ -9,13 +9,12 @@
 
 // Hal
 #include "hal_timer.h"
+#include "hal_critical_section.h"
 
 // Msg
 #include "msgBroker.h"
 #include "vehiclePositionMsg.h"
 #include "vehicleAttitudeMsg.h"
-#include "ctrlSetPointMsg.h"
-#include "actuatorOutputMsg.h"
 
 // Module
 #include "parameterManager.h"
@@ -49,8 +48,12 @@ namespace module{
         _x(0.045f),
         _y(0.045f),
         _yaw(90.0f * DEG2RAD),
-        _v(0.3f),
-        _a(3.0f),
+        _x_setp(0.045f),
+        _y_setp(0.045f),
+        _yaw_setp(90.0f * DEG2RAD),
+        _turn_type(ETurnType::NONE),
+        _v(0.25f),
+        _a(4.0f),
         _yawrate_max(1000.0f * DEG2RAD),
         _yawacc(1000.0f * DEG2RAD),
         _wall2mouse_center_dist(0.0f),
@@ -58,6 +61,7 @@ namespace module{
         _read_wall_offset2(0.0031)
     {
         setModuleName("Navigator");
+        _maze.readMazeDataFromFlash();
     }
     
     void Navigator::setNavMode(ENavMode mode){
@@ -144,13 +148,15 @@ namespace module{
                 (_sub_mode == ENavSubMode::START2GOAL2START && _done_outward)
                )
             ){                
-                _nav_cmd_queue.push_back(ENavCommand::GO_CENTER);                                
+                _nav_cmd_queue.push_back(ENavCommand::GO_CENTER);
+                _nav_cmd_queue.push_back(ENavCommand::SAVE_MAZE);
                 _navigating = false;
             }
             else{
                 if(_x_cur == _x_goal && _y_cur == _y_goal){
                     _done_outward = true;
                     module::LedController::getInstance().flashFcled(0, 1, 0, 0.5, 0.5);
+                    _nav_cmd_queue.push_back(ENavCommand::SAVE_MAZE);
                 }
                 // 目標区画の更新
                 _updateDestination();
@@ -190,10 +196,35 @@ namespace module{
                     StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.09, _v);
                 } 
                 else if (std::abs(rot_times) == 4) {                    
-                    StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2, _v, _v, 0.0f, _a, _a);
-                    StopFactory::push(0.1f);
-                    SpinTurnFactory::push(180.0f * DEG2RAD, _yawrate_max, _yawacc);
-                    StopFactory::push(0.1f);
+                    if(_ws_msg.is_ahead){
+                        float cor_margin = 0.0f;
+                        StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - cor_margin - _read_wall_offset2, _v, _v, 0.0f, _a, _a);
+                        StopFactory::push(0.1f);
+                        AheadWallCorrectionFactory::push(3.0f, 0.5f);
+                        if(_maze.existRWall(_x_cur, _y_cur, _azimuth)){
+                            SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
+                            StopFactory::push(0.1f);
+                            AheadWallCorrectionFactory::push(3.0f, 0.5f);
+                            SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
+                            StopFactory::push(0.1f);            
+                        }
+                        else if(_maze.existLWall(_x_cur, _y_cur, _azimuth)){
+                            SpinTurnFactory::push(-90.0f * DEG2RAD, _yawrate_max, _yawacc);
+                            StopFactory::push(0.1f);
+                            AheadWallCorrectionFactory::push(3.0f, 0.5f);
+                            SpinTurnFactory::push(-90.0f * DEG2RAD, _yawrate_max, _yawacc);
+                            StopFactory::push(0.1f);            
+                        }
+                        else{
+                            SpinTurnFactory::push(180.0f * DEG2RAD, _yawrate_max, _yawacc);
+                            StopFactory::push(0.1f);
+                        }
+                    }else{
+                        StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2, _v, _v, 0.0f, _a, _a);
+                        StopFactory::push(0.1f);
+                        SpinTurnFactory::push(180.0f * DEG2RAD, _yawrate_max, _yawacc);
+                        StopFactory::push(0.1f);
+                    }
                     StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f + _read_wall_offset2, 0.0f, _v, _v, _a, _a);
                 }
                 else if(rot_times == 2) {
@@ -215,7 +246,12 @@ namespace module{
             else if(cmd == ENavCommand::UPDATE_POTENTIAL_MAP){
                 _maze.makeSearchMap(_x_dest, _y_dest);
                 PRINTF_PICKLE("UPDATE_POTENTIAL_MAP | x_setp:%6.3f, y_setp:%6.3f | x:%6.3f, y:%6.3f\n",_x_setp/0.09f, _y_setp/0.09f, _x/0.09f, _y/0.09f);
-            }                        
+            }
+            else if(cmd == ENavCommand::SAVE_MAZE){
+                //hal::enterCriticalSection();
+                _maze.writeMazeData2Flash();
+                //hal::leaveCriticalSection();
+            }
         }
         _lock_guard = false;       
 
@@ -231,6 +267,59 @@ namespace module{
         _maze.makeSearchMap(29, 29);
         uint64_t elapsed_time = hal::getElapsedUsec() - start_time;
         PRINTF_ASYNC("  elapsed time : %d [us]\n", elapsed_time);
+    }
+
+    void Navigator::printMaze(){
+        
+        for(uint8_t i=0;i<32;i++){
+            PRINTF_ASYNC("+");
+            for(uint8_t j=0;j<32;j++){
+                std::string h_wall;
+                if(_maze.readWall(j,31-i).N){
+                	h_wall = "---";
+                }
+                else{
+                	h_wall = "   ";
+                }
+
+                if(j==31){
+                	PRINTF_ASYNC("%s+\n", h_wall.c_str());
+                }
+                else{
+                	PRINTF_ASYNC("%s+", h_wall.c_str());
+                }
+            }
+            for(uint8_t j=0;j<32;j++){
+                std::string v_wall;
+                if(_maze.readWall(j,31-i).W || i==0){
+                	if(_maze.isReached(j,31-i)){
+                		v_wall = "|   ";
+                	}
+                	else{
+                		v_wall = "| N ";
+                	}
+                }
+                else{
+                	if(_maze.isReached(j,31-i)){
+                		v_wall = "    ";
+                	}
+                	else{
+                		v_wall = "  N ";
+                	}
+                }
+                PRINTF_ASYNC("%s", v_wall.c_str());                
+            }
+            PRINTF_ASYNC("|\n");
+        }
+        PRINTF_ASYNC("+");
+        for(uint8_t j=0;j<32;j++){
+            std::string h_wall;
+            if(_maze.readWall(j,0).S) h_wall = "---";
+            else h_wall = "   ";                
+            if(j==31) h_wall += "+\n";
+            PRINTF_ASYNC("%s+", h_wall.c_str());
+        }
+
     }
 
     void Navigator::_updateParam(){
@@ -261,6 +350,7 @@ namespace module{
         _x_setp = setp_msg.x;
         _y_setp = setp_msg.y;
         _yaw_setp = setp_msg.yaw;
+        _turn_type = setp_msg.turn_type;
 
         _is_actuator_error = aout_msg.is_error;
         _ctrl_mode = aout_msg.ctrl_mode;
@@ -313,7 +403,8 @@ namespace module{
     }
 
     bool Navigator::_isFailsafe(){
-        return (_ctrl_mode == ECtrlMode::VEHICLE &&
+        return (_turn_type != ETurnType::AHEAD_WALL_CORRECTION &&
+            _ctrl_mode == ECtrlMode::VEHICLE &&
            (std::fabs(_x - _x_setp) > 0.02f || 
             std::fabs(_y - _y_setp) > 0.02f //||
             //_is_actuator_error
@@ -474,6 +565,11 @@ namespace module{
     int usrcmd_navigator(int argc, char **argv){
         if (ntlibc_strcmp(argv[1], "test_pmap") == 0) {
             Navigator::getInstance().testPmap();
+            return 0;
+        }
+
+        if (ntlibc_strcmp(argv[1], "printMaze") == 0) {
+            Navigator::getInstance().printMaze();
             return 0;
         }
 

@@ -5,6 +5,7 @@
 #include <deque>
 #include <stdint.h>
 #include <Eigen/Geometry>
+#include "turnEnum.h"
 
 namespace module {
     class PositionEstimator : public BaseModule<PositionEstimator> {
@@ -18,6 +19,7 @@ namespace module {
                 
         PositionEstimator();
         void _onWallCenterCorrection();
+        void _aheadWallCorrection();
         void _publish_vehicle_position();
         void _publish_vehicle_attitude();
         
@@ -56,6 +58,8 @@ namespace module {
         float _yawrate;
         float _rollrate;
         float _pitchrate;
+
+        ETurnType _turn_type;
 
         std::deque<float> _acc_y_list;
         std::deque<float> _v_enc_list;

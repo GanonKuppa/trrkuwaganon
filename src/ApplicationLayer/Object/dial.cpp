@@ -25,8 +25,9 @@ void Dial::setEnable(bool enable){
     _enable = enable;
 }
 
-void Dial::setDeltaT(float delta_t){
+void Dial::setDeltaT(float delta_t){    
     _delta_t = delta_t;
+    _ang_pidf.setDeltaT(delta_t);
 }
 
 bool Dial::getEnable(){

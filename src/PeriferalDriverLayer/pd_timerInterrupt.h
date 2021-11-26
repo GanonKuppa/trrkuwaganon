@@ -6,6 +6,7 @@ namespace periferal_driver {
     void setPriorityCMT0(uint8_t priori);
     void startCMT0();
     void stopCMT0();
+    void setEnableCMT0(bool enable);
 
     uint32_t endTimeuCountIntCMT0();
     uint32_t getTimeuCountIntCMT0();

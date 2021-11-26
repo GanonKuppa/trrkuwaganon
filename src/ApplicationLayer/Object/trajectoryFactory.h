@@ -33,3 +33,10 @@ class CurveFactory{
     static void pushWithStraight(ETurnParamSet param_set , ETurnType turn_type, ETurnDir turn_dir, float offset_pre, float offset_fol);
 };
 
+class AheadWallCorrectionFactory{
+  public:  
+    static std::unique_ptr<BaseTrajectory> create(float stop_time);
+    static std::unique_ptr<BaseTrajectory> create(float stop_time, float calm_time);
+    static void push(float stop_time);
+    static void push(float stop_time, float calm_time);
+};

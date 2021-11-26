@@ -219,7 +219,11 @@ namespace module {
         float dial_i; //186
         float dial_i_limit; //187
         float dial_limit; //188
-        float cp_coef; // 189        
+        float cp_coef; //189        
+        float wall_dist_p; //190
+        float wall_dist_i; //191
+        float wall_diff_p; //192
+        float wall_diff_i; //193            
 
         float shortest_0_v; //200
         float shortest_0_v_d; //201

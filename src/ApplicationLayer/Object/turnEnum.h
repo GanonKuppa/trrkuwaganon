@@ -8,6 +8,7 @@ enum class ETrajType : uint8_t{
     SPINTURN,
     STRAIGHT,        
     CURVE,
+    AHEAD_WALL_CORRECTION,
     NONE
 };
 
@@ -29,6 +30,7 @@ enum class ETurnType : uint8_t{
     TURN_D2S_45,
     TURN_D2S_135,    
     CIRCULAR,
+    AHEAD_WALL_CORRECTION,
     NONE
 };
 
@@ -72,7 +74,9 @@ inline std::string trajType2Str(ETrajType tt){
             return std::string("STRAIGHT");
         case ETrajType::CURVE:
             return std::string("CURVE");
-        case ETrajType::NONE:
+        case ETrajType::AHEAD_WALL_CORRECTION:
+            return std::string("AHEAD_WALL_CORRECTION");
+        case ETrajType::NONE:        
             return std::string("NONE");
         default:
             return std::string("");
@@ -115,6 +119,8 @@ inline std::string turnType2Str(ETurnType tt){
             return std::string("DIAGONAL_CENTER_EDGE");
         case ETurnType::CIRCULAR:
             return std::string("CIRCULAR");
+        case ETurnType::AHEAD_WALL_CORRECTION:
+            return std::string("AHEAD_WALL_CORRECTION");
         case ETurnType::NONE:
             return std::string("NONE");
         default:

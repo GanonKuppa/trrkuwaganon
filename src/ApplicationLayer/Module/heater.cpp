@@ -37,6 +37,11 @@ namespace module{
         return _duty;
     }
 
+    void Heater::setDeltaT(float delta_t){
+        _delta_t = delta_t;
+        _pidf.setDeltaT(delta_t);
+    }
+
     void Heater::setTargetTemp(float temp){
         _target_temp = temp;
         ParameterManager& pm = ParameterManager::getInstance();
