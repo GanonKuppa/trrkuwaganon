@@ -530,19 +530,19 @@ void Maze::makeRandomFastestMap(uint8_t x, uint8_t y) {
         Wall wall = readWall(x, y);
         que.pop_front();
         if( (wall.E == 0) && (wall.EF == 1) && (x != 31) && (p_map[x+1][y] == 0xffff) ) {
-            p_map[x+1][y] = p_map[x][y] + 1 + _xor32() % 10;
+            p_map[x+1][y] = p_map[x][y] + 1 + xor32() % 10;
             que.push_back(std::make_pair(x+1,y));
         }
         if( (wall.N == 0 ) && (wall.NF == 1 ) && (y != 31) && (p_map[x][y+1] == 0xffff) ) {
-            p_map[x][y+1] = p_map[x][y] + 1 + _xor32() % 10;
+            p_map[x][y+1] = p_map[x][y] + 1 + xor32() % 10;
             que.push_back(std::make_pair(x,y+1));
         }
         if( (wall.W == 0) && (wall.WF == 1) && (x != 0) && (p_map[x-1][y] == 0xffff) ) {
-            p_map[x-1][y] = p_map[x][y] + 1 + _xor32() % 10;
+            p_map[x-1][y] = p_map[x][y] + 1 + xor32() % 10;
             que.push_back(std::make_pair(x-1,y));
         }
         if( (wall.S == 0) && (wall.SF == 1) && (y != 0) && (p_map[x][y-1] == 0xffff) ) {
-            p_map[x][y-1] = p_map[x][y] + 1 + _xor32() % 10;
+            p_map[x][y-1] = p_map[x][y] + 1 + xor32() % 10;
             que.push_back(std::make_pair(x,y-1));
         }
     }
@@ -606,19 +606,19 @@ void Maze::makeRandomNoEntryMaskMap(uint8_t x, uint8_t y) {
         Wall wall = readWall((uint8_t)(que.front().first), (uint8_t)(que.front().second));
         que.pop_front();
         if( (wall.E == 0) && !isNoEntry(x+1,y) &&(wall.EF == 1) && (x != 31) && (p_map[x+1][y] == 0xffff) ) {
-            p_map[x+1][y] = p_map[x][y] + 1 + _xor32() % 10;
+            p_map[x+1][y] = p_map[x][y] + 1 + xor32() % 10;
             que.push_back(std::make_pair(x+1,y));
         }
         if( (wall.N == 0 ) && !isNoEntry(x,y+1) && (wall.NF == 1 ) && (y != 31) && (p_map[x][y+1] == 0xffff) ) {
-            p_map[x][y+1] = p_map[x][y] + 1 + _xor32() % 10;
+            p_map[x][y+1] = p_map[x][y] + 1 + xor32() % 10;
             que.push_back(std::make_pair(x,y+1));
         }
         if( (wall.W == 0) && !isNoEntry(x-1,y) && (wall.WF == 1) && (x != 0) && (p_map[x-1][y] == 0xffff) ) {
-            p_map[x-1][y] = p_map[x][y] + 1 + _xor32() % 10;
+            p_map[x-1][y] = p_map[x][y] + 1 + xor32() % 10;
             que.push_back(std::make_pair(x-1,y));
         }
         if( (wall.S == 0) && !isNoEntry(x,y-1) && (wall.SF == 1) && (y != 0) && (p_map[x][y-1] == 0xffff) ) {
-            p_map[x][y-1] = p_map[x][y] + 1 + _xor32() % 10;
+            p_map[x][y-1] = p_map[x][y] + 1 + xor32() % 10;
             que.push_back(std::make_pair(x,y-1));
         }
     }
@@ -737,7 +737,7 @@ void Maze::readMazeDataFromFlash(void) {
 
 }
 
-uint32_t Maze::_xor32(void) {
+uint32_t Maze::xor32(void) {
     static uint32_t y = 2463534242;
     y = y ^ (y << 13);
     y = y ^ (y >> 17);

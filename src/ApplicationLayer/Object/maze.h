@@ -85,8 +85,7 @@ class Maze {
     void serializeMazeData(uint8_t* byte_arr);
     void writeMazeData2Flash(void);
     void readMazeDataFromFlash(void);
-  private:
-    uint32_t _xor32(void);
+    uint32_t xor32(void);    
 };
 
 

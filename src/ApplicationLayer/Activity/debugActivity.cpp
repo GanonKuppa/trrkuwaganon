@@ -10,6 +10,7 @@
 
 // Activity
 #include "activityFactory.h"
+#include "intent.h"
 
 // Module
 #include "trajectoryCommander.h"
@@ -18,7 +19,7 @@
 #include "positionEstimator.h"
 #include "imuDriver.h"
 #include "logger.h"
-#include "intent.h"
+
 #include "ledController.h"
 
 // Msg

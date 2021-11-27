@@ -55,6 +55,10 @@ namespace module {
         return _turnPreCalcs.at(tp).generateTurnIterator(tt);
     }
 
+    TurnParameter TrajectoryInitializer::getTurnParameter(ETurnParamSet tp){
+        return _turnParamSet.at(tp);
+    }
+
     void TrajectoryInitializer::_init(){
         ParameterManager& pm = ParameterManager::getInstance();
         _turnParamSet[ETurnParamSet::SEARCH] = TurnParameter(pm.v_search_run, pm.a_search_run);

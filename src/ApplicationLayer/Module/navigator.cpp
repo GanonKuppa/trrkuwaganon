@@ -133,7 +133,8 @@ namespace module{
         _in_read_wall_area = _inReadWallArea(_read_wall_offset1, _read_wall_offset2);
         if(_in_read_wall_area && !pre_in_read_wall_area && 
            !(_x_last == _x_cur && _y_last == _y_cur ) &&
-           _navigating
+           _navigating &&
+           _mode == ENavMode::SEARCH
         ){                            
 
             // 迷路の壁情報更新
@@ -291,7 +292,7 @@ namespace module{
             }
             for(uint8_t j=0;j<32;j++){
                 std::string v_wall;
-                if(_maze.readWall(j,31-i).W || i==0){
+                if(_maze.readWall(j,31-i).W){
                 	if(_maze.isReached(j,31-i)){
                 		v_wall = "|   ";
                 	}
