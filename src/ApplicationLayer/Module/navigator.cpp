@@ -57,8 +57,11 @@ namespace module{
         _yawrate_max(1000.0f * DEG2RAD),
         _yawacc(1000.0f * DEG2RAD),
         _wall2mouse_center_dist(0.0f),
-        _read_wall_offset1(0.0001),
-        _read_wall_offset2(0.0031)
+        _read_wall_offset1(0.012f),
+        _read_wall_offset2(0.0135f),
+        _is_pre_read_l_wall(false),
+        _is_pre_read_r_wall(false)
+
     {
         setModuleName("Navigator");
         _maze.readMazeDataFromFlash();
@@ -127,7 +130,13 @@ namespace module{
         _x_cur = (uint8_t)(_x / 0.09f);
         _y_cur = (uint8_t)(_y / 0.09f);
         _azimuth = yaw2Azimuth(_yaw);
-                    
+
+        // 横壁の読み取り
+        if(_inReadWallArea(0.0001f, 0.001f)){
+            _is_pre_read_l_wall = _ws_msg.is_left;
+            _is_pre_read_r_wall = _ws_msg.is_right;
+        }
+
         // 壁の更新エリアに入ったときの動作
         bool pre_in_read_wall_area = _in_read_wall_area;
         _in_read_wall_area = _inReadWallArea(_read_wall_offset1, _read_wall_offset2);
@@ -141,7 +150,11 @@ namespace module{
             if(!_maze.isReached(_x_cur, _y_cur)){                               
                 PRINTF_PICKLE("UPDATE_WALL          | x_setp:%6.3f, y_setp:%6.3f | x:%6.3f, y:%6.3f | azimuth:%c\n",_x_setp/0.09f, _y_setp/0.09f, _x/0.09f, _y/0.09f, azimuth2Char(_azimuth));
                 PRINTF_PICKLE("  dist: %.3f, %.3f, %.3f, %.3f\n", _ws_msg.dist_al, _ws_msg.dist_l, _ws_msg.dist_r, _ws_msg.dist_ar);
-                _maze.updateWall(_x_cur, _y_cur, _azimuth, _ws_msg);
+                WallSensorMsg ws_msg_temp = _ws_msg;
+                
+                ws_msg_temp.is_left = _is_pre_read_l_wall;
+                ws_msg_temp.is_right = _is_pre_read_r_wall;                
+                _maze.updateWall(_x_cur, _y_cur, _azimuth, ws_msg_temp);
             }
 
             if(_x_cur == _x_dest && _y_cur == _y_dest && 
@@ -196,35 +209,27 @@ namespace module{
                 if(rot_times == 0) {
                     StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.09, _v);
                 } 
-                else if (std::abs(rot_times) == 4) {                    
-                    if(_ws_msg.is_ahead){
-                        float cor_margin = 0.0f;
-                        StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - cor_margin - _read_wall_offset2, _v, _v, 0.0f, _a, _a);
-                        StopFactory::push(0.1f);
-                        AheadWallCorrectionFactory::push(3.0f, 0.5f);
+                else if (std::abs(rot_times) == 4) {
+                    _nav_cmd_queue.push_back(ENavCommand::SAVE_MAZE);   
+                    if(_maze.existAWall(_x_cur, _y_cur, _azimuth)){
+                        StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2, _v, _v, 0.0f, _a, _a);                        
+                        AheadWallCorrectionFactory::push(0.3f, 0.1f);
                         if(_maze.existRWall(_x_cur, _y_cur, _azimuth)){
-                            SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
-                            StopFactory::push(0.1f);
-                            AheadWallCorrectionFactory::push(3.0f, 0.5f);
-                            SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
-                            StopFactory::push(0.1f);            
+                            SpinTurnFactory::push(-90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
+                            AheadWallCorrectionFactory::push(0.3f, 0.1f);
+                            SpinTurnFactory::push(-90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
                         }
                         else if(_maze.existLWall(_x_cur, _y_cur, _azimuth)){
-                            SpinTurnFactory::push(-90.0f * DEG2RAD, _yawrate_max, _yawacc);
-                            StopFactory::push(0.1f);
-                            AheadWallCorrectionFactory::push(3.0f, 0.5f);
-                            SpinTurnFactory::push(-90.0f * DEG2RAD, _yawrate_max, _yawacc);
-                            StopFactory::push(0.1f);            
+                            SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
+                            AheadWallCorrectionFactory::push(0.3f, 0.1f);
+                            SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
                         }
                         else{
-                            SpinTurnFactory::push(180.0f * DEG2RAD, _yawrate_max, _yawacc);
-                            StopFactory::push(0.1f);
+                            SpinTurnFactory::push(180.0f * DEG2RAD, _yawrate_max, _yawacc);                           
                         }
                     }else{
-                        StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2, _v, _v, 0.0f, _a, _a);
-                        StopFactory::push(0.1f);
-                        SpinTurnFactory::push(180.0f * DEG2RAD, _yawrate_max, _yawacc);
-                        StopFactory::push(0.1f);
+                        StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2, _v, _v, 0.0f, _a, _a);                       
+                        SpinTurnFactory::push(180.0f * DEG2RAD, _yawrate_max, _yawacc);                        
                     }
                     StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f + _read_wall_offset2, 0.0f, _v, _v, _a, _a);
                 }
@@ -408,19 +413,21 @@ namespace module{
             _ctrl_mode == ECtrlMode::VEHICLE &&
            (std::fabs(_x - _x_setp) > 0.02f || 
             std::fabs(_y - _y_setp) > 0.02f //||
+            //std::fabs(_yaw - _yaw_setp) > 20.0f * DEG2RAD
+            //||
             //_is_actuator_error
            )
         );
     }
 
-    bool Navigator::_inReadWallArea(float offset1, float offset2){
+    bool Navigator::_inReadWallArea(float offset_pre, float offset_fol){
         float fmod_x = fmodf(_x, 0.09f);
         float fmod_y = fmodf(_y, 0.09f);
 
-        if(_azimuth == EAzimuth::E) return (fmod_x >= offset1 && fmod_x <= offset2);    
-        else if(_azimuth == EAzimuth::N) return (fmod_y >= offset1 && fmod_y <= offset2);
-        else if(_azimuth == EAzimuth::W) return (fmod_x >= 0.09f - offset2 && fmod_x <= 0.09f - offset1);            
-        else if(_azimuth == EAzimuth::S) return (fmod_y >= 0.09f - offset2 && fmod_y <= 0.09f - offset1);
+        if(_azimuth == EAzimuth::E) return (fmod_x >= offset_pre && fmod_x <= offset_fol);
+        else if(_azimuth == EAzimuth::N) return (fmod_y >= offset_pre && fmod_y <= offset_fol);
+        else if(_azimuth == EAzimuth::W) return (fmod_x >= 0.09f - offset_fol && fmod_x <= 0.09f - offset_pre);            
+        else if(_azimuth == EAzimuth::S) return (fmod_y >= 0.09f - offset_fol && fmod_y <= 0.09f - offset_pre);
         else return false;        
     }
 

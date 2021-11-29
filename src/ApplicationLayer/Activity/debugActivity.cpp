@@ -105,8 +105,9 @@ namespace activity{
             StopFactory::push(2.0f);
         }
         else if(mode == 4){
-        	ETurnType turn_type = ETurnType::STRAIGHT_CENTER;
-        	float target_dist = 0.09 * 8.0f;
+        	
+            ETurnType turn_type = ETurnType::STRAIGHT_CENTER;
+        	float target_dist = 0.09 * 8.0f + pm.wall2mouse_center_dist;
             float v_0 = 0.0f;
             float v_max = pm.v_search_run;
             float v_end = 0.0f;

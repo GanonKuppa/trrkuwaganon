@@ -261,10 +261,10 @@ void HF_playPath(ETurnParamSet tp, std::vector<Path>& path_vec) {
 
     for (uint16_t i = 0; i < (uint16_t)path_vec.size(); i++) {
         if(path_vec[i].turn_type == ETurnType::STRAIGHT) {
-            if (is_start_section == true && path_vec[i+1].turn_type == ETurnType::STRAIGHT ) {
+            if (is_start_section && path_vec[i+1].turn_type == ETurnType::STRAIGHT ) {
                 x = wall2mouse_center_dist + float(path_vec[i+1].block_num) * 0.045f;
                 path_vec.erase(path_vec.begin() + i + 1);
-            } else if (is_start_section == true && path_vec[i+1].turn_type != ETurnType::STRAIGHT) {
+            } else if (is_start_section && path_vec[i+1].turn_type != ETurnType::STRAIGHT) {
                 x = wall2mouse_center_dist;
             } else {
                 x = float(path_vec[i].block_num) * 0.045f;
@@ -297,31 +297,30 @@ void HF_playPath(ETurnParamSet tp, std::vector<Path>& path_vec) {
         } else {
             v = turn_p.getV(path_vec[i].turn_type);
             dir = path_vec[i].turn_dir;
-            {
-                if (i == 0) v_pre = 0.0f;
-                else v_pre = turn_p.getV(path_vec[i-1].turn_type);
+            
+            if (i == 0) v_pre = 0.0f;
+            else v_pre = turn_p.getV(path_vec[i-1].turn_type);
 
-                if (i + 1 == (uint16_t)path_vec.size()) v_fol = 0.0f;
-                else v_fol = turn_p.getV(path_vec[i+1].turn_type);
-                a = turn_p.getAcc(ETurnType::STRAIGHT);
-                float pre_dist = module::TrajectoryInitializer::getInstance().getPreDist(tp ,path_vec[i].turn_type);
-                float fol_dist = module::TrajectoryInitializer::getInstance().getFolDist(tp ,path_vec[i].turn_type);
-                float a_pre = std::max(a, std::fabs(v_pre * v_pre -  v * v) / (2.0f * pre_dist));
-                float a_fol = std::max(a, std::fabs(v_fol * v_fol -  v * v) / (2.0f * fol_dist));
+            if (i + 1 == (uint16_t)path_vec.size()) v_fol = 0.0f;
+            else v_fol = turn_p.getV(path_vec[i+1].turn_type);
+            a = turn_p.getAcc(ETurnType::STRAIGHT);
+            float pre_dist = module::TrajectoryInitializer::getInstance().getPreDist(tp ,path_vec[i].turn_type);
+            float fol_dist = module::TrajectoryInitializer::getInstance().getFolDist(tp ,path_vec[i].turn_type);
+            float a_pre = std::max(a, std::fabs(v_pre * v_pre -  v * v) / (2.0f * pre_dist));
+            float a_fol = std::max(a, std::fabs(v_fol * v_fol -  v * v) / (2.0f * fol_dist));
 
-                StraightFactory::push(ETurnType::DIAGONAL, x, v_pre, v_max, v_fol, a, a); 
-                if(path_vec[i].isStraightStart()) {
-                    StraightFactory::push(ETurnType::STRAIGHT_CENTER, pre_dist, v_pre, v, v, a_pre, a_pre); 
-                } else {
-                    StraightFactory::push(ETurnType::DIAGONAL, pre_dist, v_pre, v, v, a_pre, a_pre); 
-                }
-                CurveFactory::push(tp, path_vec[i].turn_type, dir);
-                if(path_vec[i].isStraightEnd()) {
-                    StraightFactory::push(ETurnType::STRAIGHT_CENTER, fol_dist, v, v, v_fol, a_fol, a_fol);
-                } else {
-                    StraightFactory::push(ETurnType::DIAGONAL, fol_dist, v, v, v_fol, a_fol, a_fol);
-                }
+            if(path_vec[i].isStraightStart()) {
+                StraightFactory::push(ETurnType::STRAIGHT_CENTER, pre_dist, v_pre, v, v, a_pre, a_pre); 
+            } else {
+                StraightFactory::push(ETurnType::DIAGONAL, pre_dist, v_pre, v, v, a_pre, a_pre); 
             }
+            CurveFactory::push(tp, path_vec[i].turn_type, dir);
+            if(path_vec[i].isStraightEnd()) {
+                StraightFactory::push(ETurnType::STRAIGHT_CENTER, fol_dist, v, v, v_fol, a_fol, a_fol);
+            } else {
+                StraightFactory::push(ETurnType::DIAGONAL, fol_dist, v, v, v_fol, a_fol, a_fol);
+            }
+            
 
         }
     }
@@ -344,10 +343,10 @@ float HF_calcPlayPathTime(ETurnParamSet tp, std::vector<Path>& path_vec) {
         if(i == 1 && path_vec[i].turn_type == ETurnType::STRAIGHT) continue;
         
         if(path_vec[i].turn_type == ETurnType::STRAIGHT) {
-            if (is_start_section == true && path_vec[i+1].turn_type == ETurnType::STRAIGHT ) {
+            if (is_start_section && path_vec[i+1].turn_type == ETurnType::STRAIGHT ) {
                 x = wall2mouse_center_dist + float(path_vec[i+1].block_num) * 0.045f;
                 //path_vec.erase(path_vec.begin() + i + 1);
-            } else if (is_start_section == true && path_vec[i+1].turn_type != ETurnType::STRAIGHT) {
+            } else if (is_start_section && path_vec[i+1].turn_type != ETurnType::STRAIGHT) {
                 x = wall2mouse_center_dist;
             } else {
                 x = float(path_vec[i].block_num) * 0.045f;
@@ -392,13 +391,12 @@ float HF_calcPlayPathTime(ETurnParamSet tp, std::vector<Path>& path_vec) {
                 float a_pre = std::max(a, std::fabs(v_pre * v_pre -  v * v) / (2.0f * pre_dist));
                 float a_fol = std::max(a, std::fabs(v_fol * v_fol -  v * v) / (2.0f * fol_dist));
 
-                StraightFactory::push(ETurnType::DIAGONAL, x, v_pre, v_max, v_fol, a, a); 
                 if(path_vec[i].isStraightStart()) {
                     necessary_time += StraightFactory::create(ETurnType::STRAIGHT_CENTER, pre_dist, v_pre, v, v, a_pre, a_pre)->getNecessaryTime();
                 } else {
                     necessary_time += StraightFactory::create(ETurnType::DIAGONAL, pre_dist, v_pre, v, v, a_pre, a_pre)->getNecessaryTime();
                 }
-                CurveFactory::push(tp, path_vec[i].turn_type, dir);
+                necessary_time += CurveFactory::create(tp, path_vec[i].turn_type, dir)->getNecessaryTime();
                 if(path_vec[i].isStraightEnd()) {
                     necessary_time += StraightFactory::create(ETurnType::STRAIGHT_CENTER, fol_dist, v, v, v_fol, a_fol, a_fol)->getNecessaryTime();
                 } else {

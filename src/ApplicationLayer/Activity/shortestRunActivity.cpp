@@ -126,7 +126,7 @@ namespace activity{
         ELoopStatus loop_status = ELoopStatus::CONTINUE;
         
         if(nav_msg.is_failsafe){
-            module::TrajectoryCommander::getInstance().clear();
+            //module::TrajectoryCommander::getInstance().clear();
             loop_status = ELoopStatus::FINISH;
         }
 

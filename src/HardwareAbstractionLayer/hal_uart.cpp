@@ -132,6 +132,10 @@ namespace hal {
             if(_pickleBuf.size() < PICKLE_BUF_MAX){
                 _pickleBuf.push_back(buffer[i]);
             }
+            else{
+                _pickleBuf.pop_front();
+                _pickleBuf.push_back(buffer[i]);
+            }
         }
         _lock_guard_pickle = false;
         va_end(ap);

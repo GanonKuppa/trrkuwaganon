@@ -224,6 +224,38 @@ void Maze::writeAheadWall(uint8_t x, uint8_t y, EAzimuth dir, bool ahead) {
     writeWall(x, y, wall);
 }
 
+void Maze::writeSideWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool r) {
+    Wall wall = readWall(x,y);
+    wall.WF = 0;
+    wall.SF = 0;
+    wall.EF = 0;
+    wall.NF = 0;
+
+    switch(dir) {
+        case EAzimuth::E:  //まうすは東向き
+            wall.W = 0;
+            wall.S = r;            
+            wall.N = l;
+            break;
+        case EAzimuth::N://まうすは北向き
+            wall.S = 0;
+            wall.E = r;            
+            wall.W = l;
+            break;
+        case EAzimuth::W://まうすは西向き
+            wall.E = 0;
+            wall.N = r;            
+            wall.S = l;
+            break;
+        case EAzimuth::S://まうすは南向き
+            wall.N = 0;
+            wall.W = r;            
+            wall.E = l;
+            break;
+    }
+    writeWall(x, y, wall);
+}
+
 void Maze::writeWall(uint8_t x, uint8_t y, Wall wall) {
     //壁情報の配列番号に変換
     int8_t v_left = x-1;

@@ -211,12 +211,12 @@ namespace module {
         registration<float>(191, wall_dist_i, "wall_dist_i");//191
         registration<float>(192, wall_diff_p, "wall_diff_p");//192
         registration<float>(193, wall_diff_i, "wall_diff_i");//193
-        ;//194
-        ;//195
-        ;//196
-        ;//197
-        ;//198
-        ;//199
+        registration<float>(194, wall_al_thr, "wall_al_thr");//194
+        registration<float>(195, wall_l_thr, "wall_l_thr");//195
+        registration<float>(196, wall_r_thr, "wall_r_thr");//196
+        registration<float>(197, wall_ar_thr, "wall_ar_thr");//197
+        registration<float>(198, wall_center_l, "wall_center_l");//198
+        registration<float>(199, wall_center_r, "wall_center_r");//199
         registration<float>(200, shortest_0_v, "shortest_0_v"); //200
         registration<float>(201, shortest_0_v_d, "shortest_0_v_d"); //201
         registration<float>(202, shortest_0_v_90, "shortest_0_v_90"); //202

@@ -77,12 +77,14 @@ namespace module {
 
         float _read_wall_offset1;
         float _read_wall_offset2;
+        bool _is_pre_read_l_wall;
+        bool _is_pre_read_r_wall;
 
         void _updateParam();
         void _updateWallEnable();
         void _updateDestination();
         bool _isFailsafe();
-        bool _inReadWallArea(float offset1, float offset2);        
+        bool _inReadWallArea(float offset_pre, float offset_fol);
 
         bool _existRWall(float x, float y, EAzimuth azimuth);
         bool _existLWall(float x, float y, EAzimuth azimuth);

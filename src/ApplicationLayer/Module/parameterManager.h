@@ -223,7 +223,13 @@ namespace module {
         float wall_dist_p; //190
         float wall_dist_i; //191
         float wall_diff_p; //192
-        float wall_diff_i; //193            
+        float wall_diff_i; //193
+        float wall_al_thr; //194
+        float wall_l_thr; //195
+        float wall_r_thr; //196
+        float wall_ar_thr; //197
+        float wall_center_l; //198
+        float wall_center_r; //199
 
         float shortest_0_v; //200
         float shortest_0_v_d; //201

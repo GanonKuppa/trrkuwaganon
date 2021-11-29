@@ -61,6 +61,7 @@ class Maze {
     int8_t calcRotTimes(EAzimuth dest_dir, EAzimuth my_dir);
 
     void writeAheadWall(uint8_t x, uint8_t y, EAzimuth dir, bool ahead);
+    void writeSideWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool r);
     void writeWall(uint8_t x, uint8_t y, Wall wall);
     void writeWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool a, bool r);
     void writeWall(uint8_t x, uint8_t y, EAzimuth dir, WallSensorMsg& ws_msg);

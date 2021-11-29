@@ -198,7 +198,9 @@ namespace module{
 
         // 壁制御
         if(_turn_type == ETurnType::STRAIGHT_CENTER || _turn_type == ETurnType::STRAIGHT_CENTER_EDGE) {            
-            _wall_pidf.update(0.045f - _ws_msg.dist_r, 0.045f - _ws_msg.dist_l, _nav_msg.r_wall_enable, _nav_msg.l_wall_enable);
+            float wall_center_r = pm.wall_center_r;
+            float wall_center_l = pm.wall_center_l;
+            _wall_pidf.update(wall_center_r - _ws_msg.dist_r, wall_center_l - _ws_msg.dist_l, _nav_msg.r_wall_enable, _nav_msg.l_wall_enable);
             //_wall_pidf.update(0.045f - _ws_msg.dist_r, 0.045f - _ws_msg.dist_l, true, true);
             // 壁制御量は曲率とみなし, 速度をかけることで角速度に変換
             float v_now = _pos_msg.v_xy_body_for_ctrl;

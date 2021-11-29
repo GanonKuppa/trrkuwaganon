@@ -12,6 +12,9 @@
 #include "hal_gpio.h"
 #include "hal_timer.h"
 
+// Module
+#include "parameterManager.h"
+
 // Msg
 #include "wallSensorMsg.h"
 #include "msgBroker.h"
@@ -107,11 +110,12 @@ namespace module {
         _dist_l = _distL((float)_left_q.at(0));
         _dist_r = _distR((float)_right_q.at(0));
 
-        _is_ahead_l = (_dist_al <= 0.125f); 
-        _is_ahead_r = (_dist_ar <= 0.125f);
+        ParameterManager& pm = ParameterManager::getInstance();
+        _is_ahead_l = (_dist_al <= pm.wall_al_thr); // 0.125f 
+        _is_ahead_r = (_dist_ar <= pm.wall_ar_thr); // 0.125f
         _is_ahead = (_is_ahead_l || _is_ahead_r);
-        _is_left = (_dist_l <= 0.0575f);
-        _is_right = (_dist_r <= 0.0575f);
+        _is_left = (_dist_l <= pm.wall_l_thr); // 0.0575f
+        _is_right = (_dist_r <= pm.wall_r_thr); // 0.0575f
         _is_left_ctrl = _is_left;
         _is_right_ctrl = _is_right;
         _is_contact_wall = (_dist_al < 0.04) && (_dist_ar < 0.04);
