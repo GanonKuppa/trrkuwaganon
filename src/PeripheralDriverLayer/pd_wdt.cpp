@@ -1,7 +1,7 @@
+#include <PeripheralDriverLayer/pd_wdt.h>
 #include "iodefine.h"
-#include "pd_wdt.h"
 
-namespace periferal_driver {
+namespace peripheral_driver {
     void resetWdt() {
         WDT.WDTRR = 0x00;
         WDT.WDTRR = 0xff;

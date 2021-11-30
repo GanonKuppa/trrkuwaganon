@@ -1,9 +1,9 @@
+#include <PeripheralDriverLayer/pd_phaseCounting.h>
 #include <stdint.h>
 #include "iodefine.h"
-#include "pd_phaseCounting.h"
 
 
-namespace periferal_driver {
+namespace peripheral_driver {
     void initMTU1() {
         SYSTEM.PRCR.WORD = 0xA502;
         MSTP(MTU1) = 0;

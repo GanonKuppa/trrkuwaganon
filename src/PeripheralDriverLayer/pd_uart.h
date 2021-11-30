@@ -4,7 +4,7 @@
 #include <deque>
 
 
-namespace periferal_driver {
+namespace peripheral_driver {
 
     void initSCI1();
     void put1byteSCI1(uint8_t c);

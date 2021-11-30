@@ -1,6 +1,6 @@
 #pragma once
 
-namespace periferal_driver {
+namespace peripheral_driver {
     void resetWdt();
     void initWdt();
     void startWdt();

@@ -2,7 +2,7 @@
 #include "hal_timer.h"
 
 #ifndef SILS
-#include "pd_timer.h"
+#include <PeripheralDriverLayer/pd_timer.h>
 #else
 #include <chrono>
 #include <unistd.h>
@@ -12,10 +12,10 @@ static std::chrono::system_clock::time_point start;
 namespace hal {
     void initTimer() {
 #ifndef SILS        
-        periferal_driver::initCMTW0();
-        periferal_driver::initCMTW1();
-        periferal_driver::startCMTW();        
-        periferal_driver::initTPU0();
+        peripheral_driver::initCMTW0();
+        peripheral_driver::initCMTW1();
+        peripheral_driver::startCMTW();        
+        peripheral_driver::initTPU0();
 #else
         start = std::chrono::system_clock::now(); // 計測開始時間
 #endif
@@ -23,13 +23,13 @@ namespace hal {
 
     void waitClockCount(uint32_t cCount) {
 #ifndef SILS
-        periferal_driver::waitClockCount(cCount);
+        peripheral_driver::waitClockCount(cCount);
 #endif
     }
 
     void waitnsec(uint32_t nsec) {
 #ifndef SILS
-        periferal_driver::waitnsec(nsec);
+        peripheral_driver::waitnsec(nsec);
 #else
         nanosleep(nsec);
 #endif
@@ -37,7 +37,7 @@ namespace hal {
 
     void waitusec(uint32_t usec) {
 #ifndef SILS
-        periferal_driver::waitusec(usec);
+        peripheral_driver::waitusec(usec);
 #else
         usleep(usec);
 #endif
@@ -45,7 +45,7 @@ namespace hal {
 
     void waitmsec(uint32_t msec) {
 #ifndef SILS
-        periferal_driver::waitmsec(msec);
+        peripheral_driver::waitmsec(msec);
 #else
         usleep(msec * 1000);
 #endif
@@ -53,7 +53,7 @@ namespace hal {
 
     uint64_t getElapsedClockCount() {
 #ifndef SILS
-        return periferal_driver::getElapsedClockCount();
+        return peripheral_driver::getElapsedClockCount();
 #else
         std::chrono::system_clock::time_point end; // 型は auto で可
         end = std::chrono::system_clock::now();  // 計測終了時間
@@ -64,7 +64,7 @@ namespace hal {
 
     uint64_t getElapsedNsec() {
 #ifndef SILS
-        return periferal_driver::getElapsedNsec();
+        return peripheral_driver::getElapsedNsec();
 #else
         std::chrono::system_clock::time_point end; // 型は auto で可
         end = std::chrono::system_clock::now();  // 計測終了時間
@@ -76,7 +76,7 @@ namespace hal {
 
     uint64_t getElapsedUsec() {
 #ifndef SILS
-        return periferal_driver::getElapsedUsec();
+        return peripheral_driver::getElapsedUsec();
 #else
         std::chrono::system_clock::time_point end; // 型は auto で可
         end = std::chrono::system_clock::now();  // 計測終了時間
@@ -87,7 +87,7 @@ namespace hal {
 
     uint32_t getElapsedMsec() {
 #ifndef SILS
-        return periferal_driver::getElapsedMsec();
+        return peripheral_driver::getElapsedMsec();
 #else
         std::chrono::system_clock::time_point end; // 型は auto で可
         end = std::chrono::system_clock::now();  // 計測終了時間
@@ -98,7 +98,7 @@ namespace hal {
 
     uint32_t getElapsedSec() {
 #ifndef SILS
-        return periferal_driver::getElapsedSec();
+        return peripheral_driver::getElapsedSec();
 #else
         std::chrono::system_clock::time_point end; // 型は auto で可
         end = std::chrono::system_clock::now();  // 計測終了時間
@@ -109,7 +109,7 @@ namespace hal {
 
     float calcElapsedUsec(uint64_t clock_count){
 #ifndef SILS
-        return periferal_driver::calcElapsedUsec(clock_count);
+        return peripheral_driver::calcElapsedUsec(clock_count);
 #else
         std::chrono::system_clock::time_point end; // 型は auto で可
         end = std::chrono::system_clock::now();  // 計測終了時間
@@ -120,7 +120,7 @@ namespace hal {
 
     void hrtStartTimer(){
 #ifndef SILS
-        return periferal_driver::hrtStartTimer();
+        return peripheral_driver::hrtStartTimer();
 #else
 
 #endif        
@@ -128,7 +128,7 @@ namespace hal {
 
     void hrtStopTimer(){
 #ifndef SILS
-        return periferal_driver::hrtStopTimer();
+        return peripheral_driver::hrtStopTimer();
 #else
 
 #endif
@@ -136,7 +136,7 @@ namespace hal {
 
     float hrtGetElapsedUsec(float usec){
 #ifndef SILS
-        return periferal_driver::hrtGetElapsedUsec(usec);
+        return peripheral_driver::hrtGetElapsedUsec(usec);
 #else
         return 0.0f;
 #endif

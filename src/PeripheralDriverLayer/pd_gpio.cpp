@@ -1,8 +1,8 @@
+#include <PeripheralDriverLayer/pd_gpio.h>
 #include <stdint.h>
 #include "iodefine.h"
-#include "pd_gpio.h"
 
-namespace periferal_driver {
+namespace peripheral_driver {
     void initGpio() {
         //未使用ピンの処理
         PORT0.PDR.BYTE = (uint8_t) (PORT0.PDR.BYTE | 0x0F);

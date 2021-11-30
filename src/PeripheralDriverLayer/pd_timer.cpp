@@ -1,10 +1,10 @@
+#include <PeripheralDriverLayer/pd_clock.h>
+#include <PeripheralDriverLayer/pd_timer.h>
 #include <stdint.h>
 
 #include "iodefine.h"
-#include "pd_clock.h"
-#include "pd_timer.h"
 
-namespace periferal_driver {
+namespace peripheral_driver {
 
 //タイマを三つ使用
 //CMTW0 elepsedTimeの下位bit用 (48MHzを8分周でカウント)

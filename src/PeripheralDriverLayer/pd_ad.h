@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-namespace periferal_driver {
+namespace peripheral_driver {
 
     void initAD();
 

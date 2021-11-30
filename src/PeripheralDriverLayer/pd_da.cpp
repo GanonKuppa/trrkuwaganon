@@ -1,10 +1,10 @@
+#include <PeripheralDriverLayer/pd_da.h>
 #include <stdint.h>
 
-#include "pd_da.h"
 #include "iodefine.h"
 
 
-namespace periferal_driver {
+namespace peripheral_driver {
     void initDA() {
         SYSTEM.PRCR.WORD = 0xA502;
         MSTP(DA) = 0;

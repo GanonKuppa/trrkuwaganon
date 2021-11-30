@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-namespace periferal_driver {
+namespace peripheral_driver {
     void initCMT0();
     void setPriorityCMT0(uint8_t priori);
     void startCMT0();

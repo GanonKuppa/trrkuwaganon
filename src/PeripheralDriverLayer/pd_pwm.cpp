@@ -1,11 +1,11 @@
+#include <PeripheralDriverLayer/pd_clock.h>
+#include <PeripheralDriverLayer/pd_pwm.h>
 #include <stdint.h>
 #include <cmath>
 #include <cfloat>
 #include <algorithm>
 #include "iodefine.h"
 
-#include "pd_clock.h"
-#include "pd_pwm.h"
 
 //49ピン PC3 MOTOR_L_PWM2 MTIOC4B //GTIOC1B-D
 //50ピン PC2 MOTOR_L_PWM1 MTIOC4D //GTIOC2B-D
@@ -15,7 +15,7 @@
 //68ピン PA2 SUC_MOTOR_PWM MTIOC7A
 //69ピン PA1 HEATER_PWM MTIOC7B/MTIOC0B/GTIOC2A-C/TIOCB0
 
-namespace periferal_driver {    
+namespace peripheral_driver {    
     static float dutyMTU0; //69ピン PA1 HEATER_PWM MTIOC0B
     
     static float dutyMTU3A; //51ピン PC1 MOTOR_R_PWM1 MTIOC3A

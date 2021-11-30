@@ -1,10 +1,10 @@
+#include <PeripheralDriverLayer/pd_spi.h>
 #include <stdint.h>
-#include "pd_spi.h"
 #include "iodefine.h"
 
 
 
-namespace periferal_driver {
+namespace peripheral_driver {
 
     void initRSPI0() {
         int dummy;

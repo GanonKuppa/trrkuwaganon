@@ -1,12 +1,12 @@
+#include <PeripheralDriverLayer/pd_uart.h>
 #include <stdint.h>
 #include <deque>
 
-#include "pd_uart.h"
 #include "iodefine.h"
 
 using std::deque;
 
-namespace periferal_driver {
+namespace peripheral_driver {
 
     void initSCI1() {
         SYSTEM.PRCR.WORD = 0xA502;

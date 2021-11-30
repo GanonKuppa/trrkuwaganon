@@ -1,6 +1,6 @@
 #pragma once
 
-namespace periferal_driver {
+namespace peripheral_driver {
 
     void initMTU0();
     void initMTU3();

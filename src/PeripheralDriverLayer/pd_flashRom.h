@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-namespace periferal_driver {
+namespace peripheral_driver {
     const uint32_t DATA_FLASH_BLOCK_NUM = 1024;
     const uint32_t DATA_FLASH_BLOCK_BYTE_SIZE = 64;
 

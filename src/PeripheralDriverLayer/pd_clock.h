@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-namespace periferal_driver {
+namespace peripheral_driver {
 
     constexpr uint32_t ICLK = 96000000;   // 240MHz Max
     constexpr uint32_t BCLK = 96000000;   // 120MHz Max

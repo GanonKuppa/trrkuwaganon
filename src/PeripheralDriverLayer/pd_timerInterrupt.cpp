@@ -1,8 +1,8 @@
+#include <PeripheralDriverLayer/pd_timerInterrupt.h>
 #include <stdint.h>
-#include "pd_timerInterrupt.h"
 #include "iodefine.h"
 
-namespace periferal_driver {
+namespace peripheral_driver {
     volatile static uint32_t uCountIntCMT0 = 0;
     volatile static uint32_t uCountIntCMT1 = 0;
 

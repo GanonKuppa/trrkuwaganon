@@ -1,7 +1,7 @@
+#include <PeripheralDriverLayer/pd_clock.h>
 #include "iodefine.h"
-#include "pd_clock.h"
 
-namespace periferal_driver {
+namespace peripheral_driver {
 
     void initClock() {
         /* ---- Initialization of the non-existent ports ---- */

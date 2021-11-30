@@ -5,56 +5,56 @@
 #include "hal_uart.h"
 
 #ifndef SILS
-#include "pd_uart.h"
+#include <PeripheralDriverLayer/pd_uart.h>
 #endif
 
 
 namespace hal {
     void initUart0() {
 #ifndef SILS
-        periferal_driver::initSCI1();
+        peripheral_driver::initSCI1();
 #endif
     }
 
     void put1byteUart0(uint8_t c) {
 #ifndef SILS
-        periferal_driver::put1byteSCI1(c);
+        peripheral_driver::put1byteSCI1(c);
 #endif
     }
 
     void putnbyteUart0(uint8_t* buf, uint16_t len) {
 #ifndef SILS
-        periferal_driver::putnbyteSCI1(buf, len);
+        peripheral_driver::putnbyteSCI1(buf, len);
 #endif
     }
 
     void initUart1() {
 #ifndef SILS
-        periferal_driver::initSCIFA9();
+        peripheral_driver::initSCIFA9();
 #endif
     }
 
     void putnbyteUart1(uint8_t* buf, uint16_t len) {
 #ifndef SILS
-        periferal_driver::putnbyteSCIFA9(buf, len);
+        peripheral_driver::putnbyteSCIFA9(buf, len);
 #endif
     }
 
     void recvDataUart1() {
 #ifndef SILS
-        periferal_driver::recvDataSCIFA9();
+        peripheral_driver::recvDataSCIFA9();
 #endif
     }
 
     void sendDataUart1() {
 #ifndef SILS
-        periferal_driver::sendDataSCIFA9();
+        peripheral_driver::sendDataSCIFA9();
 #endif
     }
 
     bool readnbyteUart1(uint8_t* buf, uint16_t len){
 #ifndef SILS
-        bool rtn = periferal_driver::readnbyteSCIFA9(buf, len);
+        bool rtn = peripheral_driver::readnbyteSCIFA9(buf, len);
         return rtn;
 #endif
         return false;
@@ -62,14 +62,14 @@ namespace hal {
 
     bool isEmptyRecvBufUart1(){
 #ifndef SILS
-        return periferal_driver::isEmptyRecvBufSCIFA9();
+        return peripheral_driver::isEmptyRecvBufSCIFA9();
 #endif
         return false;
     }
     
     uint16_t getRecvBufUart1size(){
 #ifndef SILS
-        uint16_t size = periferal_driver::getSCIFA9Bufsize();
+        uint16_t size = peripheral_driver::getSCIFA9Bufsize();
         return size;
 #endif
         return 0;
@@ -144,9 +144,9 @@ namespace hal {
 
     int feedPickleWithPrintfAsync(){        
         for(auto &c : _pickleBuf){            
-            periferal_driver::put1byteSCIFA9(c);
-            if(periferal_driver::getSCIFA9Bufsize() > 512){
-                while(periferal_driver::getSCIFA9Bufsize() > 256);
+            peripheral_driver::put1byteSCIFA9(c);
+            if(peripheral_driver::getSCIFA9Bufsize() > 512){
+                while(peripheral_driver::getSCIFA9Bufsize() > 256);
             }
         }
     };

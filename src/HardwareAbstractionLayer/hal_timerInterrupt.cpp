@@ -3,7 +3,7 @@
 #include "hal_timerInterrupt.h"
 
 #ifndef SILS
-#include "pd_timerInterrupt.h"
+#include <PeripheralDriverLayer/pd_timerInterrupt.h>
 #endif
 
 static float slot0time = 0.0f;
@@ -14,31 +14,31 @@ static float slot3time = 0.0f;
 namespace hal {
     void initTimerInterrupt0() {
 #ifndef SILS
-        periferal_driver::initCMT0();
+        peripheral_driver::initCMT0();
 #endif
     }
 
     void setPriorityTimerInterrupt0(uint8_t priori) {
 #ifndef SILS
-        periferal_driver::setPriorityCMT0(priori);
+        peripheral_driver::setPriorityCMT0(priori);
 #endif
     }
 
     void startTimerInterrupt0() {
 #ifndef SILS
-        periferal_driver::startCMT0();
+        peripheral_driver::startCMT0();
 #endif
     }
 
     void stopTimerInterrupt0() {
 #ifndef SILS
-        periferal_driver::stopCMT0();
+        peripheral_driver::stopCMT0();
 #endif
     }
 
     uint32_t endTimeuCountTimerInterrupt0() {
 #ifndef SILS
-        return periferal_driver::endTimeuCountIntCMT0();
+        return peripheral_driver::endTimeuCountIntCMT0();
 #else
         return 0;
 #endif
@@ -46,7 +46,7 @@ namespace hal {
 
     uint32_t getTimeuCountTimerInterrupt0() {
 #ifndef SILS
-        return periferal_driver::getTimeuCountIntCMT0();
+        return peripheral_driver::getTimeuCountIntCMT0();
 #else
         return 0;
 #endif
@@ -67,31 +67,31 @@ namespace hal {
 
     void initTimerInterrupt1() {
 #ifndef SILS
-        periferal_driver::initCMT1();
+        peripheral_driver::initCMT1();
 #endif
     }
 
     void setPriorityTimerInterrupt1(uint8_t priori) {
 #ifndef SILS
-        periferal_driver::setPriorityCMT1(priori);
+        peripheral_driver::setPriorityCMT1(priori);
 #endif
     }
 
     void startTimerInterrupt1() {
 #ifndef SILS
-        periferal_driver::startCMT1();
+        peripheral_driver::startCMT1();
 #endif
     }
 
     void stopTimerInterrupt1() {
 #ifndef SILS
-        periferal_driver::stopCMT1();
+        peripheral_driver::stopCMT1();
 #endif
     }
 
     uint32_t endTimeuCountTimerInterrupt1() {
 #ifndef SILS
-        return periferal_driver::endTimeuCountIntCMT1();
+        return peripheral_driver::endTimeuCountIntCMT1();
 #else
         return 0;
 #endif
@@ -100,7 +100,7 @@ namespace hal {
 
     uint32_t getTimeuCountTimerInterrupt1() {
 #ifndef SILS
-        return periferal_driver::getTimeuCountIntCMT1();
+        return peripheral_driver::getTimeuCountIntCMT1();
 #else
         return 0;
 #endif

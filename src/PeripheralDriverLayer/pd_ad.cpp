@@ -9,7 +9,7 @@
  */
 
 
-namespace periferal_driver {
+namespace peripheral_driver {
     void initAD() {
         SYSTEM.PRCR.WORD = 0xA502;
         MSTP(S12AD) = 0;

@@ -2,7 +2,7 @@
 #include "hal_flashRom.h"
 
 #ifndef SILS
-#include "pd_flashRom.h"
+#include <PeripheralDriverLayer/pd_flashRom.h>
 #else
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,7 +52,7 @@ namespace hal {
 
     bool initFlashRom() {
 #ifndef SILS
-        return periferal_driver::initDataFlash();
+        return peripheral_driver::initDataFlash();
 #else
         
         bool is_file_exist = existFile(ROM_PATH);
@@ -81,7 +81,7 @@ namespace hal {
 
     uint8_t readFlashRom(uint32_t org) {
 #ifndef SILS
-        return periferal_driver::readDataFlash(org);
+        return peripheral_driver::readDataFlash(org);
 #else
         FILE* fp = fopen(ROM_PATH, "rb");
         if (fp == NULL) {
@@ -99,7 +99,7 @@ namespace hal {
 
     bool readFlashRom(uint32_t org, void* dst, uint32_t len) {
 #ifndef SILS
-        return periferal_driver::readDataFlash(org, dst, len);
+        return peripheral_driver::readDataFlash(org, dst, len);
 #else
         FILE* fp = fopen(ROM_PATH, "rb");
         if (fp == NULL) {
@@ -115,7 +115,7 @@ namespace hal {
 
     bool eraseCheckFlashRom(uint32_t org, uint32_t len) {
 #ifndef SILS
-        return periferal_driver::eraseCheckDataFlash(org, len);
+        return peripheral_driver::eraseCheckDataFlash(org, len);
 #else
         return true;
 #endif
@@ -123,7 +123,7 @@ namespace hal {
 
     bool eraseFlashRom(uint32_t org) {
 #ifndef SILS
-        return periferal_driver::eraseDataFlash(org);
+        return peripheral_driver::eraseDataFlash(org);
 #else
         return true;
 #endif
@@ -131,7 +131,7 @@ namespace hal {
 
     bool eraseAllFlashRom() {
 #ifndef SILS
-        return periferal_driver::eraseAllDataFlash();
+        return peripheral_driver::eraseAllDataFlash();
 #else
         FILE* fp = fopen( "sils_flashRom.bin", "wb" );
         if( fp == NULL ){
@@ -151,7 +151,7 @@ namespace hal {
 
     bool writeFlashRom(uint32_t org, const void* src, uint32_t len) {
 #ifndef SILS
-        return periferal_driver::writeDataFlash(org, src, len);
+        return peripheral_driver::writeDataFlash(org, src, len);
 #else
         uint8_t read_data[FLASH_ROM_SIZE];
         readFlashRom(0, read_data, FLASH_ROM_SIZE);
@@ -171,7 +171,7 @@ namespace hal {
 
     bool writeFlashRom(uint32_t org, uint8_t data) {
 #ifndef SILS
-        return periferal_driver::writeDataFlash(org, data);
+        return peripheral_driver::writeDataFlash(org, data);
 #else
         uint8_t read_data[FLASH_ROM_SIZE];
         readFlashRom(0, read_data, FLASH_ROM_SIZE);

@@ -1,7 +1,7 @@
+#include <PeripheralDriverLayer/pd_flashRom.h>
 #include <stdint.h>
 #include <cstring>
 
-#include "pd_flashRom.h"
 #include "iodefine.h"
 
 
@@ -25,7 +25,7 @@
  */
 //=====================================================================//
 
-namespace periferal_driver {
+namespace peripheral_driver {
 
     static const uint32_t data_flash_block = 64; // データ・フラッシュのブロックサイズ
     static const uint32_t data_flash_size = 65536; // データ・フラッシュの容量

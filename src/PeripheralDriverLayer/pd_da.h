@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-namespace periferal_driver {
+namespace peripheral_driver {
     void initDA();
     void setDA(uint16_t da);
     uint16_t getDA();
