@@ -17,7 +17,7 @@ namespace module {
     _lock_guard(false)    
     {
         setModuleName("TrajectoryCommander");
-    };
+    }
 
     void TrajectoryCommander::push(std::unique_ptr<BaseTrajectory>&& traj) {
         _lock_guard = true;

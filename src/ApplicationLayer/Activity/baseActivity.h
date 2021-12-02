@@ -35,7 +35,7 @@ namespace activity {
                 uint64_t elapsed_usec = end_usec - start_usec;
                 int64_t wait_usec = _lower_limit_loop_usec - elapsed_usec;
                 if(wait_usec > 0) hal::waitusec(wait_usec);
-            };
+            }
 
             PRINTF_ASYNC("--- %s end ---\n", getModeName().c_str());
             onFinish();
