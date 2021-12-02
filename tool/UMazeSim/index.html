@@ -1,0 +1,393 @@
+<!-- Licensed under a BSD license. See license.html for license -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>UMaze Sim</title>
+    <style>
+    body {
+        margin: 0;
+    }
+    #c {
+        width: 100vw;
+        height: 100vh;
+        display: block;
+    }
+    #c:focus {
+      outline: none;
+    }
+    </style>
+  </head>
+  <body>
+    <canvas id="c" tabindex="1"></canvas>    
+  </body>
+
+
+
+
+
+
+
+<script  type="module">
+import * as umobj from "./src/js/UMouseObject.js"
+import * as FileSaver from './src/js/lib/FileSaver.js'
+
+'use strict';  // eslint-disable-line
+const time_start = ( performance || Date ).now();
+const fs = require('fs');
+const yaml = require('js-yaml');
+try {
+  const config = yaml.safeLoad(fs.readFileSync('src/config.yaml', 'utf8'));
+  var UDP_PORT = config["UDP_PORT"];
+} catch (e) {
+  console.log(e);
+}
+
+/* global init */
+let maze_data;
+const mouseEventHandler = makeSendPropertiesHandler([
+  'ctrlKey',
+  'metaKey',
+  'shiftKey',
+  'button',
+  'clientX',
+  'clientY',
+  'pageX',
+  'pageY',
+]);
+const wheelEventHandlerImpl = makeSendPropertiesHandler([
+  'deltaX',
+  'deltaY',
+]);
+const keydownEventHandler = makeSendPropertiesHandler([
+  'ctrlKey',
+  'metaKey',
+  'shiftKey',
+  'keyCode',
+]);
+
+function wheelEventHandler(event, sendFn) {
+  event.preventDefault();
+  wheelEventHandlerImpl(event, sendFn);
+}
+
+function preventDefaultHandler(event) {
+  event.preventDefault();
+}
+
+function copyProperties(src, properties, dst) {
+  for (const name of properties) {
+      dst[name] = src[name];
+  }
+}
+
+function makeSendPropertiesHandler(properties) {
+  return function sendProperties(event, sendFn) {
+    const data = {type: event.type};
+    copyProperties(event, properties, data);
+    sendFn(data);
+  };
+}
+
+function touchEventHandler(event, sendFn) {
+  const touches = [];
+  const data = {type: event.type, touches};
+  for (let i = 0; i < event.touches.length; ++i) {
+    const touch = event.touches[i];
+    touches.push({
+      pageX: touch.pageX,
+      pageY: touch.pageY,
+    });
+  }
+  sendFn(data);
+}
+
+// The four arrow keys
+const orbitKeys = {
+  '37': true,  // left
+  '38': true,  // up
+  '39': true,  // right
+  '40': true,  // down
+};
+function filteredKeydownEventHandler(event, sendFn) {
+  const {keyCode} = event;
+  if (orbitKeys[keyCode]) {
+    event.preventDefault();
+    keydownEventHandler(event, sendFn);
+  }
+}
+
+let nextProxyId = 0;
+class ElementProxy {
+  constructor(element, worker, eventHandlers) {
+    this.id = nextProxyId++;
+    this.worker = worker;
+    const sendEvent = (data) => {
+      this.worker.postMessage({
+        type: 'event',
+        id: this.id,
+        data,
+      });
+    };
+
+    // register an id
+    worker.postMessage({
+      type: 'makeProxy',
+      id: this.id,
+    });
+    sendSize();
+    for (const [eventName, handler] of Object.entries(eventHandlers)) {
+      element.addEventListener(eventName, function(event) {
+        handler(event, sendEvent);
+      });
+    }
+
+    function sendSize() {
+      const rect = element.getBoundingClientRect();
+      sendEvent({
+        type: 'size',
+        left: rect.left,
+        top: rect.top,
+        width: element.clientWidth,
+        height: element.clientHeight,
+      });
+    }
+
+    // really need to use ResizeObserver
+    window.addEventListener('resize', sendSize);
+  }
+}
+
+function startWorker(canvas) {
+  canvas.focus();
+  const offscreen = canvas.transferControlToOffscreen();
+  const worker = new Worker('./src/js/offscreencanvas-worker-orbitcontrols.js', { type: "module" });
+
+  const eventHandlers = {
+    contextmenu: preventDefaultHandler,
+    mousedown: mouseEventHandler,
+    mousemove: mouseEventHandler,
+    mouseup: mouseEventHandler,
+    touchstart: touchEventHandler,
+    touchmove: touchEventHandler,
+    touchend: touchEventHandler,
+    wheel: wheelEventHandler,
+    keydown: filteredKeydownEventHandler,
+  };
+  const proxy = new ElementProxy(canvas, worker, eventHandlers);
+  worker.postMessage({
+    type: 'start',
+    canvas: offscreen,
+    canvasId: proxy.id,
+  }, [offscreen]);
+  console.log('using OffscreenCanvas');  /* eslint-disable-line no-console */
+  return worker;
+}
+
+function startMainPage(canvas) {
+  init({canvas, inputElement: canvas});
+  console.log('using regular canvas');  /* eslint-disable-line no-console */
+}
+
+function main() {  /* eslint consistent-return: 0 */
+  const canvas = document.querySelector('#c');
+  let worker;
+  if (canvas.transferControlToOffscreen) {
+    worker = startWorker(canvas);
+  } else {
+    startMainPage(canvas);
+  }
+
+  worker.onmessage = function(event){
+    const time_now = ( performance || Date ).now();
+    const time_elapsed = (time_now - time_start)/1000.0;
+    updateAppInfo(time_elapsed, event.data["fps"]);
+    maze_data = event.data["maze_data"];
+  }
+
+  const dgram = require('dgram');
+  const udp_server = dgram.createSocket('udp4');
+
+  udp_server.on('listening', function () {
+  const address = udp_server.address();
+    console.log('UDP Server listening on ' + address.address + ":" + address.port);
+  });
+
+  udp_server.on('message', function (message, remote) {
+    //console.log(remote.address + ':' + remote.port +' - ' + message);
+    
+    try {      
+
+      const json = JSON.parse(message);
+      if(json['cmd'] == 'UPDATE_DATA_VIEW'){
+        updateDataView(json["time"], json["bat"], json["V_l"], json["V_r"], json["x"], json["y"], json["ang"]);
+      }
+      else if(json['cmd'] == 'UPDATE_WALL_SENSOR_VIEW'){
+        updateWallSensorView(json["lf"], json["l"], json["r"], json["rf"]);
+      }
+      else if(json['cmd'] == 'SAVE_WALLS_WITHOUT_OUTER_32'){
+        const fs = require('fs');
+        console.log(json);
+        fs.writeFileSync(json['path'] ,JSON.stringify(maze_data));
+      }
+      else if(json['cmd'] == 'SAVE_STL'){
+        let str = umobj.makeMazeStlString(maze_data);
+        var blob = new Blob( [str], { type : 'text/plain' } ); // Generate Blob from the string
+        FileSaver.saveAs( blob, 'maze_data32.stl' ); //Save the Blob to file.stl
+        console.log(json);
+        console.log(str);
+      }
+      
+      json['type'] = 'doJsonCmd';
+      worker.postMessage(json);
+    
+
+    } catch (error) {
+      console.log(error);
+    }
+
+
+  });
+  udp_server.bind(UDP_PORT, 'localhost');
+
+
+  
+
+}
+
+
+main();
+
+function updateDataView(time, bat, V_l, V_r, x, y, ang, v) {
+  document.getElementById('mouse_time').innerText = (time).toFixed(4);
+  document.getElementById('mouse_bat').innerText = (bat).toFixed(4);
+  document.getElementById('mouse_x').innerText = (x).toFixed(4);
+  document.getElementById('mouse_y').innerText = (y).toFixed(4);
+  document.getElementById('mouse_ang').innerText = (ang).toFixed(4);
+  document.getElementById('mouse_v').innerText = (v).toFixed(4);
+  document.getElementById('maze_x').innerText = (x / 0.09).toFixed(4);
+  document.getElementById('maze_y').innerText = (y / 0.09).toFixed(4);
+  document.getElementById('mouse_V_l').innerText = V_l.toFixed(4);
+  document.getElementById('mouse_V_r').innerText = V_r.toFixed(4);
+
+}
+
+function updateWallSensorView(lf, l, r, rf) {
+  document.getElementById('wall_sen_lf').innerText = (lf).toFixed(0);
+  document.getElementById('wall_sen_l').innerText = (l).toFixed(0);
+  document.getElementById('wall_sen_r').innerText = (r).toFixed(0);
+  document.getElementById('wall_sen_rf').innerText = (rf).toFixed(0);
+}
+
+function updateAppInfo(time, fps){
+  document.getElementById('app_time').innerText = (time).toFixed(2) + " [sec]";
+  document.getElementById('app_fps').innerText = (fps).toFixed(2);
+}
+
+
+</script>
+
+
+
+<div id="data_view" style="
+  position: absolute;
+  padding : 10px;
+  top: 10px;
+  left: 10px;
+  z-index: 100;
+  width:220px;
+  background-color:rgba(0,0,0,0.75);
+  color:#FFF;
+  font-size:x-large;
+  font-family: 'Inconsolata', 'Source Code Pro','ＭＳ ゴシック';
+  opacity: 0.85">
+
+  <font style="font-size:12pt;" color="#ffffff"><b>起動時間・Bat電圧</b>    </font> <br>
+  <font style="font-size:11pt;" color="#ffffff">　time&nbsp;:  </font>
+  <font style="font-size:11pt;" color="#ffffff" id="mouse_time" 　　>value   </font> <br>
+  
+  <font style="font-size:11pt;" color="#ffffff">　V&nbsp;&nbsp;&nbsp;&nbsp;: </font>
+  <font style="font-size:11pt;" color="#ffffff" id="mouse_bat" 　　>value    </font> <br>
+  
+  <font style="font-size:11pt;" color="#ffffff">　V_R&nbsp;&nbsp;: </font>
+  <font style="font-size:11pt;" color="#ffffff" id="mouse_V_r" 　　>value    </font> <br>
+  
+  <font style="font-size:11pt;" color="#ffffff">　V_L&nbsp;&nbsp;: </font>
+  <font style="font-size:11pt;" color="#ffffff" id="mouse_V_l" 　　>value    </font>
+  <br>
+  <font style="font-size:12pt;" color="#ffffff"><b>推定位置・角度・速度</b></font> <br>
+  <font style="font-size:11pt;" color="#ffffff">　x&nbsp;&nbsp;&nbsp;&nbsp;: </font>
+  <font style="font-size:11pt;" color="#ffffff" id="mouse_x" 　　>value      </font> <br>
+  
+  <font style="font-size:11pt;" color="#ffffff">　y&nbsp;&nbsp;&nbsp;&nbsp;: </font>
+  <font style="font-size:11pt;" color="#ffffff" id="mouse_y" 　　>value      </font> <br>
+  
+  <font style="font-size:11pt;" color="#ffffff">　ang&nbsp;&nbsp;: </font>
+  <font style="font-size:11pt;" color="#ffffff" id="mouse_ang" 　　>value    </font> <br>
+  
+  <font style="font-size:11pt;" color="#ffffff">　v&nbsp;&nbsp;&nbsp;&nbsp;: </font>
+  <font style="font-size:11pt;" color="#ffffff" id="mouse_v" 　　>value      </font>
+  <br>
+  <font style="font-size:12pt;" color="#ffffff"><b>迷路座標</b>            </font> <br>
+  <font style="font-size:11pt;" color="#ffffff">　x&nbsp;&nbsp;&nbsp;&nbsp;:                         </font>
+  <font style="font-size:11pt;" color="#ffffff" id="maze_x" 　　>value       </font> <br>
+  
+  <font style="font-size:11pt;" color="#ffffff">　y&nbsp;&nbsp;&nbsp;&nbsp;: </font>
+  <font style="font-size:11pt;" color="#ffffff" id="maze_y" 　　>value       </font>
+  <br>
+  <font style="font-size:12pt;" color="#ffffff"><b>壁センサ</b>           </font>　<br>
+  <font style="font-size:11pt;" color="#ffffff">　lf&nbsp;&nbsp;&nbsp;: </font>
+  <font style="font-size:11pt;" color="#ffffff" id="wall_sen_lf" 　　>value  </font> <br>
+  
+  <font style="font-size:11pt;" color="#ffffff">　l&nbsp;&nbsp;&nbsp;&nbsp;: </font>
+  <font style="font-size:11pt;" color="#ffffff" id="wall_sen_l" 　　>value   </font> <br>
+  
+  <font style="font-size:11pt;" color="#ffffff">　r&nbsp;&nbsp;&nbsp;&nbsp;: </font>
+  <font style="font-size:11pt;" color="#ffffff" id="wall_sen_r" 　　>value   </font> <br>
+  
+  <font style="font-size:11pt;" color="#ffffff">　rf&nbsp;&nbsp;&nbsp;: </font>
+  <font style="font-size:11pt;" color="#ffffff" id="wall_sen_rf" 　　>value  </font>
+  <br>
+  <font style="font-size:12pt;" color="#ffffff"><b>アプリ情報</b>           </font>　<br>
+  <font style="font-size:11pt;" color="#ffffff">　time&nbsp;: </font>
+  <font style="font-size:11pt;" color="#ffffff" id="app_time" 　　>value   </font> <br>
+  
+  <font style="font-size:11pt;" color="#ffffff">　fps&nbsp;&nbsp;: </font>
+  <font style="font-size:11pt;" color="#ffffff" id="app_fps" 　　>value  </font> <br>
+
+
+</div>
+
+<div id="msg_list" style="position:absolute;
+              left:10px; top:540px;
+              padding : 10px;
+              z-index: 100;
+              height:150px;
+              width:220px;
+              background-color:rgba(0,0,0,0.75);
+              color:#FFF;
+              font-size:small;              
+              font-family: 'Inconsolata', 'Source Code Pro','ＭＳ ゴシック';
+              opacity: 0.85">
+  <font style="font-size:12pt;" color="#ffffff"><b>Console</b>    </font> <br>
+  <div style=  "padding : 5px;">
+  <font style="font-size:7pt;" color="#ffffff">0　xxxxxxxxxxxxxxxxx    </font> <br>
+  <font style="font-size:7pt;" color="#ffffff">1　xxxxxxxxxxxxxxxxx    </font> <br>
+  <font style="font-size:7pt;" color="#ffffff">2　xxxxxxxxxxxxxxxxx    </font> <br>
+  <font style="font-size:7pt;" color="#ffffff">3　xxxxxxxxxxxxxxxxx    </font> <br>
+  <font style="font-size:7pt;" color="#ffffff">4　xxxxxxxxxxxxxxxxx    </font> <br>
+  <font style="font-size:7pt;" color="#ffffff">5　xxxxxxxxxxxxxxxxx    </font> <br>
+  <font style="font-size:7pt;" color="#ffffff">6　xxxxxxxxxxxxxxxxx    </font> <br>
+  <font style="font-size:7pt;" color="#ffffff">7　xxxxxxxxxxxxxxxxx    </font> <br>
+  <font style="font-size:7pt;" color="#ffffff">8　xxxxxxxxxxxxxxxxx    </font> <br>
+  <font style="font-size:7pt;" color="#ffffff">9　xxxxxxxxxxxxxxxxx    </font> <br>
+</div>
+    
+</div>
+
+
+
+
+</html>
+

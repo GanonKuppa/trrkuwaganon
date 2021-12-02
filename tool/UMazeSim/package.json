@@ -1,0 +1,20 @@
+{
+  "name": "umazeviewer",
+  "version": "0.1.0",
+  "description": "マイクロマウスの迷路とロボットの可視化用アプリ",
+  "main": "index.js",
+  "homepage": "./",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run": "node_modules\\electron\\dist\\electron.exe .",
+    "build": "node node_modules\\electron-packager\\bin\\electron-packager.js . UMazeSim --platform=win32 --arch=x64 --overwrite"
+  },
+  "author": "GanonKuppa",
+  "license": "MIT",
+  "dependencies": {
+    "dgram": "1.0.1",
+    "electron": "8.2.3",
+    "electron-packager": "14.2.1",
+    "js-yaml": "3.13.1"
+  }
+}

@@ -1,0 +1,8 @@
+# UMazeViwer設定ファイル
+UDP_PORT:          2020              # コマンドを待ち受けるUDPポート
+WINDOW_WIDTH:      1280              # 画面幅サイズ
+WINDOW_HEIGHT:     720               # 画面高さサイズ
+MAZE_SIZE:         "HALF32x32"       # "HALF32x32" or "CL16x16"
+
+
+

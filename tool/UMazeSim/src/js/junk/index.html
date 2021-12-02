@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>UMazeViewer</title>
+  
+</head>
+<body>
+  <script  type="module">
+/*
+    import {animate, scene} from "./src/js/ThreeUtil.js";
+    import * as umobj from "./src/js/UMouseObject.js"
+    
+
+    umobj.addGround(scene);
+    umobj.addLight(scene);
+    umobj.addTable(scene);
+    umobj.addPillar32(scene);
+    umobj.addWhiteLine32(scene);
+    umobj.addLetterCoorX32(scene);
+    umobj.addLetterCoorY32(scene);
+    umobj.addWalls32(scene);
+    //umobj.addWallV32(scene);
+    for (let i=0;i<32;i++){
+        for (let j=0;j<32;j++){
+          //umobj.setWallOpacity32(i, j, 0.2, 0.2, 0.2, 0.2);
+        }
+    }
+    umobj.addRobot(scene);
+    umobj.addNeedle(scene, 0, 1, "hoge");
+    umobj.addNeedle(scene, 1, 0, "hoge2");
+    
+    umobj.addMsgFlag(scene, 1, 1,"テストです", "flg1");
+    umobj.addMsgFlag(scene, 1, 1,"テストです", "flg2");
+    umobj.addMsgFlag(scene, 1, 1,"テストです", "flg3");
+    umobj.addMsgFlag(scene, 1, 1,"テストです", "flg4");
+    umobj.addMsgFlag(scene, 1, 1,"テストです", "flg5");
+    umobj.addMsgFlag(scene, 1, 1,"テストです", "flg11");
+    umobj.addMsgFlag(scene, 1, 1,"テストです", "flg21");
+    umobj.addMsgFlag(scene, 1, 1,"テストです", "flg31");
+    umobj.addMsgFlag(scene, 1, 1,"テストです", "flg41");
+    umobj.addMsgFlag(scene, 1, 1,"テストです", "flg51");
+    umobj.removeAllNamedObject(scene);
+    umobj.addMsgFlag(scene, 1.1, 1.01,"テストですddddddddddddddddddddddddddddddddddd", "flg5");
+    umobj.addMsgFlag(scene, 1.15, 1.02,"テストです", "flg5");
+    umobj.addNumberSquare32(scene);
+
+    // 描画ループ
+    animate();
+*/
+
+/*
+    const dgram = require('dgram');
+    const udp_server = dgram.createSocket('udp4');
+
+    udp_server.on('listening', function () {
+    const address = udp_server.address();
+      console.log('UDP Server listening on ' + address.address + ":" + address.port);
+    });
+
+    udp_server.on('message', function (message, remote) {
+      console.log(remote.address + ':' + remote.port +' - ' + message);      
+    });
+    udp_server.bind(2020, 'localhost');
+*/
+    // x, y, ang, v
+    // set_pannel x, y, r, g, b, alpha message
+    // remove_panel x, y
+    // remove_all_panel
+
+    // add_flag x, y, ang, message
+
+    // add_nidle x, y, "name"
+    // remove_object "name"
+    // remove_all_object
+
+    // remove_pos_traj
+    // remove_v_traj
+    // pos_traj_off
+    // pos_traj_on
+    // v_traj_on
+    // v_traj_off
+
+    // wall_32x32 wall_data
+    // wall x, y, E, N, W, S
+    // wall_opacity x, y, E,N,W,S
+    // wall_opacity_all  opacity
+
+    // a, v, x, y, time, ang, ang_v, ang_a, ws_l ws_r, ws_ra, ws_la bat_voltage
+    // robot_color r, g, b, alpha
+
+  // 普通のキャンバスを取得
+  const canvasElement = document.querySelector('#mainCanvas');
+  // オフスクリーンキャンバスを取得
+  const offscreenCanvas = canvasElement.transferControlToOffscreen();
+  // ワーカーを起動
+  const worker = new Worker('./src/js/ThreeOffscreenWorker.js', { type: "module" });
+  // ワーカー側にオフスクリーンキャンバスを転送
+  worker.postMessage({ canvas: offscreenCanvas }, [offscreenCanvas]);
+
+  </script>
+
+  <canvas id="mainCanvas"></canvas>
+
+
+</body>
+</html>

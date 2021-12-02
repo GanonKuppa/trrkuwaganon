@@ -61,8 +61,19 @@ doxygen:
 help:
 	@- $(HELP)
 
+
+.PHONY: test_simSearch
+test_simSearch:
+	- rm -r test/simSearch/build
+	- mkdir test/simSearch/build
+	- cd test/simSearch/build; cmake .. -G Ninja                         
+	- cd test/simSearch/build; ninja
+	- test/simSearch/build/main
+
+
+
 .PHONY: test_traj
-test_traj:	
+test_traj:
 	- rm -r test/traj/build
 	- mkdir test/traj/build
 	- cd test/traj/build; cmake .. -G Ninja                         
