@@ -13,6 +13,7 @@ namespace module {
         void update3();        
         void setEnable(bool en);
         void debug();
+        void eval();
       private:
         bool _enable;
         int16_t _ahead_l_on;
@@ -29,6 +30,14 @@ namespace module {
         std::deque<int16_t> _ahead_r_q;
         std::deque<int16_t> _left_q;
         std::deque<int16_t> _right_q;
+        float _ahead_l_time_buf[80];
+        float _ahead_r_time_buf[80];
+        float _left_time_buf[80];
+        float _right_time_buf[80];
+        int16_t _ahead_l_buf[80];
+        int16_t _ahead_r_buf[80];
+        int16_t _left_buf[80];
+        int16_t _right_buf[80];
 
         float _dist_al;
         float _dist_ar;
@@ -52,7 +61,7 @@ namespace module {
         float _on_wall_center_time;
 
         const uint8_t BUFF_SIZE = 30;
-        const uint16_t LED_ON_USEC = 30;
+        const uint16_t LED_ON_USEC = 100;
 
         WallSensor();
         void _updateOffVal(bool sled1, bool sled2, bool sled3, bool sled4);

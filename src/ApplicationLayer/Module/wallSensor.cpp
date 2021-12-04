@@ -48,7 +48,15 @@ namespace module {
         _is_on_wall_center(false),
         _contact_wall_time(0.0f),
         _on_wall_ahead_time(0.0f),
-        _on_wall_center_time(0.0f)
+        _on_wall_center_time(0.0f),
+        _ahead_l_time_buf(),
+        _ahead_r_time_buf(),
+        _left_time_buf(),
+        _right_time_buf(),
+        _ahead_l_buf(),
+        _ahead_r_buf(),
+        _left_buf(),
+        _right_buf()
     {
         setModuleName("WallSensor");
         for (uint8_t i = 0; i < BUFF_SIZE; i++) {
@@ -74,11 +82,34 @@ namespace module {
         _updateOffVal(1, 0, 1, 0);
 
         _turnLed(1, 0, 0, 0);
-        hal::waitusec(LED_ON_USEC);
+        //hal::waitusec(LED_ON_USEC);
+        {
+            uint8_t i = 0;
+            float start_time = hal::hrtGetElapsedUsec();            
+            while(1){
+                float elapsed_time = hal::hrtGetElapsedUsec(start_time);
+                _ahead_l_buf[i] = hal::startAD1();
+                _ahead_l_time_buf[i] = elapsed_time;
+                i++;
+                if(elapsed_time > LED_ON_USEC || i > 80) break;
+            }
+        }
         _updateOnVal(1, 0, 0, 0);
 
         _turnLed(0, 0, 1, 0);
-        hal::waitusec(LED_ON_USEC);
+        //hal::waitusec(LED_ON_USEC);
+        {
+            uint8_t i = 0;
+            float start_time = hal::hrtGetElapsedUsec();
+            while(1){
+                float elapsed_time = hal::hrtGetElapsedUsec(start_time);
+                _right_buf[i] = hal::startAD3();
+                _right_time_buf[i] = elapsed_time;
+                i++;
+                if(elapsed_time > LED_ON_USEC || i > 80) break;
+            }
+        }
+                
         _updateOnVal(0, 0, 1, 0);
 
         _turnLed(0, 0, 0, 0);
@@ -93,11 +124,34 @@ namespace module {
 
 
         _turnLed(0, 1, 0, 0);
-        hal::waitusec(LED_ON_USEC);
+        //hal::waitusec(LED_ON_USEC);
+        {
+            uint8_t i = 0;
+            float start_time = hal::hrtGetElapsedUsec();            
+            while(1){
+                float elapsed_time = hal::hrtGetElapsedUsec(start_time);
+                _left_buf[i] = hal::startAD2();
+                _left_time_buf[i] = elapsed_time;
+                i++;
+                if(elapsed_time > LED_ON_USEC || i > 80) break;
+            }
+        }
+        
         _updateOnVal(0, 1, 0, 0);
 
         _turnLed(0, 0, 0, 1);
-        hal::waitusec(LED_ON_USEC);
+        //hal::waitusec(LED_ON_USEC);
+        {
+            uint8_t i = 0;
+            float start_time = hal::hrtGetElapsedUsec();            
+            while(1){
+                float elapsed_time = hal::hrtGetElapsedUsec(start_time);
+                _ahead_r_buf[i] = hal::startAD4();
+                _ahead_r_time_buf[i] = elapsed_time;
+                i++;
+                if(elapsed_time > LED_ON_USEC || i > 80) break;
+            }
+        }
         _updateOnVal(0, 0, 0, 1);
 
         _turnLed(0, 0, 0, 0);
@@ -354,7 +408,26 @@ namespace module {
         PRINTF_ASYNC("  contact_wall_time   : %f\n", _contact_wall_time);
         PRINTF_ASYNC("  on_wall_ahead_time  : %f\n", _on_wall_ahead_time);
         PRINTF_ASYNC("  on_wall_center_time : %f\n", _on_wall_center_time);
-    };
+    }
+
+    void WallSensor::eval() {
+        PRINTF_ASYNC("-------------------------------------------\n");
+        PRINTF_ASYNC("t_la, la, t_l, l, t_r, r, t_ra, ra\n");
+        for(uint8_t i=0;i<80;i++){
+            PRINTF_ASYNC("%f, %d, %f, %d, %f, %d, %f, %d\n",
+            _ahead_l_time_buf[i],
+            _ahead_l_buf[i],
+            _left_time_buf[i],
+            _left_buf[i],
+            _right_time_buf[i],
+            _right_buf[i],
+            _ahead_r_time_buf[i],
+            _ahead_r_buf[i]
+            );
+        }
+
+    }
+
 
     int usrcmd_wallSensor(int argc, char **argv){
         if (ntlibc_strcmp(argv[1], "status") == 0) {
@@ -362,9 +435,15 @@ namespace module {
             return 0;
         }
 
+        if (ntlibc_strcmp(argv[1], "eval") == 0) {
+            WallSensor::getInstance().eval();
+            return 0;
+        }
+
+
         PRINTF_ASYNC("  Unknown sub command found\r\n");
         return -1;        
-    };
+    }
 }
 
 

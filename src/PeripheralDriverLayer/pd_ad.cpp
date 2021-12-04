@@ -166,21 +166,24 @@ namespace peripheral_driver {
         S12AD.ADCSR.BIT.EXTRG = 1;
         S12AD.ADCSR.BIT.TRGE = 1;
         S12AD.ADCSR.BIT.ADCS = 0;
+        S12AD.ADADC.BIT.ADC   = 3; //3:加算回数の選択 4times変換 3times加算
+        S12AD.ADADC.BIT.AVEE = 1; //1:加算後の値は平均        
+        S12AD.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
 
         S12AD1.ADCSR.BIT.EXTRG = 1;
         S12AD1.ADCSR.BIT.TRGE = 1;
         S12AD1.ADCSR.BIT.ADCS = 0;
-
+        S12AD1.ADADC.BIT.ADC   = 3; //3:加算回数の選択 4times変換 3times加算
+        S12AD1.ADADC.BIT.AVEE = 1; //1:加算後の値は平均 
+        S12AD1.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
     }
 
     uint16_t startAD_AN000() {
         S12AD.ADANSA0.WORD = 0x0001;
         S12AD.ADADS0.BIT.ADS0 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
         S12AD.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
 
         S12AD.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
         int dummy = 0;
         while (S12AD.ADCSR.BIT.ADST == 1) dummy ++;
 
@@ -190,11 +193,9 @@ namespace peripheral_driver {
     uint16_t startAD_AN001() {
         S12AD.ADANSA0.WORD = 0x0002;
         S12AD.ADADS0.BIT.ADS0 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
         S12AD.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
 
         S12AD.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
         volatile int dummy = 0;
         while (S12AD.ADCSR.BIT.ADST == 1) dummy ++;
 
@@ -204,11 +205,9 @@ namespace peripheral_driver {
     uint16_t startAD_AN002() {
         S12AD.ADANSA0.WORD = 0x0004;
         S12AD.ADADS0.BIT.ADS0 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
         S12AD.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
 
         S12AD.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
         volatile int dummy = 0;
         while (S12AD.ADCSR.BIT.ADST == 1) dummy ++;
 
@@ -218,11 +217,8 @@ namespace peripheral_driver {
     uint16_t startAD_AN003() {
         S12AD.ADANSA0.WORD = 0x0008;
         S12AD.ADADS0.BIT.ADS0 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
-        S12AD.ADCER.BIT.ADRFMT = 0; //右詰めフォーマットhttps://googleads.g.doubleclick.net/aclk?sa=l&ai=CEx_Jr0f8Ws6YB4239gWC5LOIBq6RmqBRrPCCga4B9Ku33q0CEAEg8vTYJmCJo9OErBSgAeSHjNIDyAECqQLZUtdpv35DPuACAKgDAcgDmQSqBM8BT9Au0Z4OStJ8dX_7W7x--3TijwWDPhYCRkGk-FJXdJ0Jyae27vyAYyxB6I10RlgdufFNlnmrj22ZFop2FEGgNsQxWH4FUd4u0uNNdneU5Ud9ozXXyGh-pe0J3zeMD2CBOV9L-WnLjN07u0RDi44VQ4feCooxXWar12ut5CNa9hhgYFkFRqOrdoT3RkPaObW8LVlMJwcc3QZNeiTnWTpPJVb_NDcjoudX_5KzqOhp_NdhZ0sYHrhfQEjAYw3AxlJXZOx2Ubx7WR9NufdutFP_4AQBoAYCgAeE-PMtqAeOzhuoB43NG6gH1ckbqAf3zBuoB6a-G6gHmM4b2AcB0ggHCIBhEAEYAbEJ7m4YwrWJ_BOACgPYEwI&num=1&sig=AOD64_1h3oAvACxJxDFu7tcEZBJUSHRwaQ&client=ca-pub-7093843854058227&nm=3&nx=915&ny=22&mb=1&adurl=http://www.noise-counterplan.com/
 
         S12AD.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
         int dummy = 0;
         while (S12AD.ADCSR.BIT.ADST == 1) dummy ++;
 
@@ -236,7 +232,6 @@ namespace peripheral_driver {
         S12AD.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
 
         S12AD.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
         int dummy = 0;
         while (S12AD.ADCSR.BIT.ADST == 1)dummy ++;
 
@@ -438,7 +433,6 @@ namespace peripheral_driver {
         S12AD1.ADANSA0.WORD = 0x0800;
         S12AD1.ADADS1.BIT.ADS1 = 0x0000; //1:変換値加算モード選択 0：非選択
         //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
-        S12AD1.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
 
         S12AD1.ADCSR.BIT.ADST = 1;
         //S12AD.ADSTRGR.BIT.ADSTRS = 0;
