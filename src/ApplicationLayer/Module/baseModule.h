@@ -59,7 +59,7 @@ namespace module {
             return _instance;
         }
 
-        void printCycleTime(){
+        virtual void printCycleTime(){
             PRINTF_ASYNC("    %s\n",getModuleName().c_str());
             PRINTF_ASYNC("      %6.2f[us], %6.2f[us], %6.2f[us], %6.2f[us], %6.2f[us], %6.2f[us]\n\n", _cycle_time_us[0], _cycle_time_us[1], _cycle_time_us[2], _cycle_time_us[3], _cycle_time_every_us, _cycle_time_in_main_loop_us);
         }

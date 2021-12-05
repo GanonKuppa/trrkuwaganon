@@ -89,6 +89,13 @@ namespace hal {
 #endif
     }
 
+    void setInterruptPeriodTimerInterrupt1(uint16_t delay_us){
+#ifndef SILS
+        peripheral_driver::setInterruptPeriodCMT1(delay_us);
+#endif
+    }
+
+
     uint32_t endTimeuCountTimerInterrupt1() {
 #ifndef SILS
         return peripheral_driver::endTimeuCountIntCMT1();
@@ -106,4 +113,16 @@ namespace hal {
 #endif
     }
 
+    void enableMultipleinterrupt(){
+#ifndef SILS
+        __builtin_rx_setpsw('I');
+#else
+        return;
+#endif
+        
+    }
+
+
 }
+
+

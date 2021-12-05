@@ -81,5 +81,11 @@ namespace peripheral_driver {
         return uCountIntCMT1;
     }
 
+    void setInterruptPeriodCMT1(uint16_t delay_us){
+        CMT1.CMCOR = 6*delay_us - 1; //60:10usec 300:50usec 1500:250usec 6000:1msec
+        IR(CMT0,CMI0)=0; //割り込みステータフラグをクリア
+        CMT1.CMCNT = 0;        
+    }
+
 
 }

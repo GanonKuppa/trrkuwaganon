@@ -55,6 +55,7 @@ extern "C" void timerInterrupt1();
 
 void timerInterrupt0() {
     //__builtin_rx_setpsw('I'); 多重割り込み受付
+    hal::enableMultipleinterrupt();
 
     static uint64_t int_tick_count = 0;
     //uint64_t start_clock_count = hal::getElapsedClockCount();
@@ -67,6 +68,7 @@ void timerInterrupt0() {
     }
     // スロット0
     if (int_tick_count % 4 == 0) {
+        module::WallSensor::getInstance().cycle0();
         module::TrajectoryCommander::getInstance().cycle0();
         module::ImuDriver::getInstance().cycle0();
         module::WheelOdometry::getInstance().cycle0();
@@ -79,32 +81,31 @@ void timerInterrupt0() {
     }
     // スロット1
     if (int_tick_count % 4 == 1) {
+        module::WallSensor::getInstance().cycle1();
         module::LedController::getInstance().cycle1();        
         module::Navigator::getInstance().cycle1();
         module::Shell::getInstance().cycle1();
         hal::setSlot1Time(hal::hrtGetElapsedUsec());
     }
     // スロット2
-    if (int_tick_count % 4 == 2) {
-        module::WallSensor::getInstance().cycle2();
+    if (int_tick_count % 4 == 2) {        
         module::PseudoDial::getInstance().cycle2();        
         module::Shell::getInstance().cycle2();        
         hal::setSlot2Time(hal::hrtGetElapsedUsec());
     }
     // スロット3
-    if (int_tick_count % 4 == 3) {        
-        module::WallSensor::getInstance().cycle3();
+    if (int_tick_count % 4 == 3) {                
         module::Logger::getInstance().cycle3();
         module::Shell::getInstance().cycle3();        
         hal::setSlot3Time(hal::hrtGetElapsedUsec());
     }
 
-    hal::hrtStopTimer();
+    //hal::hrtStopTimer();
     int_tick_count++;
 }
 
 void timerInterrupt1() {
-
+    module::WallSensor::getInstance().emitLedTask();
 }
 
 int main(void) {
@@ -148,7 +149,7 @@ void halInit() {
     hal::initSPI1();
     hal::initTimerInterrupt0();
     hal::initPickle();
-    //hal::initTimerInterrupt1();
+    hal::initTimerInterrupt1();
     //hal::initWdt();    
 }
 
@@ -156,7 +157,9 @@ void halInit() {
 //起動時の処理
 void startUpInit() {
     object_init();
-    hal::setPriorityTimerInterrupt0(15);
+    hal::setPriorityTimerInterrupt0(14);
+    hal::setPriorityTimerInterrupt1(15);
+    hal::setInterruptPeriodTimerInterrupt1(80);
     hal::startTimerInterrupt0();
 }
 

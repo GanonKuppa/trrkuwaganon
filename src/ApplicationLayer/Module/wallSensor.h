@@ -9,11 +9,13 @@
 namespace module {
     class WallSensor : public BaseModule<WallSensor> {
       public:
-      	void update2();
-        void update3();        
+      	void update0();
+      	void update1();        
         void setEnable(bool en);
+        void emitLedTask();
         void debug();
         void eval();
+        void printCycleTime();
       private:
         bool _enable;
         int16_t _ahead_l_on;
@@ -30,14 +32,6 @@ namespace module {
         std::deque<int16_t> _ahead_r_q;
         std::deque<int16_t> _left_q;
         std::deque<int16_t> _right_q;
-        float _ahead_l_time_buf[80];
-        float _ahead_r_time_buf[80];
-        float _left_time_buf[80];
-        float _right_time_buf[80];
-        int16_t _ahead_l_buf[80];
-        int16_t _ahead_r_buf[80];
-        int16_t _left_buf[80];
-        int16_t _right_buf[80];
 
         float _dist_al;
         float _dist_ar;
@@ -61,7 +55,8 @@ namespace module {
         float _on_wall_center_time;
 
         const uint8_t BUFF_SIZE = 30;
-        const uint16_t LED_ON_USEC = 100;
+        const uint8_t LED_ON_SEC = 80;
+        float _emit_led_cycle_time_us[8];
 
         WallSensor();
         void _updateOffVal(bool sled1, bool sled2, bool sled3, bool sled4);
@@ -75,6 +70,7 @@ namespace module {
         float _distL(float ad);
         float _distR(float ad);
         float _aheadDist(float dist_al, float dist_ar);
+        uint16_t _trimAverage(uint16_t ad_array[], uint16_t num, uint16_t trim_num);
 
         friend class BaseModule<WallSensor>;
     };

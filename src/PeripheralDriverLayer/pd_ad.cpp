@@ -166,304 +166,217 @@ namespace peripheral_driver {
         S12AD.ADCSR.BIT.EXTRG = 1;
         S12AD.ADCSR.BIT.TRGE = 1;
         S12AD.ADCSR.BIT.ADCS = 0;
-        S12AD.ADADC.BIT.ADC   = 3; //3:加算回数の選択 4times変換 3times加算
-        S12AD.ADADC.BIT.AVEE = 1; //1:加算後の値は平均        
+        //S12AD.ADADC.BIT.ADC  = 0; //3:加算回数の選択 4times変換 3times加算
+        //S12AD.ADADC.BIT.AVEE = 1; //1:加算後の値は平均        
         S12AD.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
+        //S12AD.ADADS0.BIT.ADS0 = 0x0000; //1:変換値加算モード選択 0：非選択
 
         S12AD1.ADCSR.BIT.EXTRG = 1;
         S12AD1.ADCSR.BIT.TRGE = 1;
         S12AD1.ADCSR.BIT.ADCS = 0;
-        S12AD1.ADADC.BIT.ADC   = 3; //3:加算回数の選択 4times変換 3times加算
-        S12AD1.ADADC.BIT.AVEE = 1; //1:加算後の値は平均 
+        //S12AD1.ADADC.BIT.ADC  = 0; //3:加算回数の選択 4times変換 3times加算
+        //S12AD1.ADADC.BIT.AVEE = 1; //1:加算後の値は平均
         S12AD1.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
+        //S12AD1.ADADS0.BIT.ADS0 = 0x0000; //1:変換値加算モード選択 0：非選択
+        //S12AD1.ADADS1.BIT.ADS1 = 0x0000; //1:変換値加算モード選択 0：非選択
+        
     }
 
     uint16_t startAD_AN000() {
         S12AD.ADANSA0.WORD = 0x0001;
-        S12AD.ADADS0.BIT.ADS0 = 0x0000; //1:変換値加算モード選択 0：非選択
-        S12AD.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
-
+                
         S12AD.ADCSR.BIT.ADST = 1;
-        int dummy = 0;
+        volatile int dummy = 0;
         while (S12AD.ADCSR.BIT.ADST == 1) dummy ++;
-
         return S12AD.ADDR0;
     }
 
     uint16_t startAD_AN001() {
         S12AD.ADANSA0.WORD = 0x0002;
-        S12AD.ADADS0.BIT.ADS0 = 0x0000; //1:変換値加算モード選択 0：非選択
-        S12AD.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
-
+              
         S12AD.ADCSR.BIT.ADST = 1;
         volatile int dummy = 0;
         while (S12AD.ADCSR.BIT.ADST == 1) dummy ++;
-
         return S12AD.ADDR1;
     }
 
     uint16_t startAD_AN002() {
         S12AD.ADANSA0.WORD = 0x0004;
-        S12AD.ADADS0.BIT.ADS0 = 0x0000; //1:変換値加算モード選択 0：非選択
-        S12AD.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
 
         S12AD.ADCSR.BIT.ADST = 1;
         volatile int dummy = 0;
         while (S12AD.ADCSR.BIT.ADST == 1) dummy ++;
-
         return S12AD.ADDR2;
     }
 
     uint16_t startAD_AN003() {
         S12AD.ADANSA0.WORD = 0x0008;
-        S12AD.ADADS0.BIT.ADS0 = 0x0000; //1:変換値加算モード選択 0：非選択
-
+        
         S12AD.ADCSR.BIT.ADST = 1;
-        int dummy = 0;
+        volatile int dummy = 0;
         while (S12AD.ADCSR.BIT.ADST == 1) dummy ++;
-
         return S12AD.ADDR3;
     }
 
     uint16_t startAD_AN004() {
         S12AD.ADANSA0.WORD = 0x0010;
-        S12AD.ADADS0.BIT.ADS0 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
-        S12AD.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
-
+        
         S12AD.ADCSR.BIT.ADST = 1;
-        int dummy = 0;
+        volatile int dummy = 0;
         while (S12AD.ADCSR.BIT.ADST == 1)dummy ++;
-
         return S12AD.ADDR4;
     }
 
     uint16_t startAD_AN005() {
         S12AD.ADANSA0.WORD = 0x0020;
-        S12AD.ADADS0.BIT.ADS0 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
-        S12AD.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
-
-        S12AD.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
+        
+        S12AD.ADCSR.BIT.ADST = 1;        
         int dummy = 0;
         while (S12AD.ADCSR.BIT.ADST == 1) dummy ++;
-
         return S12AD.ADDR5;
     }
 
     uint16_t startAD_AN006() {
         S12AD.ADANSA0.WORD = 0x0040;
-        S12AD.ADADS0.BIT.ADS0 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
-        S12AD.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
-
-        S12AD.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
-        int dummy = 0;
+        
+        S12AD.ADCSR.BIT.ADST = 1;        
+        volatile int dummy = 0;
         while (S12AD.ADCSR.BIT.ADST == 1) dummy ++;
-
         return S12AD.ADDR6;
     }
 
     uint16_t startAD_AN007() {
         S12AD.ADANSA0.WORD = 0x0080;
-        S12AD.ADADS0.BIT.ADS0 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
-        S12AD.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
-
-        S12AD.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
-        int dummy = 0;
+        
+        S12AD.ADCSR.BIT.ADST = 1;        
+        volatile int dummy = 0;
         while (S12AD.ADCSR.BIT.ADST == 1) dummy ++;
-
         return S12AD.ADDR7;
     }
 
     uint16_t startAD_AN100() {
         S12AD1.ADANSA0.WORD = 0x0001;
-        S12AD1.ADADS1.BIT.ADS1 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
-        S12AD1.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
-
-        S12AD1.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
+        
+        S12AD1.ADCSR.BIT.ADST = 1;        
         volatile int dummy = 0;
         while (S12AD1.ADCSR.BIT.ADST == 1) dummy ++;
-
         return S12AD1.ADDR0;
     }
 
     uint16_t startAD_AN101() {
         S12AD1.ADANSA0.WORD = 0x0002;
-        S12AD1.ADADS1.BIT.ADS1 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
-        S12AD1.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
-
-        S12AD1.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
+        
+        S12AD1.ADCSR.BIT.ADST = 1;        
         volatile int dummy = 0;
         while (S12AD1.ADCSR.BIT.ADST == 1) dummy ++;
-
         return S12AD1.ADDR1;
     }
 
     uint16_t startAD_AN102() {
         S12AD1.ADANSA0.WORD = 0x0004;
-        S12AD1.ADADS1.BIT.ADS1 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
-        S12AD1.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
 
-        S12AD1.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
+        S12AD1.ADCSR.BIT.ADST = 1;        
         volatile int dummy = 0;
         while (S12AD1.ADCSR.BIT.ADST == 1) dummy ++;
-
         return S12AD1.ADDR2;
     }
 
     uint16_t startAD_AN103() {
         S12AD1.ADANSA0.WORD = 0x0008;
-        S12AD1.ADADS1.BIT.ADS1 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
-        S12AD1.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
 
-        S12AD1.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
-        int dummy = 0;
+        S12AD1.ADCSR.BIT.ADST = 1;        
+        volatile int dummy = 0;
         while (S12AD1.ADCSR.BIT.ADST == 1)dummy ++;
-
         return S12AD1.ADDR3;
     }
 
     uint16_t startAD_AN104() {
         S12AD1.ADANSA0.WORD = 0x0010;
-        S12AD1.ADADS1.BIT.ADS1 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
-        S12AD1.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
 
-        S12AD1.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
-        int dummy = 0;
+        S12AD1.ADCSR.BIT.ADST = 1;        
+        volatile int dummy = 0;
         while (S12AD1.ADCSR.BIT.ADST == 1) dummy ++;
-
         return S12AD1.ADDR4;
     }
 
     uint16_t startAD_AN105() {
         S12AD1.ADANSA0.WORD = 0x0020;
-        S12AD1.ADADS1.BIT.ADS1 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
-        S12AD1.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
 
-        S12AD1.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
+        S12AD1.ADCSR.BIT.ADST = 1;        
         volatile int dummy = 0;
         while (S12AD1.ADCSR.BIT.ADST == 1) dummy ++;
-
         return S12AD1.ADDR5;
     }
 
     uint16_t startAD_AN106() {
         S12AD1.ADANSA0.WORD = 0x0040;
-        S12AD1.ADADS1.BIT.ADS1 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
-        S12AD1.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
 
-        S12AD1.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
-        while (S12AD1.ADCSR.BIT.ADST == 1)
-            ;
+        S12AD1.ADCSR.BIT.ADST = 1;        
+        volatile int dummy = 0;
+        while (S12AD1.ADCSR.BIT.ADST == 1) dummy ++;
         return S12AD1.ADDR6;
     }
 
     uint16_t startAD_AN107() {
         S12AD1.ADANSA0.WORD = 0x0040;
-        S12AD1.ADADS1.BIT.ADS1 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
-        S12AD1.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
-
-        S12AD1.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
-        while (S12AD1.ADCSR.BIT.ADST == 1)
-            ;
+        
+        S12AD1.ADCSR.BIT.ADST = 1;        
+        volatile int dummy = 0;
+        while (S12AD1.ADCSR.BIT.ADST == 1) dummy ++;
         return S12AD1.ADDR7;
     }
 
     uint16_t startAD_AN108() {
         S12AD1.ADANSA0.WORD = 0x0100;
-        S12AD1.ADADS1.BIT.ADS1 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
-        S12AD1.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
-
+        
         S12AD1.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
-        while (S12AD1.ADCSR.BIT.ADST == 1)
-            ;
+        volatile int dummy = 0;
+        while (S12AD1.ADCSR.BIT.ADST == 1) dummy ++;
         return S12AD1.ADDR8;
     }
 
     uint16_t startAD_AN109() {
         S12AD1.ADANSA0.WORD = 0x0200;
-        S12AD1.ADADS1.BIT.ADS1 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
-        S12AD1.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
-
+        
         S12AD1.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
-        while (S12AD1.ADCSR.BIT.ADST == 1)
-            ;
+        volatile int dummy = 0;
+        while (S12AD1.ADCSR.BIT.ADST == 1) dummy ++;
         return S12AD1.ADDR9;
     }
 
     uint16_t startAD_AN110() {
         S12AD1.ADANSA0.WORD = 0x0400;
-        S12AD1.ADADS1.BIT.ADS1 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
-        S12AD1.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
-
+        
         S12AD1.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
-        while (S12AD1.ADCSR.BIT.ADST == 1)
-            ;
+        volatile int dummy = 0;
+        while (S12AD1.ADCSR.BIT.ADST == 1)  dummy ++;            
         return S12AD1.ADDR10;
     }
 
     uint16_t startAD_AN111() {
         S12AD1.ADANSA0.WORD = 0x0800;
-        S12AD1.ADADS1.BIT.ADS1 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
 
         S12AD1.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
-        while (S12AD1.ADCSR.BIT.ADST == 1)
-            ;
+        volatile int dummy = 0;
+        while (S12AD1.ADCSR.BIT.ADST == 1) dummy ++;
         return S12AD1.ADDR11;
     }
 
     uint16_t startAD_AN112() {
         S12AD1.ADANSA0.WORD = 0x1000;
-        S12AD1.ADADS1.BIT.ADS1 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
-        S12AD1.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
 
         S12AD1.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
-        while (S12AD1.ADCSR.BIT.ADST == 1)
-            ;
+        volatile int dummy = 0;
+        while (S12AD1.ADCSR.BIT.ADST == 1) dummy ++;
         return S12AD1.ADDR12;
     }
 
     uint16_t startAD_AN113() {
         S12AD1.ADANSA0.WORD = 0x2000;
-        S12AD1.ADADS1.BIT.ADS1 = 0x0000; //1:変換値加算モード選択 0：非選択
-        //S12AD.ADADC.BIT.ADC   = 3; //加算回数の選択 4times変換 3times加算
-        S12AD1.ADCER.BIT.ADRFMT = 0; //右詰めフォーマット
 
-        S12AD1.ADCSR.BIT.ADST = 1;
-        //S12AD.ADSTRGR.BIT.ADSTRS = 0;
-        while (S12AD1.ADCSR.BIT.ADST == 1)
-            ;
+        S12AD1.ADCSR.BIT.ADST = 1;        
+        volatile int dummy = 0;
+        while (S12AD1.ADCSR.BIT.ADST == 1) dummy ++;
         return S12AD1.ADDR13;
     }
 

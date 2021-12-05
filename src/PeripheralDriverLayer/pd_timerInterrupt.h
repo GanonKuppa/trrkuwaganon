@@ -16,6 +16,8 @@ namespace peripheral_driver {
     void startCMT1();
     void stopCMT1();
 
+    void setInterruptPeriodCMT1(uint16_t delay_us);
+
     uint32_t endTimeuCountIntCMT1();
     uint32_t getTimeuCountIntCMT1();
 }

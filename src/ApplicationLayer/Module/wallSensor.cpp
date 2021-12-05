@@ -11,6 +11,8 @@
 #include "hal_ad.h"
 #include "hal_gpio.h"
 #include "hal_timer.h"
+#include "hal_timerInterrupt.h"
+#include "hal_critical_section.h"
 
 // Module
 #include "parameterManager.h"
@@ -49,14 +51,7 @@ namespace module {
         _contact_wall_time(0.0f),
         _on_wall_ahead_time(0.0f),
         _on_wall_center_time(0.0f),
-        _ahead_l_time_buf(),
-        _ahead_r_time_buf(),
-        _left_time_buf(),
-        _right_time_buf(),
-        _ahead_l_buf(),
-        _ahead_r_buf(),
-        _left_buf(),
-        _right_buf()
+        _emit_led_cycle_time_us()   
     {
         setModuleName("WallSensor");
         for (uint8_t i = 0; i < BUFF_SIZE; i++) {
@@ -72,90 +67,12 @@ namespace module {
         _enable = en;
     }
 
-    
-    
-    void WallSensor::update2(){
-        if(!_enable){
-            _turnLed(0, 0, 0, 0);
-            return;
-        }          
-        _updateOffVal(1, 0, 1, 0);
-
-        _turnLed(1, 0, 0, 0);
-        //hal::waitusec(LED_ON_USEC);
-        {
-            uint8_t i = 0;
-            float start_time = hal::hrtGetElapsedUsec();            
-            while(1){
-                float elapsed_time = hal::hrtGetElapsedUsec(start_time);
-                _ahead_l_buf[i] = hal::startAD1();
-                _ahead_l_time_buf[i] = elapsed_time;
-                i++;
-                if(elapsed_time > LED_ON_USEC || i > 80) break;
-            }
-        }
-        _updateOnVal(1, 0, 0, 0);
-
-        _turnLed(0, 0, 1, 0);
-        //hal::waitusec(LED_ON_USEC);
-        {
-            uint8_t i = 0;
-            float start_time = hal::hrtGetElapsedUsec();
-            while(1){
-                float elapsed_time = hal::hrtGetElapsedUsec(start_time);
-                _right_buf[i] = hal::startAD3();
-                _right_time_buf[i] = elapsed_time;
-                i++;
-                if(elapsed_time > LED_ON_USEC || i > 80) break;
-            }
-        }
-                
-        _updateOnVal(0, 0, 1, 0);
-
+    void WallSensor::update0(){
         _turnLed(0, 0, 0, 0);
-    }
-
-    void WallSensor::update3(){
-        if(!_enable){
-            _turnLed(0, 0, 0, 0);
+        if(!_enable){            
             return;
-        }  
-        _updateOffVal(0, 1, 0, 1);
-
-
-        _turnLed(0, 1, 0, 0);
-        //hal::waitusec(LED_ON_USEC);
-        {
-            uint8_t i = 0;
-            float start_time = hal::hrtGetElapsedUsec();            
-            while(1){
-                float elapsed_time = hal::hrtGetElapsedUsec(start_time);
-                _left_buf[i] = hal::startAD2();
-                _left_time_buf[i] = elapsed_time;
-                i++;
-                if(elapsed_time > LED_ON_USEC || i > 80) break;
-            }
         }
-        
-        _updateOnVal(0, 1, 0, 0);
 
-        _turnLed(0, 0, 0, 1);
-        //hal::waitusec(LED_ON_USEC);
-        {
-            uint8_t i = 0;
-            float start_time = hal::hrtGetElapsedUsec();            
-            while(1){
-                float elapsed_time = hal::hrtGetElapsedUsec(start_time);
-                _ahead_r_buf[i] = hal::startAD4();
-                _ahead_r_time_buf[i] = elapsed_time;
-                i++;
-                if(elapsed_time > LED_ON_USEC || i > 80) break;
-            }
-        }
-        _updateOnVal(0, 0, 0, 1);
-
-        _turnLed(0, 0, 0, 0);
-        
         _modulateVal();
 
         _dist_al = _aheadDistL((float)_ahead_l_q.at(0));
@@ -197,50 +114,134 @@ namespace module {
         }
 
         _publish();
+    }
 
+    void WallSensor::update1(){
+        _turnLed(0,0,0,0);
+        if(!_enable){            
+            return;
+        }
+        _updateOffVal(1, 1, 1, 1);
+        hal::setInterruptPeriodTimerInterrupt1(LED_ON_SEC);
+        hal::startTimerInterrupt1();       
+    }
+    
+
+    void WallSensor::emitLedTask(){
+        static uint8_t loop_count = 0;
+
+        float start_usec = hal::hrtGetElapsedUsec();
+        if(!_enable){            
+            _turnLed(0, 0, 0, 0);
+            hal::stopTimerInterrupt1();
+            loop_count = 0;
+            return;
+        }
+
+        if(loop_count % 8 == 0){                        
+            _turnLed(1,0,0,0);
+             _emit_led_cycle_time_us[0] = hal::hrtGetElapsedUsec(start_usec);
+        }
+        else if(loop_count % 8 == 1){
+            _updateOnVal(1,0,0,0);
+            _turnLed(0,0,0,0);
+            _emit_led_cycle_time_us[1] = hal::hrtGetElapsedUsec(start_usec);
+        }
+        else if(loop_count % 8 == 2){
+            _turnLed(0,1,0,0);
+            _emit_led_cycle_time_us[2] = hal::hrtGetElapsedUsec(start_usec);
+        }
+        else if(loop_count % 8 == 3){
+            _updateOnVal(0,1,0,0);
+            _turnLed(0,0,0,0);
+            _emit_led_cycle_time_us[3] = hal::hrtGetElapsedUsec(start_usec);
+        }
+        else if(loop_count % 8 == 4){
+            _turnLed(0,0,1,0);
+            _emit_led_cycle_time_us[4] = hal::hrtGetElapsedUsec(start_usec);
+        }
+        else if(loop_count % 8 == 5){
+            _updateOnVal(0,0,1,0);
+            _turnLed(0,0,0,0);
+            _emit_led_cycle_time_us[5] = hal::hrtGetElapsedUsec(start_usec);
+        }
+        else if(loop_count % 8 == 6){
+            _turnLed(0,0,0,1);
+            _emit_led_cycle_time_us[6] = hal::hrtGetElapsedUsec(start_usec);
+        }
+        else if(loop_count % 8 == 7){
+            _updateOnVal(0,0,0,1);
+            _turnLed(0,0,0,0);
+            hal::stopTimerInterrupt1();
+            _emit_led_cycle_time_us[7] = hal::hrtGetElapsedUsec(start_usec);
+        }
+        else{
+            _turnLed(0,0,0,0);
+            hal::stopTimerInterrupt1();
+        }
+
+        loop_count ++;
     }
 
 
-
     void WallSensor::_updateOffVal(bool sled1, bool sled2, bool sled3, bool sled4){
+        uint16_t ad_array[10];
         if(sled1) {
-            _ahead_l_off = hal::startAD1();
-            _ahead_l_off = hal::startAD1();
+            for(uint8_t i=0;i<10;i++){
+                ad_array[i] = hal::startAD1();
+            }
+            _ahead_l_off = _trimAverage(ad_array, 10, 4);
         }
         if(sled2) {
-            _left_off = hal::startAD2();
-            _left_off = hal::startAD2();
+            for(uint8_t i=0;i<10;i++){
+                ad_array[i] = hal::startAD2();
+            }
+            _left_off = _trimAverage(ad_array, 10, 4);
         }
         if(sled3) {
-            _right_off = hal::startAD3();
-            _right_off = hal::startAD3();
+            for(uint8_t i=0;i<10;i++){
+                ad_array[i] = hal::startAD3();
+            }
+            _right_off = _trimAverage(ad_array, 10, 4);
         }
         if(sled4) {
-            _ahead_r_off = hal::startAD4();
-            _ahead_r_off= hal::startAD4();
+            for(uint8_t i=0;i<10;i++){
+                ad_array[i] = hal::startAD4();
+            }
+            _ahead_r_off = _trimAverage(ad_array, 10, 4);
         }
     }
 
     void WallSensor::_updateOnVal(bool sled1, bool sled2, bool sled3, bool sled4) {
+        uint16_t ad_array[10];
         if(sled1) {
-            _ahead_l_on = hal::startAD1();
-            _ahead_l_on = hal::startAD1();
+            for(uint8_t i=0;i<10;i++){
+                ad_array[i] = hal::startAD1();
+            }
+            _ahead_l_on = _trimAverage(ad_array, 10, 4);
         }
         if(sled2) {
-            _left_on = hal::startAD2();
-            _left_on = hal::startAD2();
+            for(uint8_t i=0;i<10;i++){
+                ad_array[i] = hal::startAD2();
+            }
+            _left_on = _trimAverage(ad_array, 10, 4);
         }
         if(sled3) {
-            _right_on = hal::startAD3();
-            _right_on = hal::startAD3();
+            for(uint8_t i=0;i<10;i++){
+                ad_array[i] = hal::startAD3();
+            }
+            _right_on = _trimAverage(ad_array, 10, 4);
         }
         if(sled4) {
-            _ahead_r_on = hal::startAD4();
-            _ahead_r_on = hal::startAD4();
+            for(uint8_t i=0;i<10;i++){
+                ad_array[i] = hal::startAD4();
+            }
+            _ahead_r_on = _trimAverage(ad_array, 10, 4);
         }
     }
 
     void WallSensor::_turnLed(bool sled1, bool sled2, bool sled3, bool sled4) {     
+
         if(sled1){
             hal::setDout3(1);
             hal::setDout4(1);
@@ -383,7 +384,14 @@ namespace module {
         return a * std::log(x) + b;
     }
 
-
+    uint16_t WallSensor::_trimAverage(uint16_t ad_array[], uint16_t num, uint16_t trim_num){
+        std::sort(ad_array, ad_array + (sizeof(ad_array)/sizeof(ad_array[0])));
+        uint32_t sum = 0;
+        for(uint16_t i=trim_num;i<num-trim_num;i++){
+            sum += ad_array[i];
+        }
+        return sum / (num - trim_num * 2);
+    }    
 
     void WallSensor::debug() {        
         PRINTF_ASYNC("  =============================\n");
@@ -411,23 +419,105 @@ namespace module {
     }
 
     void WallSensor::eval() {
+        hal::enterCriticalSection();
+        _turnLed(0, 0, 0, 0);
+        hal::hrtStopTimer();
+        hal::hrtStartTimer();
+        
+        float ahead_l_time_buf[50];
+        float ahead_r_time_buf[50];
+        float left_time_buf[50];
+        float right_time_buf[50];
+        int16_t ahead_l_buf[50];
+        int16_t ahead_r_buf[50];
+        int16_t left_buf[50];
+        int16_t right_buf[50];
+
+        _turnLed(1, 0, 0, 0);
+        {
+            uint8_t i = 0;
+            float start_time = hal::hrtGetElapsedUsec();            
+            while(1){
+                float elapsed_time = hal::hrtGetElapsedUsec(start_time);
+                hal::startAD1();
+                ahead_l_buf[i] = hal::startAD1() ;
+                ahead_l_time_buf[i] = elapsed_time;
+                i++;                
+                if(i > 50) break;
+            }
+        }        
+        _turnLed(0, 0, 0, 0);
+        hal::waitusec(60);
+
+        _turnLed(0, 0, 1, 0);
+        {
+            uint8_t i = 0;
+            float start_time = hal::hrtGetElapsedUsec();
+            while(1){
+                float elapsed_time = hal::hrtGetElapsedUsec(start_time);
+                hal::startAD3();
+                right_buf[i] = hal::startAD3();
+                right_time_buf[i] = elapsed_time;
+                i++;                
+                if(i > 50) break;
+            }
+        }
+        _turnLed(0, 0, 0, 0);
+        hal::waitusec(60);
+
+        _turnLed(0, 1, 0, 0);
+        {
+            uint8_t i = 0;
+            float start_time = hal::hrtGetElapsedUsec();            
+            while(1){
+                float elapsed_time = hal::hrtGetElapsedUsec(start_time);
+                hal::startAD2();
+                left_buf[i] = hal::startAD2();
+                left_time_buf[i] = elapsed_time;
+                i++;                
+                if(i > 50) break;
+            }
+        }
+        _turnLed(0, 0, 0, 0);
+        hal::waitusec(60);
+
+        _turnLed(0, 0, 0, 1);
+        {
+            uint8_t i = 0;
+            float start_time = hal::hrtGetElapsedUsec();            
+            while(1){
+                float elapsed_time = hal::hrtGetElapsedUsec(start_time);
+                hal::startAD4();
+                ahead_r_buf[i] = hal::startAD4();
+                ahead_r_time_buf[i] = elapsed_time;
+                i++;                
+                if(i > 50) break;
+            }
+        }        
+        _turnLed(0, 0, 0, 0);
+        
+        hal::leaveCriticalSection();
+
         PRINTF_ASYNC("-------------------------------------------\n");
         PRINTF_ASYNC("t_la, la, t_l, l, t_r, r, t_ra, ra\n");
-        for(uint8_t i=0;i<80;i++){
+        for(uint8_t i=0;i<50;i++){
             PRINTF_ASYNC("%f, %d, %f, %d, %f, %d, %f, %d\n",
-            _ahead_l_time_buf[i],
-            _ahead_l_buf[i],
-            _left_time_buf[i],
-            _left_buf[i],
-            _right_time_buf[i],
-            _right_buf[i],
-            _ahead_r_time_buf[i],
-            _ahead_r_buf[i]
+                ahead_l_time_buf[i], ahead_l_buf[i],
+                left_time_buf[i], left_buf[i],
+                right_time_buf[i], right_buf[i],
+                ahead_r_time_buf[i], ahead_r_buf[i]
             );
         }
-
     }
 
+    void WallSensor::printCycleTime(){
+        PRINTF_ASYNC("    %s\n",getModuleName().c_str());
+        PRINTF_ASYNC("      %6.2f[us], %6.2f[us], %6.2f[us], %6.2f[us], %6.2f[us], %6.2f[us]\n", _cycle_time_us[0], _cycle_time_us[1], _cycle_time_us[2], _cycle_time_us[3], _cycle_time_every_us, _cycle_time_in_main_loop_us);
+        PRINTF_ASYNC("      -- emitLedTask() 0 to 7 --\n");        
+        PRINTF_ASYNC("      %6.2f[us], %6.2f[us], %6.2f[us], %6.2f[us]\n", _emit_led_cycle_time_us[0], _emit_led_cycle_time_us[1], _emit_led_cycle_time_us[2], _emit_led_cycle_time_us[3]);
+        PRINTF_ASYNC("      %6.2f[us], %6.2f[us], %6.2f[us], %6.2f[us]\n\n", _emit_led_cycle_time_us[4], _emit_led_cycle_time_us[5], _emit_led_cycle_time_us[6], _emit_led_cycle_time_us[7]);
+
+    }
 
     int usrcmd_wallSensor(int argc, char **argv){
         if (ntlibc_strcmp(argv[1], "status") == 0) {
@@ -439,7 +529,6 @@ namespace module {
             WallSensor::getInstance().eval();
             return 0;
         }
-
 
         PRINTF_ASYNC("  Unknown sub command found\r\n");
         return -1;        

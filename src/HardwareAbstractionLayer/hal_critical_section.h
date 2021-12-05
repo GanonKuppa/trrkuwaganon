@@ -5,6 +5,7 @@
 namespace hal{
     inline void enterCriticalSection(){
         peripheral_driver::stopCMT0();
+        peripheral_driver::stopCMT1();
     };
 
     inline void leaveCriticalSection(){        
