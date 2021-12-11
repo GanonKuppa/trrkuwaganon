@@ -72,7 +72,7 @@ namespace module {
         if(!_enable){            
             return;
         }
-
+        _updateOffVal(1, 1, 1, 1);
         _modulateVal();
 
         _dist_al = _aheadDistL((float)_ahead_l_q.at(0));
@@ -114,18 +114,10 @@ namespace module {
         }
 
         _publish();
-    }
 
-    void WallSensor::update1(){
-        _turnLed(0,0,0,0);
-        if(!_enable){            
-            return;
-        }
-        _updateOffVal(1, 1, 1, 1);
         hal::setInterruptPeriodTimerInterrupt1(LED_ON_SEC);
-        hal::startTimerInterrupt1();       
-    }
-    
+        hal::startTimerInterrupt1();
+    }    
 
     void WallSensor::emitLedTask(){
         static uint8_t loop_count = 0;
@@ -148,20 +140,20 @@ namespace module {
             _emit_led_cycle_time_us[1] = hal::hrtGetElapsedUsec(start_usec);
         }
         else if(loop_count % 8 == 2){
-            _turnLed(0,1,0,0);
+            _turnLed(0,0,1,0);
             _emit_led_cycle_time_us[2] = hal::hrtGetElapsedUsec(start_usec);
         }
         else if(loop_count % 8 == 3){
-            _updateOnVal(0,1,0,0);
+            _updateOnVal(0,0,1,0);
             _turnLed(0,0,0,0);
             _emit_led_cycle_time_us[3] = hal::hrtGetElapsedUsec(start_usec);
         }
         else if(loop_count % 8 == 4){
-            _turnLed(0,0,1,0);
+            _turnLed(0,1,0,0);
             _emit_led_cycle_time_us[4] = hal::hrtGetElapsedUsec(start_usec);
         }
         else if(loop_count % 8 == 5){
-            _updateOnVal(0,0,1,0);
+            _updateOnVal(0,1,0,0);
             _turnLed(0,0,0,0);
             _emit_led_cycle_time_us[5] = hal::hrtGetElapsedUsec(start_usec);
         }
@@ -173,7 +165,7 @@ namespace module {
             _updateOnVal(0,0,0,1);
             _turnLed(0,0,0,0);
             hal::stopTimerInterrupt1();
-            _emit_led_cycle_time_us[7] = hal::hrtGetElapsedUsec(start_usec);
+            _emit_led_cycle_time_us[7] = hal::hrtGetElapsedUsec(start_usec);            
         }
         else{
             _turnLed(0,0,0,0);
@@ -423,83 +415,64 @@ namespace module {
         _turnLed(0, 0, 0, 0);
         hal::hrtStopTimer();
         hal::hrtStartTimer();
+        constexpr uint16_t BUF_SIZE = 70;
+        float ahead_l_time_buf[BUF_SIZE];
+        float ahead_r_time_buf[BUF_SIZE];
+        float left_time_buf[BUF_SIZE];
+        float right_time_buf[BUF_SIZE];
+        int16_t ahead_l_buf[BUF_SIZE];
+        int16_t ahead_r_buf[BUF_SIZE];
+        int16_t left_buf[BUF_SIZE];
+        int16_t right_buf[BUF_SIZE];
         
-        float ahead_l_time_buf[50];
-        float ahead_r_time_buf[50];
-        float left_time_buf[50];
-        float right_time_buf[50];
-        int16_t ahead_l_buf[50];
-        int16_t ahead_r_buf[50];
-        int16_t left_buf[50];
-        int16_t right_buf[50];
-
-        _turnLed(1, 0, 0, 0);
-        {
-            uint8_t i = 0;
-            float start_time = hal::hrtGetElapsedUsec();            
-            while(1){
-                float elapsed_time = hal::hrtGetElapsedUsec(start_time);
-                hal::startAD1();
-                ahead_l_buf[i] = hal::startAD1() ;
-                ahead_l_time_buf[i] = elapsed_time;
-                i++;                
-                if(i > 50) break;
-            }
-        }        
-        _turnLed(0, 0, 0, 0);
-        hal::waitusec(60);
-
-        _turnLed(0, 0, 1, 0);
-        {
-            uint8_t i = 0;
-            float start_time = hal::hrtGetElapsedUsec();
-            while(1){
-                float elapsed_time = hal::hrtGetElapsedUsec(start_time);
-                hal::startAD3();
-                right_buf[i] = hal::startAD3();
-                right_time_buf[i] = elapsed_time;
-                i++;                
-                if(i > 50) break;
-            }
+        hal::waitusec(150);
+        float start_time = hal::hrtGetElapsedUsec();                
+        for(uint8_t i=0;i<BUF_SIZE;i++){
+            if(i == BUF_SIZE/2)_turnLed(1, 0, 0, 0);
+            hal::startAD1();
+            ahead_l_buf[i] = hal::startAD1();
+            float elapsed_time = hal::hrtGetElapsedUsec(start_time);
+            ahead_l_time_buf[i] = elapsed_time;
         }
         _turnLed(0, 0, 0, 0);
-        hal::waitusec(60);
+        hal::waitusec(150);
 
-        _turnLed(0, 1, 0, 0);
-        {
-            uint8_t i = 0;
-            float start_time = hal::hrtGetElapsedUsec();            
-            while(1){
-                float elapsed_time = hal::hrtGetElapsedUsec(start_time);
-                hal::startAD2();
-                left_buf[i] = hal::startAD2();
-                left_time_buf[i] = elapsed_time;
-                i++;                
-                if(i > 50) break;
-            }
+        start_time = hal::hrtGetElapsedUsec();
+        for(uint8_t i=0;i<BUF_SIZE;i++){
+            if(i == BUF_SIZE/2)_turnLed(0, 0, 1, 0);
+            hal::startAD3();
+            right_buf[i] = hal::startAD3();
+            float elapsed_time = hal::hrtGetElapsedUsec(start_time);
+            right_time_buf[i] = elapsed_time;
         }
         _turnLed(0, 0, 0, 0);
-        hal::waitusec(60);
+        hal::waitusec(150);
 
-        _turnLed(0, 0, 0, 1);
-        {
-            uint8_t i = 0;
-            float start_time = hal::hrtGetElapsedUsec();            
-            while(1){
-                float elapsed_time = hal::hrtGetElapsedUsec(start_time);
-                hal::startAD4();
-                ahead_r_buf[i] = hal::startAD4();
-                ahead_r_time_buf[i] = elapsed_time;
-                i++;                
-                if(i > 50) break;
-            }
-        }        
+        start_time = hal::hrtGetElapsedUsec();            
+        for(uint8_t i=0;i<BUF_SIZE;i++){
+            if(i == BUF_SIZE/2)_turnLed(0, 1, 0, 0);
+            hal::startAD2();
+            left_buf[i] = hal::startAD2();
+            float elapsed_time = hal::hrtGetElapsedUsec(start_time);
+            left_time_buf[i] = elapsed_time;
+        }
+        _turnLed(0, 0, 0, 0);
+        hal::waitusec(150);
+        
+        start_time = hal::hrtGetElapsedUsec();            
+        for(uint8_t i=0;i<BUF_SIZE;i++){
+            if(i == BUF_SIZE/2)_turnLed(0, 0, 0, 1);
+            hal::startAD4();
+            ahead_r_buf[i] = hal::startAD4();
+            float elapsed_time = hal::hrtGetElapsedUsec(start_time);
+            ahead_r_time_buf[i] = elapsed_time;
+        }
         _turnLed(0, 0, 0, 0);
         
         hal::leaveCriticalSection();
 
         PRINTF_ASYNC("-------------------------------------------\n");
-        PRINTF_ASYNC("t_la, la, t_l, l, t_r, r, t_ra, ra\n");
+        PRINTF_ASYNC("t_al, al, t_l, l, t_r, r, t_ar, ar\n");
         for(uint8_t i=0;i<50;i++){
             PRINTF_ASYNC("%f, %d, %f, %d, %f, %d, %f, %d\n",
                 ahead_l_time_buf[i], ahead_l_buf[i],

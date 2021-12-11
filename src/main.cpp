@@ -67,8 +67,7 @@ void timerInterrupt0() {
         module::Heater::getInstance().cycleEvery();
     }
     // スロット0
-    if (int_tick_count % 4 == 0) {
-        module::WallSensor::getInstance().cycle0();
+    if (int_tick_count % 4 == 0) {        
         module::TrajectoryCommander::getInstance().cycle0();
         module::ImuDriver::getInstance().cycle0();
         module::WheelOdometry::getInstance().cycle0();
@@ -77,13 +76,13 @@ void timerInterrupt0() {
         module::BatteryMonitor::getInstance().cycle0();
         module::PowerTransmission::getInstance().cycle0();
         module::Shell::getInstance().cycle0();        
+        module::Navigator::getInstance().cycle1();
+        module::WallSensor::getInstance().cycle0();
         hal::setSlot0Time(hal::hrtGetElapsedUsec());
     }
     // スロット1
-    if (int_tick_count % 4 == 1) {
-        module::WallSensor::getInstance().cycle1();
+    if (int_tick_count % 4 == 1) {        
         module::LedController::getInstance().cycle1();        
-        module::Navigator::getInstance().cycle1();
         module::Shell::getInstance().cycle1();
         hal::setSlot1Time(hal::hrtGetElapsedUsec());
     }

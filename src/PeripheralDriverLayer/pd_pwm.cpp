@@ -26,7 +26,7 @@ namespace peripheral_driver {
     
     static float dutyMTU7; //68ピン PA2 SUC_MOTOR_PWM MTIOC7A
 
-    static constexpr uint16_t FREQ_COUNT = 200;
+    static constexpr uint16_t FREQ_COUNT = 150;
 
     void initMTU0() {
         SYSTEM.PRCR.WORD = 0xA502;

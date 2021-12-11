@@ -9,8 +9,7 @@
 namespace module {
     class WallSensor : public BaseModule<WallSensor> {
       public:
-      	void update0();
-      	void update1();        
+      	void update0();      	     
         void setEnable(bool en);
         void emitLedTask();
         void debug();
@@ -55,7 +54,7 @@ namespace module {
         float _on_wall_center_time;
 
         const uint8_t BUFF_SIZE = 30;
-        const uint8_t LED_ON_SEC = 80;
+        const uint8_t LED_ON_SEC = 100;        
         float _emit_led_cycle_time_us[8];
 
         WallSensor();
