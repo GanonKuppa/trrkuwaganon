@@ -8,7 +8,9 @@
 int main() {    
     sim::initSimConnection();
     
-    float x, y, t = 0.0f;
+    float x = 0.0f;
+    float y = 0.0f;
+    float t = 0.0f;
     while(1){
         sim::setRobotPos(x,y,90.0f,0);
         hal::waitmsec(10);

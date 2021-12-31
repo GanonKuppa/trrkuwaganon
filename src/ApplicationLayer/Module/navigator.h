@@ -7,7 +7,7 @@
 #include "navStateMsg.h"
 #include "wallSensorMsg.h"
 #include "actuatorOutputMsg.h"
-#include "ctrlSetPointMsg.h"
+#include "ctrlSetpointMsg.h"
 
 // Object
 #include "maze.h"
