@@ -143,12 +143,14 @@ namespace hal {
     }
 
     int feedPickleWithPrintfAsync(){        
+#ifndef SILS
         for(auto &c : _pickleBuf){            
             peripheral_driver::put1byteSCIFA9(c);
             if(peripheral_driver::getSCIFA9Bufsize() > 512){
                 while(peripheral_driver::getSCIFA9Bufsize() > 256);
             }
         }
+#endif
     };
 
 }

@@ -240,6 +240,7 @@ function main() {  /* eslint consistent-return: 0 */
       }
       
       json['type'] = 'doJsonCmd';
+      console.log(json);
       worker.postMessage(json);
     
 
@@ -249,7 +250,7 @@ function main() {  /* eslint consistent-return: 0 */
 
 
   });
-  udp_server.bind(UDP_PORT, 'localhost');
+  udp_server.bind(UDP_PORT, '0.0.0.0');
 
 
   

@@ -1,18 +1,20 @@
-#include <winsock2.h>
 #include <string>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 
-static SOCKET sock;
+
+
+static int sock;
 static struct sockaddr_in addr;
-static WSAData wsaData;
-
 
 void initUdpClient(std::string ip, int port) {
-    WSAStartup(MAKEWORD(2, 0), &wsaData);
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
-    addr.sin_addr.S_un.S_addr = inet_addr(ip.c_str());
-
+    addr.sin_addr.s_addr = inet_addr(ip.c_str());        
 }
 
 void sendUdpString(std::string s) {
@@ -20,7 +22,5 @@ void sendUdpString(std::string s) {
 }
 
 void finalizeUdpClient() {
-    closesocket(sock);
-    WSACleanup();
+    close(sock);
 }
-

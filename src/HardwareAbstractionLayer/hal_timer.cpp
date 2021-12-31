@@ -31,7 +31,7 @@ namespace hal {
 #ifndef SILS
         peripheral_driver::waitnsec(nsec);
 #else
-        nanosleep(nsec);
+        //nanosleep(nsec);
 #endif
     }
 
@@ -114,7 +114,7 @@ namespace hal {
         std::chrono::system_clock::time_point end; // 型は auto で可
         end = std::chrono::system_clock::now();  // 計測終了時間
         double elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count();                
-        return elepased - double(clock_count);
+        return elapsed - double(clock_count);
 #endif
     }
 

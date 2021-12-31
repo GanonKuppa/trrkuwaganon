@@ -1,10 +1,11 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <iomanip>
 #include <chrono>
-#include <windows.h>
-
 
 #include "picojson.h"
 #include "udp.h"
@@ -14,9 +15,25 @@
 
 
 namespace sim {
-
     void initSimConnection() {
-        initUdpClient("127.0.0.1", 2020);
+        char buf[256];
+        // WSL2でホストのWindowsのIPアドレスを取得するための処理
+        {
+            FILE* fp;
+
+
+            if ((fp = popen("cat /etc/resolv.conf | grep nameserver | awk '{print $2}'", "r")) == NULL) {
+                fprintf(stderr, "パイプのオープンに失敗しました！: argv[1]=%s", "cat /etc/resolv.conf | grep nameserver | awk '{print $2}'");
+                return;
+            }
+
+            printf("host ip:");
+            while (fgets(buf, sizeof(buf), fp) != NULL) {
+                printf("%s", buf);
+            }                    
+            pclose(fp);
+        }
+        initUdpClient(buf, 2020);
     }
 
     void finalizeSimConnection() {

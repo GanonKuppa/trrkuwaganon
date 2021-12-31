@@ -63,14 +63,27 @@ help:
 
 
 .PHONY: test_simSearch
-test_simSearch:
+test_simSearch:	
 	- rm -r test/simSearch/build
 	- mkdir test/simSearch/build
 	- cd test/simSearch/build; cmake .. -G Ninja                         
 	- cd test/simSearch/build; ninja
 	- test/simSearch/build/main
 
+.PHONY: test_simSearch_cmake
+test_simSearch_cmake:	
+	- cd test/simSearch/build; cmake .. -G Ninja                         
 
+
+.PHONY: test_simSearch_ninja
+test_simSearch_ninja:	
+	- cd test/simSearch/build; ninja
+	- test/simSearch/build/main
+
+.PHONY: test_simSearch_clean
+test_simSearch_clean:
+	- rm -r test/simSearch/build
+	- mkdir test/simSearch/build
 
 .PHONY: test_traj
 test_traj:
