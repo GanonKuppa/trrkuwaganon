@@ -38,7 +38,7 @@ namespace module {
         T read(std::string key);
 
         template<typename T>
-        void registration(uint16_t val_num, T& r_val, std::string key);
+        void registration(uint16_t val_num, T& r_val, std::string key, T default_val);
 
         //----管理下においた変数たち-----
         float mass; //0

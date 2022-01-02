@@ -222,8 +222,11 @@ bool StraightTrajectory::isEnd() {
     VehiclePositionMsg pos_msg;
     copyMsg(msg_id::VEHICLE_POSITION, &pos_msg);
     float res_dist = _calcResidualDist(pos_msg.x, pos_msg.y);
-
-    if (_cumulative_dist >= _target_dist && res_dist <= 0.00025f) {
+    if (_cumulative_dist >= _target_dist 
+#ifndef SILS
+    && res_dist <= 0.00025f
+#endif    
+    ) {
         _x = getEndX();
         _y = getEndY();
         _yaw = getEndYaw();

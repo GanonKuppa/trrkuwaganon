@@ -145,8 +145,7 @@ namespace activity{
             StraightFactory::push(turn_type, target_dist, v_max, v_max, v_end, a_acc, a_dec);
             StopFactory::push(2.0f);            
         }
-        else if(mode == 6){
-        	float target_dist = 0.09f;
+        else if(mode == 6){        	
             float v_0 = 0.0f;
             float v_max = pm.v_search_run;
             float v_end = 0.0f;

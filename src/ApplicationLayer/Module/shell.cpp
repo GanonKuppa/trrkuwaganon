@@ -1,6 +1,7 @@
 #include "shell.h"
 
 #include <string.h>
+#include <stdint.h>
 
 // Lib/ntshell
 #include "ntopt.h"
@@ -87,7 +88,7 @@ static const cmd_table_t cmdlist[] = {
 int usrcmd_help(int argc, char **argv)
 {
     const cmd_table_t *p = &cmdlist[0];
-    for (int i = 0; i < sizeof(cmdlist) / sizeof(cmdlist[0]); i++) {
+    for (uint16_t i = 0; i < sizeof(cmdlist) / sizeof(cmdlist[0]); i++) {
         PRINTF_ASYNC("  ");
         PRINTF_ASYNC(p->cmd);
         int command_len_max = 24;
@@ -242,7 +243,7 @@ namespace module {
             return 0;
         }
         const cmd_table_t *p = &cmdlist[0];
-        for (int i = 0; i < sizeof(cmdlist) / sizeof(cmdlist[0]); i++) {
+        for (uint16_t i = 0; i < sizeof(cmdlist) / sizeof(cmdlist[0]); i++) {
             if (ntlibc_strcmp((const char *)argv[0], p->cmd) == 0) {
                 return p->func(argc, argv);
             }

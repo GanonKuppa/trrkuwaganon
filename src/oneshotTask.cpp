@@ -15,8 +15,7 @@ static std::queue<std::function<void(void)>> task_que;
 
 
     void doTask(){
-        hal::stopTimerInterrupt0();
-        bool empty;
+        hal::stopTimerInterrupt0();        
         if(!task_que.empty()){                
 
         	hal::startTimerInterrupt0();

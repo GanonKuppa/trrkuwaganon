@@ -66,6 +66,9 @@ Wall::Wall(EAzimuth dir, bool l, bool a, bool r) {
             S = a;
             E = l;
             break;
+        default:
+            //do nothing
+            break;
     }
 }
 
@@ -252,6 +255,9 @@ void Maze::writeSideWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool r) {
             wall.W = r;            
             wall.E = l;
             break;
+        default:
+            //do nothing
+            break;
     }
     writeWall(x, y, wall);
 }
@@ -308,6 +314,9 @@ void Maze::writeWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool a, bool r)
             wall.S = a;
             wall.E = l;
             break;
+        default:
+            //do nothing;
+            break;
     }
     writeWall(x, y, wall);
 }
@@ -357,6 +366,9 @@ int8_t Maze::updateWall(uint8_t x, uint8_t y, EAzimuth dir, WallSensorMsg& ws_ms
                         readWall(x,y).W != ws_msg.is_right||
                         readWall(x,y).E != ws_msg.is_left) return -1;
                 break;
+            default:
+                //do nothing;
+                break;
         }
         return 1;
     }
@@ -395,7 +407,7 @@ EAzimuth Maze::getMinDirection(uint8_t x, uint8_t y, EAzimuth dir) {
     uint16_t potential_N = 0xffff;
     uint16_t potential_W = 0xffff;
     uint16_t potential_S = 0xffff;
-    EAzimuth min_dir;
+    EAzimuth min_dir = EAzimuth::POLE;
 
     Wall wall = readWall(x,y);
     if(wall.E == 0 && wall.EF == 1 && x != 31)potential_E = p_map[x+1][y];

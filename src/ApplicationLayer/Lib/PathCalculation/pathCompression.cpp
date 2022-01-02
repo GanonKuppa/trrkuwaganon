@@ -6,7 +6,7 @@
 
 
 void compress_l_90(std::vector<Path>& path_vec, uint16_t start_index) {
-	for (int i=start_index; i<path_vec.size()-4; i++) {
+	for (uint16_t i=start_index; i<path_vec.size()-4; i++) {
 		if(path_vec[i+0].isStraightEnd() &&
 
 				path_vec[i+1].turn_type == ETurnType::STRAIGHT &&
@@ -24,7 +24,7 @@ void compress_l_90(std::vector<Path>& path_vec, uint16_t start_index) {
 }
 
 void compress_180(std::vector<Path>& path_vec, uint16_t start_index) {
-	for (int i=start_index; i<path_vec.size()-5; i++) {
+	for (uint16_t i=start_index; i<path_vec.size()-5; i++) {
 		if(path_vec[i+0].isStraightEnd() &&
 
 				path_vec[i+1].turn_type == ETurnType::STRAIGHT &&
@@ -46,7 +46,7 @@ void compress_180(std::vector<Path>& path_vec, uint16_t start_index) {
 }
 
 void compress_s2d_135(std::vector<Path>& path_vec, uint16_t start_index) {
-	for (int i=start_index; i<path_vec.size()-4; i++) {
+	for (uint16_t i=start_index; i<path_vec.size()-4; i++) {
 		if(path_vec[i+0].isStraightEnd() &&
 
 				path_vec[i+1].turn_type == ETurnType::STRAIGHT &&
@@ -67,7 +67,7 @@ void compress_s2d_135(std::vector<Path>& path_vec, uint16_t start_index) {
 }
 
 void compress_d2s_135(std::vector<Path>& path_vec, uint16_t start_index) {
-	for (int i=start_index; i<path_vec.size()-4; i++) {
+	for (uint16_t i=start_index; i<path_vec.size()-4; i++) {
 		if( path_vec[i+0].turn_dir != path_vec[i+1].turn_dir &&
 				(path_vec[i+0].isDiagonalEnd() ||
 				 path_vec[i+0].turn_type == ETurnType::TURN_90) &&
@@ -87,7 +87,7 @@ void compress_d2s_135(std::vector<Path>& path_vec, uint16_t start_index) {
 }
 
 void compress_s2d_45(std::vector<Path>& path_vec, uint16_t start_index) {
-	for (int i=start_index; i<path_vec.size()-3; i++) {
+	for (uint16_t i=start_index; i<path_vec.size()-3; i++) {
 		if( path_vec[i+0].isStraightEnd() &&
 
 				path_vec[i+1].turn_type == ETurnType::STRAIGHT &&
@@ -105,7 +105,7 @@ void compress_s2d_45(std::vector<Path>& path_vec, uint16_t start_index) {
 }
 
 void compress_d2s_45(std::vector<Path>& path_vec, uint16_t start_index) {
-	for (int i=start_index; i<path_vec.size()-3; i++) {
+	for (uint16_t i=start_index; i<path_vec.size()-3; i++) {
 		if( path_vec[i+0].turn_dir != path_vec[i+1].turn_dir &&
 				(path_vec[i+0].isDiagonalEnd() ||
 				 path_vec[i+0].turn_type == ETurnType::TURN_90) &&
@@ -122,7 +122,7 @@ void compress_d2s_45(std::vector<Path>& path_vec, uint16_t start_index) {
 }
 
 void compress_d_90(std::vector<Path>& path_vec, uint16_t start_index) {
-	for (int i=start_index; i<path_vec.size()-3; i++) {
+	for (uint16_t i=start_index; i<path_vec.size()-3; i++) {
 		if(path_vec[i+0].turn_dir != path_vec[i+1].turn_dir &&
 				(path_vec[i+0].isDiagonalEnd() ||
 				 path_vec[i+0].turn_type == ETurnType::TURN_90) &&
@@ -166,7 +166,7 @@ void compress_straight(std::vector<Path>& path_vec, uint16_t start_num) {
 }
 
 void compress_d_straight(std::vector<Path>& path_vec, uint16_t start_index) {
-	for (int i=start_index; i<path_vec.size()-2; i++) {
+	for (uint16_t i=start_index; i<path_vec.size()-2; i++) {
 		if(path_vec[i+0].isDiagonalEnd() &&
 
 				path_vec[i+1].turn_type == ETurnType::TURN_90 &&

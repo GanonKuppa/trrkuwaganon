@@ -65,8 +65,6 @@ int main() {
     while(real_time < 600.0f) {
         if(real_time > 30.0f && (coor_x == 0 && coor_y == 0)){
             StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f, v, v, 0.0f, a, a);  
-            trajCommander.update0();
-            copyMsg(msg_id::CTRL_SETPOINT, &setp_msg);
             break;
         }
 
@@ -77,11 +75,9 @@ int main() {
         coor_y = (int)(setp_msg.y/0.09f);
 
         real_time += delta_t;
-        tick_count++;
-        //hal::waitmsec(1);
+        hal::waitmsec(1);
         if(tick_count % 30 == 0) {
             sim::setRobotPos(setp_msg.x, setp_msg.y, setp_msg.yaw*RAD2DEG, setp_msg.v_xy_body);
-            hal::waitmsec(5);
         }
         
         if(setp_msg.traj_type == ETrajType::NONE) {
@@ -101,7 +97,6 @@ int main() {
             else{
                 maze.makeSearchMap(0, 0);
                 rot_times = maze.calcRotTimes(maze.getSearchDirection2(watch_x, watch_y, watch_dir), watch_dir);
-                if(watch_x == 0 && watch_y == 0) continue;
             }
 
             if(rot_times == 0) {
@@ -119,19 +114,15 @@ int main() {
             else if(rot_times == -2) {
                 CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_90, ETurnDir::CW);
             }
-        }                
+        }
+        
+        tick_count++;
     }
 
-    while(setp_msg.traj_type != ETrajType::NONE){                
+    while(setp_msg.traj_type != ETrajType::NONE){
         trajCommander.update0();
-        copyMsg(msg_id::CTRL_SETPOINT, &setp_msg);
         real_time += delta_t;
-        //hal::waitmsec(1);
-        if(tick_count % 30 == 0) {
-            sim::setRobotPos(setp_msg.x, setp_msg.y, setp_msg.yaw*RAD2DEG, setp_msg.v_xy_body);
-            hal::waitmsec(5);
-        }
-        tick_count++;
+        hal::waitmsec(1);
     }
     PRINTF_ASYNC("1st run end time:%f\n", real_time);
 

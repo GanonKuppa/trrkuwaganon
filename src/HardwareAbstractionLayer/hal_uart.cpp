@@ -151,6 +151,7 @@ namespace hal {
             }
         }
 #endif
+        return 0;
     };
 
 }

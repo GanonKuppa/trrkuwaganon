@@ -12,18 +12,14 @@
 
 #include "sendData2Sim.h"
 
-
-
 namespace sim {
     void initSimConnection() {
         char buf[256];
         // WSL2でホストのWindowsのIPアドレスを取得するための処理
         {
             FILE* fp;
-
-
             if ((fp = popen("cat /etc/resolv.conf | grep nameserver | awk '{print $2}'", "r")) == NULL) {
-                fprintf(stderr, "パイプのオープンに失敗しました！: argv[1]=%s", "cat /etc/resolv.conf | grep nameserver | awk '{print $2}'");
+                fprintf(stderr, "パイプのオープンに失敗しました！: %s", "cat /etc/resolv.conf | grep nameserver | awk '{print $2}'");
                 return;
             }
 
@@ -89,7 +85,6 @@ namespace sim {
         sendUdpString( val.serialize());
     }
 
-
     void setMazeWall(uint32_t* walls_vertical, uint32_t* walls_horizontal) {
         picojson::object obj;
         obj.emplace(std::make_pair("type", "maze_wall"));
@@ -121,6 +116,57 @@ namespace sim {
     }
 
 
+    void setMazeWall(uint32_t* walls_vertical, uint32_t* walls_horizontal, uint32_t* transparent_v_mask, uint32_t* transparent_h_mask) {
+        picojson::object obj;
+        obj.emplace(std::make_pair("cmd", "SET_WALLS_WITHOUT_OUTER_32"));
+
+        std::stringstream vertical_ss;
+        std::stringstream horizontal_ss;
+        std::stringstream transparent_v_mask_ss;
+        std::stringstream transparent_h_mask_ss;
+
+        for(int i=0; i<31; i++) {
+            uint32_t v_val = ((walls_vertical[i] & 0xFF000000) >> (8*3)) +
+                             ((walls_vertical[i] & 0x00FF0000) >> (8*1)) +
+                             ((walls_vertical[i] & 0x0000FF00) << (8*1)) +
+                             ((walls_vertical[i] & 0x000000FF) << (8*3));
+
+            vertical_ss  << std::setw(8) << std::setfill('0') << std::hex << v_val;
+
+            uint32_t h_val = ((walls_horizontal[i] & 0xFF000000) >> (8*3)) +
+                             ((walls_horizontal[i] & 0x00FF0000) >> (8*1)) +
+                             ((walls_horizontal[i] & 0x0000FF00) << (8*1)) +
+                             ((walls_horizontal[i] & 0x000000FF) << (8*3));
+            horizontal_ss << std::setw(8) << std::setfill('0') << std::hex << h_val;
+
+            uint32_t t_v_val = ((transparent_v_mask[i] & 0xFF000000) >> (8*3)) +
+                             ((transparent_v_mask[i] & 0x00FF0000) >> (8*1)) +
+                             ((transparent_v_mask[i] & 0x0000FF00) << (8*1)) +
+                             ((transparent_v_mask[i] & 0x000000FF) << (8*3));
+            t_v_val = ~t_v_val;
+            transparent_v_mask_ss  << std::setw(8) << std::setfill('0') << std::hex << t_v_val;
+
+            uint32_t t_h_val = ((transparent_h_mask[i] & 0xFF000000) >> (8*3)) +
+                             ((transparent_h_mask[i] & 0x00FF0000) >> (8*1)) +
+                             ((transparent_h_mask[i] & 0x0000FF00) << (8*1)) +
+                             ((transparent_h_mask[i] & 0x000000FF) << (8*3));
+            t_h_val = ~t_h_val;
+            transparent_h_mask_ss << std::setw(8) << std::setfill('0') << std::hex << t_h_val;
+
+        }
+        obj.emplace(std::make_pair("walls_v_hex", vertical_ss.str()));
+        obj.emplace(std::make_pair("walls_h_hex", horizontal_ss.str()));
+        obj.emplace(std::make_pair("transparent_v_mask_hex", transparent_v_mask_ss.str()));
+        obj.emplace(std::make_pair("transparent_h_mask_hex", transparent_h_mask_ss.str()));
+
+        // 文字列にするためにvalueを使用
+        picojson::value val(obj);
+        // return std::string
+        val.serialize();
+        sendUdpString( val.serialize());
+    }
+
+
     void setNeedle(float x, float y) {
         picojson::object obj;
 
@@ -138,16 +184,21 @@ namespace sim {
     };
 
     void setReload() {
-        picojson::object obj;
+        {
+            picojson::object obj;
+            obj.emplace(std::make_pair("cmd", "REMOVE_CONTRAIL"));
+            picojson::value val(obj);
+            val.serialize();
+            sendUdpString( val.serialize());
+        }
 
-        // データの追加
-        obj.emplace(std::make_pair("type", "reload"));
-        // 文字列にするためにvalueを使用
-        picojson::value val(obj);
-        // return std::string
-        val.serialize();
-        sendUdpString( val.serialize());
-
+        {
+            picojson::object obj;
+            obj.emplace(std::make_pair("cmd", "REMOVE_ALL_NAMED_OBJECT"));
+            picojson::value val(obj);
+            val.serialize();
+            sendUdpString( val.serialize());
+        }
     };
 
     void setNumberSqure(float num, float x, float y) {

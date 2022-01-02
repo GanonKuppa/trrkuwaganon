@@ -189,7 +189,7 @@ namespace module{
         _publish();
     }
 
-    void Navigator::updateInMainLoop(){        
+    void Navigator::updateInMainLoop(){
         _lock_guard = true;
         if(!_nav_cmd_queue.empty()){
             ENavCommand cmd = _nav_cmd_queue.front();

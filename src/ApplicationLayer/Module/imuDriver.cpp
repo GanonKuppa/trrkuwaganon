@@ -62,6 +62,9 @@ namespace module {
     }
 
     void ImuDriver::calibrateGyro(uint16_t num){
+#ifdef SILS
+        return;
+#endif
         _ang_v_f_int[0] = 0.0f;
         _ang_v_f_int[1] = 0.0f;
         _ang_v_f_int[2] = 0.0f;

@@ -163,7 +163,6 @@ uint32_t calcPathVecHash(std::vector<Path>& path_vec) {
     uint32_t ret = 0;
     int j = 0;
     for (auto i : path_vec) {
-        uint64_t val = uint8_t(i.block_num) + uint8_t(i.turn_type) + uint8_t(i.turn_dir);
         ret += (uint8_t(i.block_num) + uint8_t(i.turn_type)*(3<<j) + uint8_t(i.turn_dir)*(5<<j));
         if(j>16)j = 0;
         j++;
@@ -177,7 +176,7 @@ void makeFastestDiagonalPath(uint32_t trial_times, ETurnParamSet tp, uint16_t go
     float min_time = FLT_MAX;
     std::vector<Path> min_vec;
     std::vector<uint32_t> path_vec_hash_list;
-    for(int i=0; i<trial_times; i++) {
+    for(uint32_t i=0; i<trial_times; i++) {
         path_vec.clear();
         makeQuasiMinStepPath(goal_x, goal_y, maze, path_vec);            
         uint32_t path_vec_hash = calcPathVecHash(path_vec);

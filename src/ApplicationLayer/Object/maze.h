@@ -33,6 +33,8 @@ class Maze {
     uint32_t reached[32];
     uint32_t no_entry[32];
     uint16_t p_map[32][32];
+    uint16_t goal_x;
+    uint16_t goal_y;
 
     void init();
     void initWall();

@@ -90,7 +90,7 @@ class PidfController {
     }
 
     void setDeltaT(float delta_t){
-        _delta_t;
+        _delta_t = delta_t;
     }
 
     float getError(){
