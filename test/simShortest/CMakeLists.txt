@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(test_trajSetpoint)
 
-message(STATUS  "======== trrkuwaganon test_simSearch ========")                     
+message(STATUS  "======== trrkuwaganon test_simShortest ========")                     
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)

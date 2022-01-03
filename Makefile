@@ -70,20 +70,14 @@ test_simSearch:
 	- cd test/simSearch/build; ninja
 	- test/simSearch/build/main
 
-.PHONY: test_simSearch_cmake
-test_simSearch_cmake:	
-	- cd test/simSearch/build; cmake .. -G Ninja                         
+.PHONY: test_simShortest
+test_simShortest:	
+	- rm -r test/simShortest/build
+	- mkdir test/simShortest/build
+	- cd test/simShortest/build; cmake .. -G Ninja                         
+	- cd test/simShortest/build; ninja
+	- test/simShortest/build/main
 
-
-.PHONY: test_simSearch_ninja
-test_simSearch_ninja:	
-	- cd test/simSearch/build; ninja
-	- test/simSearch/build/main
-
-.PHONY: test_simSearch_clean
-test_simSearch_clean:
-	- rm -r test/simSearch/build
-	- mkdir test/simSearch/build
 
 .PHONY: test_traj
 test_traj:

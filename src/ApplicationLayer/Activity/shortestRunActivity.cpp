@@ -1,5 +1,7 @@
 #include "shortestRunActivity.h"
 
+#include <vector>
+
 // Hal
 #include "hal_timer.h"
 
