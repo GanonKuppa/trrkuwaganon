@@ -116,7 +116,7 @@ namespace module {
         _publish();
 
         hal::setInterruptPeriodTimerInterrupt1(LED_ON_SEC);
-        hal::startTimerInterrupt1();
+        hal::restartTimerInterrupt1();
     }    
 
     void WallSensor::emitLedTask(){
@@ -163,12 +163,12 @@ namespace module {
         }
         else if(loop_count % 8 == 7){
             _updateOnVal(0,0,0,1);
-            _turnLed(0,0,0,0);
-            hal::stopTimerInterrupt1();
+            _turnLed(0,0,0,0);                        
             _emit_led_cycle_time_us[7] = hal::hrtGetElapsedUsec(start_usec);            
+            hal::stopTimerInterrupt1();
         }
         else{
-            _turnLed(0,0,0,0);
+            _turnLed(0,0,0,0);            
             hal::stopTimerInterrupt1();
         }
 
@@ -263,7 +263,7 @@ namespace module {
         }
         if(!sled1 && !sled2 && !sled3 && !sled4){
             hal::setDout5(0);
-        }       
+        }
     }
 
 

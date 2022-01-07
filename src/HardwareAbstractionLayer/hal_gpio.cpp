@@ -40,27 +40,24 @@ namespace hal {
 
     void setDout3(bool out) {
 #ifndef SILS
-        peripheral_driver::setDoutPE0(out);
+        peripheral_driver::setDoutP44(out);
 #endif
     }
 
     void setDout4(bool out) {
 #ifndef SILS
-        peripheral_driver::setDoutPD7(out);
+        peripheral_driver::setDoutP43(out);
 #endif
     }
 
     void setDout5(bool out) {
 #ifndef SILS
-        peripheral_driver::setDoutPE2(out);
+        peripheral_driver::setDoutP46(out);
 #endif
     }
 
     void setDout6(bool out) {
-#ifndef SILS
-        peripheral_driver::setDoutPA1(out);
-#endif
-    
+
     }
 
     void setDout7(bool out) {

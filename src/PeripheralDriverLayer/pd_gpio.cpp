@@ -22,12 +22,10 @@ namespace peripheral_driver {
         PORT2.PDR.BIT.B0 = 1; //R P20
 
         //センサLED
-        PORTE.PDR.BIT.B0 = 1; // LED_IMU_SEL0 PE0
-        PORTD.PDR.BIT.B7 = 1; // LED_MUL_SEL1 PD7
-        PORTE.PDR.BIT.B2 = 1; // SEN_OUT
+        PORT4.PDR.BIT.B4 = 1; // LED_IMU_SEL0 P44
+        PORT4.PDR.BIT.B3 = 1; // LED_MUL_SEL1 P43
+        PORT4.PDR.BIT.B6 = 1; // SEN_OUT P46
 
-        //ヒーター
-        //PORTA.PDR.BIT.B1 = 1; //HEATER_PWM        
     }
 
     void setDoutP22(bool out) {
@@ -42,25 +40,16 @@ namespace peripheral_driver {
         PORT2.PODR.BIT.B0 = out;
     }
 
-    void setDoutPE0(bool out) {
-        PORTE.PODR.BIT.B0 = out;
+    void setDoutP44(bool out) {
+        PORT4.PODR.BIT.B4 = out;
     }
 
-    void setDoutPD7(bool out) {
-        PORTD.PODR.BIT.B7 = out;
+    void setDoutP43(bool out) {
+        PORT4.PODR.BIT.B3 = out;
     }
 
-    void setDoutPE2(bool out) {
-        PORTE.PODR.BIT.B2 = out;
+    void setDoutP46(bool out) {
+        PORT4.PODR.BIT.B6 = out;
     }
-
-    void setDoutPA1(bool out) {
-        //PORTA.PODR.BIT.B1 = out;
-    }
-
-    void setDoutPA2(bool out) {
-
-    }
-
 
 }

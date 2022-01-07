@@ -24,6 +24,7 @@ namespace hal {
 
     void initTimerInterrupt1();
     void setPriorityTimerInterrupt1(uint8_t priori);
+    void restartTimerInterrupt1();
     void startTimerInterrupt1();
     void stopTimerInterrupt1();
     void setInterruptPeriodTimerInterrupt1(uint16_t delay_us);

@@ -13,6 +13,7 @@ namespace peripheral_driver {
 
     void initCMT1();
     void setPriorityCMT1(uint8_t priori);
+    void restartCMT1();
     void startCMT1();
     void stopCMT1();
 

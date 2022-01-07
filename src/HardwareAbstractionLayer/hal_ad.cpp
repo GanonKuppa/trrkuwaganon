@@ -14,7 +14,7 @@ namespace hal {
 
     uint16_t startAD0() {
 #ifndef SILS
-        return peripheral_driver::startAD_AN001();
+        return peripheral_driver::startAD_AN109();
 #else
         return 0;
 #endif
@@ -33,7 +33,7 @@ namespace hal {
 
     uint16_t startAD2() {
 #ifndef SILS
-        return peripheral_driver::startAD_AN108();
+        return peripheral_driver::startAD_AN111();
 #else
         return 0;
 
@@ -43,7 +43,7 @@ namespace hal {
 
     uint16_t startAD3() {
 #ifndef SILS
-        return peripheral_driver::startAD_AN005();
+        return peripheral_driver::startAD_AN110();
 #else
         return 0;
 #endif
@@ -52,7 +52,7 @@ namespace hal {
 
     uint16_t startAD4() {
 #ifndef SILS
-        return peripheral_driver::startAD_AN000();
+        return peripheral_driver::startAD_AN108();
 #else
         return 0;
 #endif
@@ -65,7 +65,7 @@ namespace hal {
 
     uint16_t getAD0() {
 #ifndef SILS
-        return peripheral_driver::getAD_AN001();
+        return peripheral_driver::getAD_AN109();
 #else
         return 0;
 #endif
@@ -83,7 +83,7 @@ namespace hal {
 
     uint16_t getAD2() {
 #ifndef SILS
-        return peripheral_driver::getAD_AN108();
+        return peripheral_driver::getAD_AN111();
 #else
         return 0;
 #endif
@@ -92,7 +92,7 @@ namespace hal {
 
     uint16_t getAD3() {
 #ifndef SILS
-        return peripheral_driver::getAD_AN005();
+        return peripheral_driver::getAD_AN110();
 #else
         return 0;
 #endif
@@ -101,7 +101,7 @@ namespace hal {
 
     uint16_t getAD4() {
 #ifndef SILS
-        return peripheral_driver::getAD_AN000();
+        return peripheral_driver::getAD_AN108();
 #else
         return 0;
 #endif

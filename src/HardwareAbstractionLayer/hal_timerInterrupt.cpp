@@ -83,6 +83,13 @@ namespace hal {
 #endif
     }
 
+    void restartTimerInterrupt1() {
+#ifndef SILS
+        peripheral_driver::restartCMT1();
+#endif
+    }
+
+
     void stopTimerInterrupt1() {
 #ifndef SILS
         peripheral_driver::stopCMT1();

@@ -68,6 +68,11 @@ namespace peripheral_driver {
         CMT.CMSTR0.BIT.STR1 = 1;
     }
 
+    void restartCMT1() {
+        CMT1.CMCNT = 0;
+        CMT.CMSTR0.BIT.STR1 = 1;
+    }
+
     void stopCMT1() {
         CMT.CMSTR0.BIT.STR1 = 0;
     }
