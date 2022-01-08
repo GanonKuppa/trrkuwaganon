@@ -154,9 +154,9 @@ void CurveFactory::pushWithStraight(ETurnParamSet param_set , ETurnType turn_typ
             turn_type_fol = ETurnType::STRAIGHT;
     }
 
-    auto traj1 = StraightFactory::create(turn_type_pre , pre_dist, v);
-    auto traj2 = CurveFactory::create(param_set , turn_type, turn_dir);
-    auto traj3 = StraightFactory::create(turn_type_fol , fol_dist, v);
+    auto traj1 = StraightFactory::create(turn_type_pre, pre_dist, v);
+    auto traj2 = CurveFactory::create(param_set, turn_type, turn_dir);
+    auto traj3 = StraightFactory::create(turn_type_fol, fol_dist, v);
     module::TrajectoryCommander::getInstance().push(std::move(traj1));
     module::TrajectoryCommander::getInstance().push(std::move(traj2));
     module::TrajectoryCommander::getInstance().push(std::move(traj3));

@@ -47,7 +47,6 @@ namespace sim {
         obj.emplace(std::make_pair("v", v));
         // 文字列にするためにvalueを使用
         picojson::value val(obj);
-        // return std::string
         val.serialize();
         sendUdpString(val.serialize());
     }
@@ -67,7 +66,7 @@ namespace sim {
         val.serialize();
         sendUdpString(val.serialize());
 
-    };
+    }
 
 
     void setTargetPos(float x, float y, float ang) {
@@ -85,9 +84,9 @@ namespace sim {
         sendUdpString( val.serialize());
     }
 
-    void setMazeWall(uint32_t* walls_vertical, uint32_t* walls_horizontal) {
+    void setWallsWithoutOuter32(uint32_t* walls_vertical, uint32_t* walls_horizontal) {
         picojson::object obj;
-        obj.emplace(std::make_pair("type", "maze_wall"));
+        obj.emplace(std::make_pair("cmd", "SET_WALLS_WITHOUT_OUTER_32"));
 
         std::stringstream vertical_ss;
         std::stringstream horizontal_ss;
@@ -106,17 +105,16 @@ namespace sim {
                              ((walls_horizontal[i] & 0x000000FF) << (8*3));
             horizontal_ss << std::setw(8) << std::setfill('0') << std::hex << h_val;
         }
-        obj.emplace(std::make_pair("walls_vertical", vertical_ss.str()));
-        obj.emplace(std::make_pair("walls_horizontal", horizontal_ss.str()));
+        obj.emplace(std::make_pair("walls_v_hex", vertical_ss.str()));
+        obj.emplace(std::make_pair("walls_h_hex", horizontal_ss.str()));
         // 文字列にするためにvalueを使用
-        picojson::value val(obj);
-        // return std::string
+        picojson::value val(obj);        
         val.serialize();
         sendUdpString( val.serialize());
     }
 
 
-    void setMazeWall(uint32_t* walls_vertical, uint32_t* walls_horizontal, uint32_t* transparent_v_mask, uint32_t* transparent_h_mask) {
+    void setWallsWithoutOuter32(uint32_t* walls_vertical, uint32_t* walls_horizontal, uint32_t* transparent_v_mask, uint32_t* transparent_h_mask) {
         picojson::object obj;
         obj.emplace(std::make_pair("cmd", "SET_WALLS_WITHOUT_OUTER_32"));
 
@@ -160,10 +158,9 @@ namespace sim {
         obj.emplace(std::make_pair("transparent_h_mask_hex", transparent_h_mask_ss.str()));
 
         // 文字列にするためにvalueを使用
-        picojson::value val(obj);
-        // return std::string
+        picojson::value val(obj);        
         val.serialize();
-        sendUdpString( val.serialize());
+        sendUdpString(val.serialize());
     }
 
 
@@ -181,7 +178,7 @@ namespace sim {
         sendUdpString( val.serialize());
 
 
-    };
+    }
 
     void setReload() {
         {
@@ -199,7 +196,7 @@ namespace sim {
             val.serialize();
             sendUdpString( val.serialize());
         }
-    };
+    }
 
     void setNumberSqure(float num, float x, float y) {
         picojson::object obj;
@@ -210,11 +207,25 @@ namespace sim {
         obj.emplace(std::make_pair("x", x));
         obj.emplace(std::make_pair("y", y));
         // 文字列にするためにvalueを使用
-        picojson::value val(obj);
-        // return std::string
+        picojson::value val(obj);        
         val.serialize();
         sendUdpString( val.serialize());
 
-    };
+    }
+
+    void updateDataView(float x, float y, float ang, float v){
+        picojson::object obj;
+
+        // データの追加
+        obj.emplace(std::make_pair("cmd", "UPDATE_DATA_VIEW"));
+        obj.emplace(std::make_pair("x", x));
+        obj.emplace(std::make_pair("y", y));
+        obj.emplace(std::make_pair("ang", ang));
+        obj.emplace(std::make_pair("v", v));
+        // 文字列にするためにvalueを使用
+        picojson::value val(obj);        
+        val.serialize();
+        sendUdpString(val.serialize());
+    }
 
 }

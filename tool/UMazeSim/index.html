@@ -217,7 +217,7 @@ function main() {  /* eslint consistent-return: 0 */
   udp_server.on('message', function (message, remote) {
     //console.log(remote.address + ':' + remote.port +' - ' + message);
     
-    try {      
+    try {
 
       const json = JSON.parse(message);
       if(json['cmd'] == 'UPDATE_DATA_VIEW'){

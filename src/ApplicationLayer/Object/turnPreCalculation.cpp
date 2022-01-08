@@ -69,11 +69,13 @@ float TurnPreCalculation::getFolDist(){
 }
 
 float TurnPreCalculation::getMoveX(){
-    return _move_x;
+    return _move_x * cosf(-_start_ang) - _move_y * sinf(-_start_ang);
+    //move_x * cosf(_yaw_0) - move_y * sinf(_yaw_0);
 }
 
 float TurnPreCalculation::getMoveY(){
-    return _move_y;
+    return _move_x * sinf(-_start_ang) + _move_y * cosf(-_start_ang);
+    //move_x * sinf(_yaw_0) + move_y * cosf(_yaw_0);
 }
 
 float TurnPreCalculation::getBetaAbsMax(){

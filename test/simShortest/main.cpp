@@ -47,7 +47,7 @@ int main() {
     for(uint16_t i=0;i<32;i++){
         for(uint16_t j=0;j<32;j++) maze.writeReached(i, j, true);
     }
-    sim::setMazeWall(maze.walls_vertical, maze.walls_horizontal);    
+    sim::setWallsWithoutOuter32(maze.walls_vertical, maze.walls_horizontal);    
 
     
     uint64_t tick_count = 0;
@@ -58,7 +58,7 @@ int main() {
     float wall2mouse_center_dist = pm.wall2mouse_center_dist;
     trajCommander.reset(0.045f, 0.045f - wall2mouse_center_dist, 90.0f * DEG2RAD);
     
-    ETurnParamSet tp = ETurnParamSet(1);
+    ETurnParamSet tp = ETurnParamSet(7);
     std::vector<Path> path_vec;        
 
     makeFastestDiagonalPath(500, tp, maze.goal_x, maze.goal_y, maze, path_vec);
@@ -73,9 +73,11 @@ int main() {
         real_time += delta_t;
         hal::waitmsec(1);
         if(tick_count % 30 == 0) {
-            sim::setRobotPos(setp_msg.x, setp_msg.y, setp_msg.yaw*RAD2DEG, setp_msg.v_xy_body);            
+            sim::setRobotPos(setp_msg.x, setp_msg.y, setp_msg.yaw*RAD2DEG, setp_msg.v_xy_body);
+            sim::updateDataView(setp_msg.x, setp_msg.y, setp_msg.yaw*RAD2DEG, setp_msg.v_xy_body);
         }
-        tick_count++;
+        //PRINTF_ASYNC("%f, %f, %d, %d\n", setp_msg.x, setp_msg.y, (uint8_t)setp_msg.traj_type, (uint8_t)setp_msg.turn_type);
+        tick_count++;        
     }
     PRINTF_ASYNC("shortest run end time:%f\n", real_time);
 

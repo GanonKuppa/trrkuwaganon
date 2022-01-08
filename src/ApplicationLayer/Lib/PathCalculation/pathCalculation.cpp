@@ -385,8 +385,8 @@ float HF_calcPlayPathTime(ETurnParamSet tp, std::vector<Path>& path_vec) {
                 if (i + 1 == (uint16_t)path_vec.size()) v_fol = 0.0f;
                 else v_fol = turn_p.getV(path_vec[i+1].turn_type);
                 a = turn_p.getAcc(ETurnType::STRAIGHT);
-                float pre_dist = module::TrajectoryInitializer::getInstance().getPreDist(tp ,path_vec[i].turn_type);
-                float fol_dist = module::TrajectoryInitializer::getInstance().getFolDist(tp ,path_vec[i].turn_type);
+                float pre_dist = module::TrajectoryInitializer::getInstance().getPreDist(tp, path_vec[i].turn_type);
+                float fol_dist = module::TrajectoryInitializer::getInstance().getFolDist(tp, path_vec[i].turn_type);
                 float a_pre = std::max(a, std::fabs(v_pre * v_pre -  v * v) / (2.0f * pre_dist));
                 float a_fol = std::max(a, std::fabs(v_fol * v_fol -  v * v) / (2.0f * fol_dist));
 
