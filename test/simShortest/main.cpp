@@ -74,7 +74,7 @@ int main() {
         hal::waitmsec(1);
         if(tick_count % 30 == 0) {
             sim::setRobotPos(setp_msg.x, setp_msg.y, setp_msg.yaw*RAD2DEG, setp_msg.v_xy_body);
-            sim::updateDataView(setp_msg.x, setp_msg.y, setp_msg.yaw*RAD2DEG, setp_msg.v_xy_body);
+            sim::addPointRobotContrail(setp_msg.x, setp_msg.y, setp_msg.yaw*RAD2DEG, setp_msg.v_xy_body);
         }
         //PRINTF_ASYNC("%f, %f, %d, %d\n", setp_msg.x, setp_msg.y, (uint8_t)setp_msg.traj_type, (uint8_t)setp_msg.turn_type);
         tick_count++;        

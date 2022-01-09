@@ -16,4 +16,6 @@ namespace sim {
     void setReload();
     void setNumberSqure(float num, float x, float y);
     void updateDataView(float x, float y, float ang, float v);
+    void addPointRobotContrail(float x, float y, float ang, float v);
+    void addPointTargetContrail(float x, float y, float ang, float v);
 }

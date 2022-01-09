@@ -597,8 +597,7 @@ function setRobotColor(r, g, b){
 
 let x_robot_contrail_pre = 0.0;
 let y_robot_contrail_pre = 0.0;
-function addPointRobotContrail(x, y, v, scene){  
-  if(robot_pos_contrails_ref.length == 0) updateRobotContrail(scene);
+function addPointRobotContrail(x, y, v){  
   geometry_robot_pos_cube.position.set(y, 0.005, x);
   if(x != x_robot_contrail_pre || y != y_robot_contrail_pre){
     geometry_robot_pos_contrail.mergeMesh(geometry_robot_pos_cube);    
@@ -607,7 +606,7 @@ function addPointRobotContrail(x, y, v, scene){
   geometry_robot_pos_contrail.elementsNeedUpdate = true;
   geometry_robot_pos_contrail.verticesNeedUpdate = true;
 
-  geometry_robot_velo_cube.position.set(y, 0.1 + v, x);
+  geometry_robot_velo_cube.position.set(y, 0.1 + v*0.1, x);
   if(x != x_robot_contrail_pre || y != y_robot_contrail_pre){ 
     geometry_robot_velo_contrail.mergeMesh(geometry_robot_velo_cube);
   }
@@ -622,13 +621,7 @@ function addPointRobotContrail(x, y, v, scene){
 
 let x_target_contrail_pre = 0.0;
 let y_target_contrail_pre = 0.0;
-function addPointTargetContrail(x, y, v, scene){
-  if(target_pos_contrails_ref.length == 0){
-    console.log(target_pos_contrails_ref.length ,"before");
-    updateTargetContrail(scene);
-    console.log(target_pos_contrails_ref.length ,"after");
-  } 
-
+function addPointTargetContrail(x, y, v){
   geometry_target_pos_cube.position.set(y, 0.005, x);
   if(x != x_target_contrail_pre || y != y_target_contrail_pre){
     geometry_target_pos_contrail.mergeMesh(geometry_target_pos_cube);

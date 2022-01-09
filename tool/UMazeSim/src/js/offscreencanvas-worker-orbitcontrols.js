@@ -129,12 +129,13 @@ function doJsonCmd(data) {
         umobj.setAllTextSquareVisible(data["visible"]);
         break;  
       case 'UPDATE_DATA_VIEW':
-        umobj.setRobotPos(data["x"], data["y"], data["ang"]);
-        SOrbitControls.x = data["x"];
-        SOrbitControls.y = data["y"];
-        SOrbitControls.ang = data["ang"];
-        SOrbitControls.v = data["v"];
         break;
+      case 'ADD_POINT_ROBOT_CONTRAIL':
+        umobj.addPointRobotContrail(data["x"], data["y"], data["v"]);
+        break;
+      case 'ADD_POINT_TARGET_CONTRAIL':
+        umobj.addPointTargetContrail(data["x"], data["y"], data["v"]);
+        break;  
       case 'UPDATE_WALL_SENSOR_VIEW':
         break;
       case 'SAVE_WALLS_WITHOUT_OUTER_32':

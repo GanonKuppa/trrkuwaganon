@@ -176,8 +176,6 @@ namespace sim {
         // return std::string
         val.serialize();
         sendUdpString( val.serialize());
-
-
     }
 
     void setReload() {
@@ -215,7 +213,6 @@ namespace sim {
 
     void updateDataView(float x, float y, float ang, float v){
         picojson::object obj;
-
         // データの追加
         obj.emplace(std::make_pair("cmd", "UPDATE_DATA_VIEW"));
         obj.emplace(std::make_pair("x", x));
@@ -223,9 +220,39 @@ namespace sim {
         obj.emplace(std::make_pair("ang", ang));
         obj.emplace(std::make_pair("v", v));
         // 文字列にするためにvalueを使用
-        picojson::value val(obj);        
+        picojson::value val(obj);
         val.serialize();
         sendUdpString(val.serialize());
     }
+
+    void addPointRobotContrail(float x, float y, float ang, float v){
+        picojson::object obj;
+        // データの追加
+        obj.emplace(std::make_pair("cmd", "ADD_POINT_ROBOT_CONTRAIL"));
+        obj.emplace(std::make_pair("x", x));
+        obj.emplace(std::make_pair("y", y));
+        obj.emplace(std::make_pair("ang", ang));
+        obj.emplace(std::make_pair("v", v));
+        // 文字列にするためにvalueを使用
+        picojson::value val(obj);
+        val.serialize();
+        sendUdpString(val.serialize());
+    }
+    
+    void addPointTargetContrail(float x, float y, float ang, float v){
+        picojson::object obj;
+        // データの追加
+        obj.emplace(std::make_pair("cmd", "ADD_POINT_TARGET_CONTRAIL"));
+        obj.emplace(std::make_pair("x", x));
+        obj.emplace(std::make_pair("y", y));
+        obj.emplace(std::make_pair("ang", ang));
+        obj.emplace(std::make_pair("v", v));
+        // 文字列にするためにvalueを使用
+        picojson::value val(obj);
+        val.serialize();
+        sendUdpString(val.serialize());
+    }
+
+
 
 }

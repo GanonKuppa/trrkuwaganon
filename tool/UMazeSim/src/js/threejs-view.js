@@ -70,13 +70,9 @@ function init(data) {   /* eslint-disable-line no-unused-vars */
 
   function render() {
     
-    if(animate_count % 60 == 0) fps_begin_time = ( performance || Date ).now();
-    
-    if(animate_count % 600 == 0) umobj.updateRobotContrail(scene);
-    if(animate_count < 60 * 1000 && animate_count % 3 == 0) umobj.addPointRobotContrail(x, y, v, scene);
-    
+    if(animate_count % 60 == 0) fps_begin_time = ( performance || Date ).now();    
+    if(animate_count % 600 == 0) umobj.updateRobotContrail(scene);    
     if(animate_count % 600 == 0) umobj.updateTargetContrail(scene);
-    if(animate_count < 60 * 1000 && animate_count % 3 == 0) umobj.addPointTargetContrail(x_target, y_target, v_target, scene);
     
     if (resizeRendererToDisplaySize(renderer)) {
       camera.aspect = inputElement.clientWidth / inputElement.clientHeight;
