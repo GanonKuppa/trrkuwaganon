@@ -29,7 +29,7 @@ namespace module{
         _target_temp = pm.heater_target_temp;             
         _pidf.set(0.0f, 0.0f, 0.0f, 0.0f);
         _pidf.setEnable(true);
-        hal::setDutyPWM0(0.0f);
+        hal::setDutyPWM5(0.0f);
 
     }
 
@@ -75,7 +75,7 @@ namespace module{
             _duty = 0.0f;
             _pidf.reset();
         }
-        hal::setDutyPWM0(_duty);
+        hal::setDutyPWM5(_duty);
         
         _current_1sec_sum += _duty * (_voltage / _resistor_ohm) * _delta_t;
         if(_current_time > 1.0f){
