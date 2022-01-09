@@ -47,7 +47,7 @@ int main() {
     Maze maze;
     Maze maze_gt;    
     maze_archive::setMaze(maze_gt, maze_archive::EMazeName::AllJapan2008Final_HF);
-    sim::setMazeWall(maze_gt.walls_vertical, maze_gt.walls_horizontal, maze.walls_vertical, maze.walls_horizontal);
+    sim::setWallsWithoutOuter32(maze_gt.walls_vertical, maze_gt.walls_horizontal, maze.walls_vertical, maze.walls_horizontal);
 
     maze.init();
     maze.writeWall(0, 0, maze_gt.readWall(0, 0));
@@ -79,6 +79,7 @@ int main() {
         hal::waitmsec(1);
         if(tick_count % 30 == 0) {
             sim::setRobotPos(setp_msg.x, setp_msg.y, setp_msg.yaw*RAD2DEG, setp_msg.v_xy_body);
+            sim::addPointRobotContrail(setp_msg.x, setp_msg.y, setp_msg.yaw*RAD2DEG, setp_msg.v_xy_body);
         }
         
         if(setp_msg.traj_type == ETrajType::NONE) {
@@ -87,7 +88,7 @@ int main() {
             EAzimuth watch_dir = yaw2Azimuth(setp_msg.yaw);
             maze.writeWall(watch_x, watch_y, maze_gt.readWall(watch_x, watch_y));
             maze.writeReached(watch_x, watch_y, true);
-            sim::setMazeWall(maze_gt.walls_vertical, maze_gt.walls_horizontal, maze.walls_vertical, maze.walls_horizontal);
+            sim::setWallsWithoutOuter32(maze_gt.walls_vertical, maze_gt.walls_horizontal, maze.walls_vertical, maze.walls_horizontal);
     
 
             int8_t rot_times = 0;
