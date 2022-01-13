@@ -63,7 +63,7 @@ namespace module {
 
         std::deque<float> _acc_y_list;
         std::deque<float> _v_enc_list;
-        const uint8_t ACC_Y_AVERAGE_NUM = 15;
+        const uint8_t ACC_Y_AVERAGE_NUM = 30;
         const float PI = 3.14159265f;
         const float DEG2RAD = PI/180.0f;
         const float RAD2DEG = 180.0f/PI;

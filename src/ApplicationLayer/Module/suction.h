@@ -8,7 +8,8 @@ namespace module{
       public:    
         void update();
         float getDuty();
-        void setDuty(float duty);        
+        void setDuty(float duty);
+        void debug();
       private:
         float _duty;
         float _on_time;

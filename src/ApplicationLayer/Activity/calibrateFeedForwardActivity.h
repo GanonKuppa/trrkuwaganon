@@ -6,7 +6,7 @@
 
 namespace activity {
 
-    class CalibrateWallCenterActivity : public BaseActivity {
+    class CalibrateFeedForwardActivity : public BaseActivity {
       public:
         std::string getModeName();
         void onStart();

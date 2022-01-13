@@ -130,7 +130,7 @@ StraightTrajectory::StraightTrajectory(ETurnType turn_type, float target_dist, f
     _a_dec = a_dec;
     _target_dist = target_dist;
     _v_end = v_end;
-    _v_min = 0.05f;
+    _v_min = 0.1f;
     _v_max = v_max;
     _v_0 = v_0;
     _v_xy_body = v_0;
@@ -222,9 +222,11 @@ bool StraightTrajectory::isEnd() {
     VehiclePositionMsg pos_msg;
     copyMsg(msg_id::VEHICLE_POSITION, &pos_msg);
     float res_dist = _calcResidualDist(pos_msg.x, pos_msg.y);
-    if (_cumulative_dist >= _target_dist 
+    if ( 
 #ifndef SILS
-    && res_dist <= 0.00025f
+    res_dist <= 0.0f && _cumulative_dist >= _target_dist
+#else
+    _cumulative_dist >= _target_dist
 #endif    
     ) {
         _x = getEndX();

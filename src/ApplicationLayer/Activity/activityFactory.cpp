@@ -6,7 +6,7 @@
 #include "debugActivity.h"
 #include "deleteMazeActivity.h"
 #include "searchRunActivity.h"
-#include "calibrateWallCenterActivity.h"
+#include "calibrateFeedForwardActivity.h"
 #include "fullAutoRunActivity.h"
 #include "radioControlActivity.h"
 #include "subModeSelectActivity.h"
@@ -26,7 +26,7 @@ namespace activity {
             case EActivityColor::BLUE:
                 return std::make_unique<SearchRunActivity>();
             case EActivityColor::MAGENTA:
-                return std::make_unique<CalibrateWallCenterActivity>();
+                return std::make_unique<CalibrateFeedForwardActivity>();
             case EActivityColor::CYAN:
                 return std::make_unique<FullAutoRunActivity>();
             case EActivityColor::WHITE:

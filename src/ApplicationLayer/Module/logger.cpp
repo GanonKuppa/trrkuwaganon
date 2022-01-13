@@ -221,11 +221,11 @@ namespace module {
             _log_data[_data_num][26] = pid_msg.v_p;
             _log_data[_data_num][27] = pid_msg.v_i;
             _log_data[_data_num][28] = pid_msg.v_d;
-            _log_data[_data_num][29] = std::fabs(aout_msg.duty_r_v);            
+            _log_data[_data_num][29] = aout_msg.duty_r_v;            
             _log_data[_data_num][30] = pid_msg.yawrate_p;
             _log_data[_data_num][31] = pid_msg.yawrate_i;
             _log_data[_data_num][32] = pid_msg.yawrate_d;            
-            _log_data[_data_num][33] = std::fabs(aout_msg.duty_r_yaw);
+            _log_data[_data_num][33] = aout_msg.duty_r_yaw;
             _log_data[_data_num][34] = pid_msg.yaw_p;
             _log_data[_data_num][35] = pid_msg.yaw_i;         
             _log_data[_data_num][36] = pid_msg.wall_p;

@@ -46,7 +46,7 @@
 /**
  * @brief Maximum depth for the history module.
  */
-#define NTCONF_HISTORY_DEPTH    (8)
+#define NTCONF_HISTORY_DEPTH    (16)
 
 #endif
 

@@ -210,7 +210,7 @@ namespace module{
                     StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.09, _v);
                 } 
                 else if (std::abs(rot_times) == 4) {
-                    _nav_cmd_queue.push_back(ENavCommand::SAVE_MAZE);   
+                    //_nav_cmd_queue.push_back(ENavCommand::SAVE_MAZE);   
                     if(_maze.existAWall(_x_cur, _y_cur, _azimuth)){
                         StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2, _v, _v, 0.0f, _a, _a);                        
                         AheadWallCorrectionFactory::push(0.3f, 0.1f);
@@ -409,10 +409,21 @@ namespace module{
     }
 
     bool Navigator::_isFailsafe(){
+        float x_thr = 0.02f;
+        float y_thr = 0.02f;
+        if(_mode == ENavMode::SEARCH){
+            x_thr = 0.02f;
+            y_thr = 0.02f;
+        }
+        else{
+            x_thr = 0.1f;
+            y_thr = 0.1f;
+        }
+        
         return (_turn_type != ETurnType::AHEAD_WALL_CORRECTION &&
             _ctrl_mode == ECtrlMode::VEHICLE &&
-           (std::fabs(_x - _x_setp) > 0.02f || 
-            std::fabs(_y - _y_setp) > 0.02f //||
+           (std::fabs(_x - _x_setp) > x_thr || 
+            std::fabs(_y - _y_setp) > y_thr //||
             //std::fabs(_yaw - _yaw_setp) > 20.0f * DEG2RAD
             //||
             //_is_actuator_error
@@ -426,7 +437,7 @@ namespace module{
 
         if(_azimuth == EAzimuth::E) return (fmod_x >= offset_pre && fmod_x <= offset_fol);
         else if(_azimuth == EAzimuth::N) return (fmod_y >= offset_pre && fmod_y <= offset_fol);
-        else if(_azimuth == EAzimuth::W) return (fmod_x >= 0.09f - offset_fol && fmod_x <= 0.09f - offset_pre);            
+        else if(_azimuth == EAzimuth::W) return (fmod_x >= 0.09f - offset_fol && fmod_x <= 0.09f - offset_pre);
         else if(_azimuth == EAzimuth::S) return (fmod_y >= 0.09f - offset_fol && fmod_y <= 0.09f - offset_pre);
         else return false;        
     }

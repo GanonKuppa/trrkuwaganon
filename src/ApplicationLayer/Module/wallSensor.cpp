@@ -313,30 +313,17 @@ namespace module {
     }
 
     float  WallSensor::_aheadDistL(float ad){
-        /*
-        //20211123 @自宅
-        1486  0.045
-        175	  0.09
-        43	  0.135
-        */
-        constexpr float a =  -0.0250449f;
-        constexpr float b =   0.2254917f;
+        constexpr float a = 0.6527638f;
+        constexpr float b = -0.3636394f;
         float x = std::max(ad, 1.0f);
-        return a * std::log(x) + b;
+        return a * std::pow(ad, b);
     }
 
     float  WallSensor::_aheadDistR(float ad){
-        /*
-        //20211123 @自宅
-        556	0.045
-        66	0.09
-        13	0.135
-
-        */
-        constexpr float a = -0.0238185f;
-        constexpr float b = 0.1938118;
+        constexpr float a = 0.5697565f;
+        constexpr float b = -0.3321443;
         float x = std::max(ad, 1.0f);
-        return a * std::log(x) + b;
+        return a * std::pow(ad, b);
     }
 
     float  WallSensor::_aheadDist(float dist_al, float dist_ar){
@@ -350,30 +337,18 @@ namespace module {
 
 
     float WallSensor::_distL(float ad){
-        /*
-        //20211123@自宅
-        105	 0.045
-        1363 0.022
-        21	 0.068
-        */
-        constexpr float a = -0.0108347f;
-        constexpr float b = 0.0988697f;
+        constexpr float a = 0.7591730f;
+        constexpr float b = -0.4121754f;
         float x = std::max(ad, 1.0f);
-        return a * std::log(x) + b;
+        return a * std::pow(ad, b);
 
     }
 
     float  WallSensor::_distR(float ad){
-        /*
-        //20211123@自宅
-        193	 0.045
-        2664 0.022
-        40	 0.068
-        */
-        constexpr float a = -0.0107316f;
-        constexpr float b = 0.1052369f;
+        constexpr float a = 0.5269620f;
+        constexpr float b = -0.3775151f;
         float x = std::max(ad, 1.0f);
-        return a * std::log(x) + b;
+        return a * std::pow(ad, b);
     }
 
     uint16_t WallSensor::_trimAverage(uint16_t ad_array[], uint16_t num, uint16_t trim_num){

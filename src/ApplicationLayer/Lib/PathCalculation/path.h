@@ -94,7 +94,7 @@ class Path {
 
 
     void print() {
-        PRINTF_ASYNC("turn_type %d, block_num %d, turn_dir %d\n", turn_type, block_num, turn_dir);
+        PRINTF_ASYNC("turn_type %s, block_num %d, turn_dir %s\n", turnType2Str(turn_type).c_str(), block_num, turnDir2Str(turn_dir).c_str());
     }
 
 };

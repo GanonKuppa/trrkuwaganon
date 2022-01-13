@@ -1,5 +1,15 @@
 #include "suction.h"
+
+#include <string>
+
+// Lib
+#include "ntlibc.h"
+#include "debugLog.h"
+
+// Hal
 #include "hal_pwm.h"
+
+
 
 namespace module{
     
@@ -29,7 +39,29 @@ namespace module{
         _on_time = 0.0f;
     }
 
+    void Suction::debug(){
+        PRINTF_ASYNC("  duty_r : %f\n", Suction::getInstance().getDuty());
+    }
+
     int usrcmd_suction(int argc, char **argv){
-        return 0;
+        if (ntlibc_strcmp(argv[1], "status") == 0) {
+            Suction::getInstance().debug();
+            return 0;
+        }
+
+        if (ntlibc_strcmp(argv[1], "duty") == 0){
+            if(argc != 3){
+                PRINTF_ASYNC("  invalid param num!\n");
+                return -1;
+            }
+
+            std::string duty_val_str(argv[2]);
+            float duty_val = std::stof(duty_val_str);
+            Suction::getInstance().setDuty(duty_val);
+            return 0;
+        }
+
+        PRINTF_ASYNC("  Unknown sub command found\r\n");            
+        return -1;
     }
 }

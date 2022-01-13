@@ -121,12 +121,12 @@ namespace module {
         
         _v_xy_body_enc = wodo_msg.v;         
         _v_xy_body_ave = v_sum / (float)ACC_Y_AVERAGE_NUM;
-        _v_xy_body_cmp = _v_xy_body_ave + acc_y_sum * _delta_t;
+        _v_xy_body_cmp = _v_xy_body_ave + acc_y_sum * (_delta_t * 0.5f);
         _v_xy_body_for_odom = _v_xy_body_enc;
         _v_xy_body_for_ctrl = _v_xy_body_enc;
         
         // 加速度積分速度算出
-        _v_xy_body_acc += imu_msg.acc_y;
+        _v_xy_body_acc += imu_msg.acc_y * _delta_t;
         if(std::fabs(_v_xy_body_enc) < 0.01f){
             _v_xy_body_acc = _v_xy_body_enc;
         }
@@ -284,7 +284,7 @@ namespace module {
 
         msg.v_xy_body_cmp = _v_xy_body_cmp;
         msg.v_xy_body_enc = _v_xy_body_enc;
-        msg.v_xy_body_enc = _v_xy_body_ave;
+        msg.v_xy_body_ave = _v_xy_body_ave;
         msg.v_xy_body_acc = _v_xy_body_acc;
 
         msg.v_x = _v_x;

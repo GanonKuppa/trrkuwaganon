@@ -116,6 +116,51 @@ namespace module {
         pm.write<float>("gyro0_z_offset", _ang_v_offset[2]);
     }
 
+    void ImuDriver::calibrateAcc(uint16_t num){
+#ifdef SILS
+        return;
+#endif
+        
+        int8_t acc_x[num];
+        int8_t acc_y[num];
+
+        float acc_x_sum = 0.0f;
+        float acc_y_sum = 0.0f;
+
+        float offset_x = 0.0f;
+        float offset_y = 0.0f;
+
+        for (int i = 0; i < 2; i++) {
+            _acc_offset[i] = 0;
+        }
+
+        for (uint16_t i = 0; i < num; i++) {
+            acc_x[i] = _acc_raw[0];
+            acc_y[i] = _acc_raw[1];
+            hal::waitmsec(1);
+            PRINTF_ASYNC("  %3d| calibrating... %d, %d\n", i, acc_x[i], acc_y[i]);            
+        }
+
+        for (uint32_t i = 0; i < num; i++) {
+            acc_x_sum += (float) (acc_x[i]);
+            acc_y_sum += (float) (acc_y[i]);
+        }
+
+        offset_x = acc_x_sum / (float)num;
+        offset_y = acc_y_sum / (float)num;
+
+        PRINTF_ASYNC("acc0 offset %f, %f\n", offset_x, offset_y);
+
+        ParameterManager& pm = ParameterManager::getInstance();
+
+        _acc_offset[0] = offset_x;
+        _acc_offset[1] = offset_y;
+
+        pm.write<float>("acc0_x_offset", _acc_offset[0]);
+        pm.write<float>("acc0_y_offset", _acc_offset[1]);
+    }
+
+
     void ImuDriver::evalGyro(uint32_t num){
         float time = 0.0f;
 
@@ -323,6 +368,13 @@ namespace module {
                 ImuDriver::getInstance().calibrateGyro(1000);
                 return 0;
             }
+
+            if(ntlibc_strcmp(argv[2], "acc") == 0){
+                ImuDriver::getInstance().calibrateAcc(1000);
+                return 0;
+            }
+
+
         }
 
         if (ntlibc_strcmp(argv[1], "eval") == 0){

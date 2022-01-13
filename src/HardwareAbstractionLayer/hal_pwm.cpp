@@ -12,25 +12,25 @@ namespace hal {
 
     void initPWM1() {
 #ifndef SILS
-        peripheral_driver::initMTU3();
+        peripheral_driver::initGPTA2();
 #endif
     }
 
     void initPWM2() {
 #ifndef SILS
-        peripheral_driver::initMTU3();
+        peripheral_driver::initGPTA1();        
 #endif
     }
 
     void initPWM3() {
 #ifndef SILS
-        peripheral_driver::initGPTA1();
+        peripheral_driver::initMTU3();
 #endif
     }
 
     void initPWM4() {
-#ifndef SILS
-        peripheral_driver::initGPTA2();
+#ifndef SILS        
+        peripheral_driver::initMTU3();
 #endif
     }
 
@@ -49,26 +49,26 @@ namespace hal {
     }
 
     void setDutyPWM1(float duty) {
-#ifndef SILS
-        peripheral_driver::setDutyMTU3A(duty);
+#ifndef SILS        
+        peripheral_driver::setDutyGPTA2(duty);
 #endif
     }
 
     void setDutyPWM2(float duty) {
 #ifndef SILS
-        peripheral_driver::setDutyMTU3C(duty);
+        peripheral_driver::setDutyGPTA1(duty);        
 #endif
     }
 
     void setDutyPWM3(float duty) {
-#ifndef SILS
-        peripheral_driver::setDutyGPTA1(duty);
+#ifndef SILS        
+        peripheral_driver::setDutyMTU3A(duty);
 #endif
     }
 
     void setDutyPWM4(float duty) {
 #ifndef SILS
-        peripheral_driver::setDutyGPTA2(duty);
+        peripheral_driver::setDutyMTU3C(duty);
 #endif
     }
 

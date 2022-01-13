@@ -20,6 +20,7 @@
 #include "trajectoryCommander.h"
 #include "imuDriver.h"
 #include "logger.h"
+#include "suction.h"
 
 // Msg
 #include "msgBroker.h"
@@ -74,9 +75,13 @@ namespace activity{
         float wall2mouse_center_dist = module::ParameterManager::getInstance().wall2mouse_center_dist;
         constexpr float DEG2RAD = 3.14159265f / 180.0f;
         module::ImuDriver::getInstance().calibrateGyro(1000);
+        module::ImuDriver::getInstance().calibrateAcc(1000);
         module::TrajectoryCommander::getInstance().reset(0.045f, 0.045f - wall2mouse_center_dist, 90.0f * DEG2RAD);
         module::PositionEstimator::getInstance().reset(0.045f, 0.045f - wall2mouse_center_dist, 90.0f * DEG2RAD);
         module::Navigator::getInstance().setNavMode(ENavMode::FASTEST);
+
+        module::Suction::getInstance().setDuty(1.0f);
+        hal::waitmsec(1000);
         
         ETurnParamSet tp = ETurnParamSet(param_mode);
         module::ParameterManager& pm = module::ParameterManager::getInstance();
@@ -105,19 +110,20 @@ namespace activity{
             HF_playPath(tp, path_vec);
         } else if(run_mode == 5) {
             makeFastestDiagonalPath(500, tp, pm.goal_x, pm.goal_y, maze, path_vec);
+            module::Logger::getInstance().start();
             HF_playPath(tp, path_vec);
         }
         PRINTF_ASYNC("--- makeMinStepPath ----\n");
         printPath(path_vec);
-
-        module::Logger::getInstance().start();
+        
         hal::waitmsec(100);
 
     }
     
     
     void ShortestRunActivity::onFinish(){
-
+        module::Suction::getInstance().setDuty(0.0f);
+        module::Logger::getInstance().end();
     }
 
 
@@ -130,10 +136,12 @@ namespace activity{
         if(nav_msg.is_failsafe){
             //module::TrajectoryCommander::getInstance().clear();
             loop_status = ELoopStatus::FINISH;
+            module::Suction::getInstance().setDuty(0.0f);
         }
 
         if(ctrl_msg.traj_type == ETrajType::NONE){            
             loop_status = ELoopStatus::FINISH;
+            module::Suction::getInstance().setDuty(0.0f);
         }
 
         return loop_status;

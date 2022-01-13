@@ -297,9 +297,17 @@ void HF_playPath(ETurnParamSet tp, std::vector<Path>& path_vec) {
             v = turn_p.getV(path_vec[i].turn_type);
             dir = path_vec[i].turn_dir;
             
-            if (i == 0) v_pre = 0.0f;
-            else v_pre = turn_p.getV(path_vec[i-1].turn_type);
-
+            if (i == 0){
+                v_pre = 0.0f;
+            }
+            else{
+                if(path_vec[i-1].turn_type != ETurnType::STRAIGHT){
+                    v_pre = turn_p.getV(path_vec[i-1].turn_type);
+                }
+                else{
+                    v_pre = turn_p.getV(path_vec[i].turn_type);
+                }
+            }
             if (i + 1 == (uint16_t)path_vec.size()) v_fol = 0.0f;
             else v_fol = turn_p.getV(path_vec[i+1].turn_type);
             a = turn_p.getAcc(ETurnType::STRAIGHT);
@@ -323,6 +331,7 @@ void HF_playPath(ETurnParamSet tp, std::vector<Path>& path_vec) {
 
         }
     }
+    StopFactory::push(2.0f);
 }
 
 float HF_calcPlayPathTime(ETurnParamSet tp, std::vector<Path>& path_vec) {
@@ -379,8 +388,18 @@ float HF_calcPlayPathTime(ETurnParamSet tp, std::vector<Path>& path_vec) {
             v = turn_p.getV(path_vec[i].turn_type);
             dir = path_vec[i].turn_dir;
             {
-                if (i == 0) v_pre = 0.0f;
-                else v_pre = turn_p.getV(path_vec[i-1].turn_type);
+
+                if (i == 0){
+                    v_pre = 0.0f;
+                }
+                else{
+                    if(path_vec[i-1].turn_type != ETurnType::STRAIGHT){
+                        v_pre = turn_p.getV(path_vec[i-1].turn_type);
+                    }
+                    else{
+                        v_pre = turn_p.getV(path_vec[i].turn_type);
+                    }
+                }
 
                 if (i + 1 == (uint16_t)path_vec.size()) v_fol = 0.0f;
                 else v_fol = turn_p.getV(path_vec[i+1].turn_type);
