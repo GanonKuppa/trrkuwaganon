@@ -15,7 +15,10 @@
 #include "vehicleAttitudeMsg.h"
 #include "vehiclePositionMsg.h"
 #include "wallSensorMsg.h"
+#include "navStateMsg.h"
 
+// Obj
+#include "navigationEnum.h"
 
 
 namespace module {
@@ -49,7 +52,8 @@ namespace module {
 	_pitchrate(0.0f),
     _turn_type(ETurnType::NONE),
 	_beta_expiration_time(0.0f),
-    _on_wall_center_dist(0.0f)
+    _on_wall_center_dist(0.0f),
+    _in_read_wall_area_pre(false)
     {        
         setModuleName("PositionEstimator");
         
@@ -79,10 +83,12 @@ namespace module {
         WheelOdometryMsg wodo_msg;
         CtrlSetpointMsg ctrl_msg;
         WallSensorMsg ws_msg;
+        NavStateMsg nav_msg;
         copyMsg(msg_id::IMU, &imu_msg);
         copyMsg(msg_id::WHEEL_ODOMETRY, &wodo_msg);
         copyMsg(msg_id::CTRL_SETPOINT, &ctrl_msg);
         copyMsg(msg_id::WALL_SENSOR, &ws_msg);
+        copyMsg(msg_id::NAV_STATE, &nav_msg);
 
         float yawrate_pre = _yawrate; // yawrateは今期に取得したものは今期のデータ
         float yaw_pre = _yaw;
@@ -177,6 +183,13 @@ namespace module {
             _aheadWallCorrection();
         }
 
+        // 迷路の壁読み時に前壁からの距離で位置を補正
+        bool in_read_wall_area = nav_msg.in_read_wall_area;
+        if(!in_read_wall_area && _in_read_wall_area_pre && ws_msg.is_ahead && nav_msg.mode == ENavMode::SEARCH){
+            _aheadWallCorrectionOnWallRead(ws_msg.dist_a);
+        }
+        _in_read_wall_area_pre = in_read_wall_area;
+
         _onWallCenterCorrection();
 
         _publish_vehicle_position();
@@ -216,19 +229,32 @@ namespace module {
         float ang = _yaw * RAD2DEG;
         if(ang >= 315.0 || ang < 45.0) {
             _x = (uint8_t)(_x / 0.09f) * 0.09f + 0.09f/2.0f;
-            //_yaw = 0.0 * DEG2RAD;
+            _yaw = 0.0 * DEG2RAD;
         } else if(ang >= 45.0 && ang < 135.0) {
             _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;
-            //_yaw = 90.0f * DEG2RAD;
+            _yaw = 90.0f * DEG2RAD;
         } else if(ang >= 135.0f && ang < 225.0f) {
             _x = (uint8_t)(_x / 0.09f) * 0.09f + 0.09f/2.0f;
-            //_yaw = 180.0 * DEG2RAD;
+            _yaw = 180.0 * DEG2RAD;
         } else if(ang >= 225.0f && ang < 315.0f) {
             _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;
-            //_yaw = 270.0f * DEG2RAD;
+            _yaw = 270.0f * DEG2RAD;
         }
         _on_wall_center_dist = 0.0f;
         PRINTF_PICKLE("AHEAD_WALL_CORRECTION | x:%6.3f, x_pre:%6.3f, y:%6.3f, y_pre:%6.3f yaw:%6.3f, yaw_pre:%6.3f\n", _x, x_pre, _y, y_pre, _yaw*RAD2DEG, yaw_pre*RAD2DEG);
+    }
+
+    void PositionEstimator::_aheadWallCorrectionOnWallRead(float dist_a) {
+        float ang = _yaw * RAD2DEG;
+        if(ang >= 315.0 || ang < 45.0) {
+            _x = (uint8_t)(_x / 0.09f) * 0.09f + 0.09f - dist_a;            
+        } else if(ang >= 45.0 && ang < 135.0) {
+            _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f - dist_a;            
+        } else if(ang >= 135.0f && ang < 225.0f) {
+            _x = (uint8_t)(_x / 0.09f) * 0.09f + dist_a;
+        } else if(ang >= 225.0f && ang < 315.0f) {
+            _y = (uint8_t)(_y / 0.09f) * 0.09f + dist_a;            
+        }
     }
 
 

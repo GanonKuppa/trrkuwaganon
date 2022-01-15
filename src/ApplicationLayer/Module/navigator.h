@@ -79,6 +79,8 @@ namespace module {
         float _read_wall_offset2;
         bool _is_pre_read_l_wall;
         bool _is_pre_read_r_wall;
+        float _pre_read_l_wall_dist;
+        float _pre_read_r_wall_dist;
 
         void _updateParam();
         void _updateWallEnable();

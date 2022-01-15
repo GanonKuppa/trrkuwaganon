@@ -60,8 +60,9 @@ namespace module{
         _read_wall_offset1(0.012f),
         _read_wall_offset2(0.0135f),
         _is_pre_read_l_wall(false),
-        _is_pre_read_r_wall(false)
-
+        _is_pre_read_r_wall(false),
+        _pre_read_l_wall_dist(0.0f),
+        _pre_read_r_wall_dist(0.0f)
     {
         setModuleName("Navigator");
         _maze.readMazeDataFromFlash();
@@ -135,6 +136,8 @@ namespace module{
         if(_inReadWallArea(0.078f, 0.08f)){
             _is_pre_read_l_wall = _ws_msg.is_left;
             _is_pre_read_r_wall = _ws_msg.is_right;
+            _pre_read_l_wall_dist = _ws_msg.dist_l;
+            _pre_read_r_wall_dist = _ws_msg.dist_r;
         }
 
         // 壁の更新エリアに入ったときの動作
@@ -149,11 +152,13 @@ namespace module{
             // 迷路の壁情報更新
             if(!_maze.isReached(_x_cur, _y_cur)){                               
                 PRINTF_PICKLE("UPDATE_WALL          | x_setp:%6.3f, y_setp:%6.3f | x:%6.3f, y:%6.3f | azimuth:%c\n",_x_setp/0.09f, _y_setp/0.09f, _x/0.09f, _y/0.09f, azimuth2Char(_azimuth));
-                PRINTF_PICKLE("  dist: %.3f, %.3f, %.3f, %.3f\n", _ws_msg.dist_al, _ws_msg.dist_l, _ws_msg.dist_r, _ws_msg.dist_ar);
                 WallSensorMsg ws_msg_temp = _ws_msg;
-                
+                ws_msg_temp.dist_l = _pre_read_l_wall_dist;
+                ws_msg_temp.dist_r = _pre_read_r_wall_dist;
                 ws_msg_temp.is_left = _is_pre_read_l_wall;
                 ws_msg_temp.is_right = _is_pre_read_r_wall;                
+                PRINTF_PICKLE("  dist: %.3f, %.3f, %.3f, %.3f\n", _ws_msg.dist_al, _ws_msg.dist_l, _ws_msg.dist_r, _ws_msg.dist_ar);
+                PRINTF_PICKLE("        %.3f, %.3f, %.3f, %.3f\n", ws_msg_temp.dist_al, ws_msg_temp.dist_l, ws_msg_temp.dist_r, ws_msg_temp.dist_ar);
                 _maze.updateWall(_x_cur, _y_cur, _azimuth, ws_msg_temp);
             }
 
@@ -409,11 +414,11 @@ namespace module{
     }
 
     bool Navigator::_isFailsafe(){
-        float x_thr = 0.02f;
-        float y_thr = 0.02f;
+        float x_thr = 0.045f;
+        float y_thr = 0.045f;
         if(_mode == ENavMode::SEARCH){
-            x_thr = 0.02f;
-            y_thr = 0.02f;
+            x_thr = 0.045f;
+            y_thr = 0.045f;
         }
         else{
             x_thr = 0.1f;

@@ -22,6 +22,7 @@ namespace module {
         void _aheadWallCorrection();
         void _publish_vehicle_position();
         void _publish_vehicle_attitude();
+        void _aheadWallCorrectionOnWallRead(float dist_a);
         
         float _x;
         float _y;
@@ -71,6 +72,8 @@ namespace module {
         const float _afrer_curve_beta_expiration_time = 0.050f;
         float _beta_expiration_time;
         float _on_wall_center_dist;
+
+        bool _in_read_wall_area_pre;
 
     };
 
