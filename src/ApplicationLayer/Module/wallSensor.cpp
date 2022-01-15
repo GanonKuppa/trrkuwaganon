@@ -48,6 +48,8 @@ namespace module {
         _is_right_ctrl(false),
         _is_contact_wall(false),
         _is_on_wall_center(false),
+        _is_corner_l(false),
+        _is_corner_r(false),
         _contact_wall_time(0.0f),
         _on_wall_ahead_time(0.0f),
         _on_wall_ahead_l_time(0.0f),
@@ -84,16 +86,18 @@ namespace module {
         _dist_r = _distR((float)_right_q.at(0));
 
         ParameterManager& pm = ParameterManager::getInstance();
-        _is_ahead_l = (_dist_al <= pm.wall_al_thr); // 0.125f 
-        _is_ahead_r = (_dist_ar <= pm.wall_ar_thr); // 0.125f
+        _is_ahead_l = (_dist_al <= pm.wall_al_thr);
+        _is_ahead_r = (_dist_ar <= pm.wall_ar_thr);
         _is_ahead = (_is_ahead_l && _is_ahead_r);
-        _is_left = (_dist_l <= pm.wall_l_thr); // 0.0575f
-        _is_right = (_dist_r <= pm.wall_r_thr); // 0.0575f
+        _is_left = (_dist_l <= pm.wall_l_thr);
+        _is_right = (_dist_r <= pm.wall_r_thr);
         _is_left_ctrl = _is_left;
         _is_right_ctrl = _is_right;
         _is_contact_wall = (_dist_al < 0.04) && (_dist_ar < 0.04);
         _is_on_wall_center = (std::fabs(_dist_r - 0.045f) < 0.005) || (std::fabs(_dist_l - 0.045f) < 0.005);
-        
+        _is_corner_l = _isCornerL();
+        _is_corner_r = _isCornerR();
+
         if(_is_contact_wall){
             _contact_wall_time += _delta_t;
         }
@@ -319,6 +323,8 @@ namespace module {
         msg.is_left_ctrl = _is_left_ctrl;
         msg.is_right_ctrl = _is_right_ctrl;
         msg.is_on_wall_center = _is_on_wall_center;
+        msg.is_corner_l = _is_corner_l;
+        msg.is_corner_r = _is_corner_r;
 
         msg.contact_wall_time = _contact_wall_time;
         msg.on_wall_ahead_time = _on_wall_ahead_time;
@@ -352,6 +358,37 @@ namespace module {
             return std::max(dist_al, dist_ar);
         }
     }
+
+    bool WallSensor::_isCornerL() {
+        ParameterManager& pm = ParameterManager::getInstance();
+        int16_t th_on = pm.wall_corner_threshold_on_l;
+        int16_t th_off = pm.wall_corner_threshold_off_l;
+
+        if(_left_q.at(0) < th_off) {
+            for(int i=1; i<BUFF_SIZE; i++) {
+                if(_left_q.at(i)> th_on) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    bool WallSensor::_isCornerR() {
+        ParameterManager& pm = ParameterManager::getInstance();
+        int16_t th_on = pm.wall_corner_threshold_on_r;
+        int16_t th_off = pm.wall_corner_threshold_off_r;
+
+        if(_right_q.at(0) < th_off) {
+            for(int i=1; i<BUFF_SIZE; i++) {
+                if(_right_q.at(i)> th_on) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 
 
     float WallSensor::_distL(float ad){
@@ -397,6 +434,8 @@ namespace module {
         PRINTF_ASYNC("  =============================\n");
         PRINTF_ASYNC("  is_contact_wall     : %d\n", _is_contact_wall);
         PRINTF_ASYNC("  is_on_wall_center   : %d\n", _is_on_wall_center);
+        PRINTF_ASYNC("  is_corner_l         : %d\n", _is_corner_l);
+        PRINTF_ASYNC("  is_corner_r         : %d\n", _is_corner_r);
         PRINTF_ASYNC("  =============================\n");
         PRINTF_ASYNC("  contact_wall_time   : %f\n", _contact_wall_time);
         PRINTF_ASYNC("  on_wall_ahead_time  : %f\n", _on_wall_ahead_time);

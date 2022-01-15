@@ -44,10 +44,13 @@ namespace module {
         bool _is_left;
         bool _is_right;
         bool _is_left_ctrl;
-        bool _is_right_ctrl;
+        bool _is_right_ctrl;        
 
         bool _is_contact_wall;
         bool _is_on_wall_center;
+
+        bool _is_corner_l;
+        bool _is_corner_r;
 
         float _contact_wall_time;        
         float _on_wall_ahead_time;
@@ -71,6 +74,8 @@ namespace module {
         float _distL(float ad);
         float _distR(float ad);
         float _aheadDist(float dist_al, float dist_ar);
+        bool _isCornerL();
+        bool _isCornerR();
         uint16_t _trimAverage(uint16_t ad_array[], uint16_t num, uint16_t trim_num);
 
         friend class BaseModule<WallSensor>;
