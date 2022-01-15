@@ -73,14 +73,14 @@ namespace activity{
             float stop_time = 0.3f;
             float yawrate_max = pm.spin_yawrate_max * DEG2RAD;
             float yawacc = pm.spin_yawacc * DEG2RAD;
-            uint16_t run_num = 160;
+            uint16_t run_num = 20;
 
             for(int i=0;i<run_num;i++){
                 StraightFactory::push(ETurnType::STRAIGHT_CENTER, x, v_0, v_max, 0.0f, a, a);
                 StopFactory::push(stop_time);
                 SpinTurnFactory::push(180.0f * DEG2RAD, yawrate_max, yawacc);
                 StopFactory::push(stop_time);
-                v_max += 0.05;
+                v_max += 0.1;
             }            
         }
         else if(mode == 2){
@@ -102,8 +102,30 @@ namespace activity{
             }
         }
         else if(mode == 3){
+            float stop_time = 0.3f;
+            float yawrate_max = 500.0f * DEG2RAD;
+            float yawacc = pm.spin_yawacc * DEG2RAD;
+            uint16_t run_num = 10;
+
+            for(int i=0;i<run_num;i++){
+                StopFactory::push(stop_time);
+                SpinTurnFactory::push(720.0f * DEG2RAD, yawrate_max, yawacc);
+                StopFactory::push(stop_time);
+                yawrate_max += 100.0f * DEG2RAD;
+            }
         }
         else if(mode == 4){
+            float stop_time = 0.3f;
+            float yawrate_max = 5000.0f * DEG2RAD;
+            float yawacc = pm.spin_yawacc = 500.0f * DEG2RAD;
+            uint16_t run_num = 30;
+
+            for(int i=0;i<run_num;i++){
+                StopFactory::push(stop_time);
+                SpinTurnFactory::push(360.0f * DEG2RAD, yawrate_max, yawacc);
+                StopFactory::push(stop_time);
+                yawacc += 500.0f * DEG2RAD;
+            }
         }
         else if(mode == 5){
         }
@@ -119,7 +141,7 @@ namespace activity{
     
     
     void CalibrateFeedForwardActivity::onFinish(){
-
+        module::Logger::getInstance().end();
     }
 
 

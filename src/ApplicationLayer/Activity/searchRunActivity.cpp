@@ -13,6 +13,7 @@
 #include "trajectoryCommander.h"
 #include "imuDriver.h"
 #include "logger.h"
+#include "suction.h"
 
 // Msg
 #include "msgBroker.h"
@@ -54,11 +55,13 @@ namespace activity{
         module::Navigator::getInstance().startNavigation();
 
         module::Logger::getInstance().start();
+        module::Suction::getInstance().setDuty(0.4f);
         hal::waitmsec(100);
     }
     
     
     void SearchRunActivity::onFinish(){
+        module::Suction::getInstance().setDuty(0.0f);
         module::Navigator::getInstance().endNavigation();
     }
 

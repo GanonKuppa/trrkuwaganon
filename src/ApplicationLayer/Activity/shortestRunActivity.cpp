@@ -30,6 +30,7 @@
 // Obj
 #include "turnEnum.h"
 #include "maze.h"
+#include "trajectoryFactory.h"
 
 
 namespace activity{    
@@ -42,9 +43,9 @@ namespace activity{
     }
 
     void ShortestRunActivity::onStart(){
-        uint8_t run_mode = 0;
+        uint8_t run_mode = 5;
         uint8_t param_mode = 0;
-
+#if 0
         {       
             Intent intent = Intent();
             intent.uint8_t_param["SUB_MODE_NUM"] = 6;
@@ -56,7 +57,7 @@ namespace activity{
             run_mode = intent.uint8_t_param["SUB_MODE"];
             if(run_mode == 0) return;
         }
-
+#endif
         {       
             Intent intent = Intent();
             intent.uint8_t_param["SUB_MODE_NUM"] = 8;
@@ -79,7 +80,7 @@ namespace activity{
         module::TrajectoryCommander::getInstance().reset(0.045f, 0.045f - wall2mouse_center_dist, 90.0f * DEG2RAD);
         module::PositionEstimator::getInstance().reset(0.045f, 0.045f - wall2mouse_center_dist, 90.0f * DEG2RAD);
         module::Navigator::getInstance().setNavMode(ENavMode::FASTEST);
-
+        StopFactory::push(1.0f);        
         module::Suction::getInstance().setDuty(1.0f);
         hal::waitmsec(1000);
         

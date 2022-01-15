@@ -50,6 +50,8 @@ namespace module {
         _is_on_wall_center(false),
         _contact_wall_time(0.0f),
         _on_wall_ahead_time(0.0f),
+        _on_wall_ahead_l_time(0.0f),
+        _on_wall_ahead_r_time(0.0f),
         _on_wall_center_time(0.0f),
         _emit_led_cycle_time_us()   
     {
@@ -84,7 +86,7 @@ namespace module {
         ParameterManager& pm = ParameterManager::getInstance();
         _is_ahead_l = (_dist_al <= pm.wall_al_thr); // 0.125f 
         _is_ahead_r = (_dist_ar <= pm.wall_ar_thr); // 0.125f
-        _is_ahead = (_is_ahead_l || _is_ahead_r);
+        _is_ahead = (_is_ahead_l && _is_ahead_r);
         _is_left = (_dist_l <= pm.wall_l_thr); // 0.0575f
         _is_right = (_dist_r <= pm.wall_r_thr); // 0.0575f
         _is_left_ctrl = _is_left;
@@ -104,6 +106,20 @@ namespace module {
         }
         else{
             _on_wall_ahead_time = 0.0f;
+        }
+
+        if(_is_ahead_l){
+            _on_wall_ahead_l_time += _delta_t;
+        }
+        else{
+            _on_wall_ahead_l_time = 0.0f;
+        }
+
+        if(_is_ahead_r){
+            _on_wall_ahead_r_time += _delta_t;
+        }
+        else{
+            _on_wall_ahead_r_time = 0.0f;
         }
 
         if(_is_on_wall_center){
@@ -306,6 +322,8 @@ namespace module {
 
         msg.contact_wall_time = _contact_wall_time;
         msg.on_wall_ahead_time = _on_wall_ahead_time;
+        msg.on_wall_ahead_l_time = _on_wall_ahead_r_time;
+        msg.on_wall_ahead_r_time = _on_wall_ahead_l_time;
         msg.on_wall_center_time = _on_wall_center_time;
         
 

@@ -132,7 +132,7 @@ namespace module{
         _azimuth = yaw2Azimuth(_yaw);
 
         // 横壁の読み取り
-        if(_inReadWallArea(0.0f, 0.001f)){
+        if(_inReadWallArea(0.078f, 0.08f)){
             _is_pre_read_l_wall = _ws_msg.is_left;
             _is_pre_read_r_wall = _ws_msg.is_right;
         }

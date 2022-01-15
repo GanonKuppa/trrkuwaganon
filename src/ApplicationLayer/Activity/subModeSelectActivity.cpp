@@ -88,7 +88,7 @@ namespace activity{
         else{
             _mode = dp_msg.dial_pos_l;
 
-            if( (dp_msg.dial_pos_r  == 4 && dp_msg.same_pos_time_r > 0.1f ) || ws_msg.on_wall_ahead_time > 1.0f) {
+            if( (dp_msg.dial_pos_r  == 4 && dp_msg.same_pos_time_r > 0.1f ) || ws_msg.on_wall_ahead_r_time > 1.0f || ws_msg.on_wall_ahead_l_time > 1.0f) {
                 return ELoopStatus::FINISH;
             }
 

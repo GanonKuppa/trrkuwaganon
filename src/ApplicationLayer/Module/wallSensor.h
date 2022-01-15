@@ -51,6 +51,8 @@ namespace module {
 
         float _contact_wall_time;        
         float _on_wall_ahead_time;
+        float _on_wall_ahead_l_time;
+        float _on_wall_ahead_r_time;
         float _on_wall_center_time;
 
         const uint8_t BUFF_SIZE = 30;
