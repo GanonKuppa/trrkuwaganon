@@ -433,6 +433,16 @@ namespace module {
     template int32_t ParameterManager::read<int32_t>(std::string key);
 
     int usrcmd_parameterManager(int argc, char **argv){
+        if (ntlibc_strcmp(argv[1], "help") == 0) {
+            PRINTF_ASYNC("  list                       :\r\n");
+            PRINTF_ASYNC("  list pid_enable            :\r\n");
+            PRINTF_ASYNC("  list pid_gain              :\r\n");
+            PRINTF_ASYNC("  list pid_saturation        :\r\n");
+            PRINTF_ASYNC("  ttl                        : output teraterm macro\r\n");
+            PRINTF_ASYNC("  write <param_name> <value> :\r\n");
+            PRINTF_ASYNC("  read <param_name>          :\r\n");
+            return 0;
+        }
 
         if (ntlibc_strcmp(argv[1], "list") == 0) {
             bool is_pid_enable_only = (argc == 3 && ntlibc_strcmp(argv[2], "pid_enable") == 0);

@@ -582,6 +582,12 @@ namespace module{
     }
 
     int usrcmd_navigator(int argc, char **argv){
+        if (ntlibc_strcmp(argv[1], "help") == 0) {
+            PRINTF_ASYNC("  test_pmap :\r\n");
+            PRINTF_ASYNC("  printMaze :\r\n");
+            return 0;
+        }
+
         if (ntlibc_strcmp(argv[1], "test_pmap") == 0) {
             Navigator::getInstance().testPmap();
             return 0;

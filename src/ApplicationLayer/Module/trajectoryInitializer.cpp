@@ -266,7 +266,14 @@ namespace module {
 
 
     int usrcmd_trajectoryInitializer(int argc, char **argv){
-        
+        if (ntlibc_strcmp(argv[1], "help") == 0) {
+            PRINTF_ASYNC("  debug mollifier :\r\n");
+            PRINTF_ASYNC("  debug param     :\r\n");
+            PRINTF_ASYNC("  debug calcs     :\r\n");
+            return 0;
+        }
+
+
         if (ntlibc_strcmp(argv[1], "debug") == 0 && ntlibc_strcmp(argv[2], "mollifier") == 0) {            
             TrajectoryInitializer::getInstance().debugMollifier();
             return 0;

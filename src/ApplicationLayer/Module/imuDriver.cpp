@@ -348,6 +348,14 @@ namespace module {
 
 
     int usrcmd_imuDriver(int argc, char **argv){
+        if (ntlibc_strcmp(argv[1], "help") == 0) {
+            PRINTF_ASYNC("  status          :\r\n");
+            PRINTF_ASYNC("  whoami          :\r\n");
+            PRINTF_ASYNC("  calib gyro      :\r\n");
+            PRINTF_ASYNC("  calib acc       :\r\n");
+            PRINTF_ASYNC("  eval gyro <num> : evaluation time is <num> * 0.1[s]\r\n");
+            return 0;
+        }
 
         if (ntlibc_strcmp(argv[1], "status") == 0) {
             ImuDriver::getInstance().debug();

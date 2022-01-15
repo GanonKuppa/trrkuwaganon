@@ -86,6 +86,12 @@ namespace module {
     }
 
     int usrcmd_batteryMonitor(int argc, char **argv){
+        if (ntlibc_strcmp(argv[1], "help") == 0) {
+            PRINTF_ASYNC("  status :\r\n");
+            PRINTF_ASYNC("  eval  :\r\n");
+            return 0;
+        }
+
         if (ntlibc_strcmp(argv[1], "status") == 0) {
             BatteryMonitor::getInstance().debug();
             return 0;

@@ -92,6 +92,11 @@ namespace module{
     }    
 
     int usrcmd_pseudoDial(int argc, char **argv){
+        if (ntlibc_strcmp(argv[1], "help") == 0) {
+            PRINTF_ASYNC("  status :\r\n");
+            return 0;
+        }
+
         if (ntlibc_strcmp(argv[1], "status") == 0) {
             PseudoDial::getInstance().debug();
             return 0;

@@ -239,6 +239,15 @@ namespace module {
     }
 
     int usrcmd_logger(int argc, char **argv){
+        if (ntlibc_strcmp(argv[1], "help") == 0) {
+            PRINTF_ASYNC("  status :\r\n");
+            PRINTF_ASYNC("  start  :\r\n");
+            PRINTF_ASYNC("  end    :\r\n");
+            PRINTF_ASYNC("  print  :\r\n");
+            PRINTF_ASYNC("  pickle :\r\n");
+            return 0;
+        }
+
         if (ntlibc_strcmp(argv[1], "status") == 0) {
             Logger::getInstance().debug();
             return 0;

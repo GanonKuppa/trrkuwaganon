@@ -44,6 +44,12 @@ namespace module{
     }
 
     int usrcmd_suction(int argc, char **argv){
+        if (ntlibc_strcmp(argv[1], "help") == 0) {
+            PRINTF_ASYNC("  status            :\r\n");
+            PRINTF_ASYNC("  duty <0.0 to 1.0> :\r\n");
+            return 0;
+        }
+
         if (ntlibc_strcmp(argv[1], "status") == 0) {
             Suction::getInstance().debug();
             return 0;
