@@ -5,6 +5,7 @@ import * as THREE from './lib/three.module.js';
 import * as SOrbitControls from './threejs-view.js';
 import * as umobj from "./UMouseObject.js";
 
+let scene;
 
 function noop() {
 }
@@ -66,8 +67,7 @@ class ProxyManager {
 
 const proxyManager = new ProxyManager();
 
-function start(data) {
-  let scene;
+function start(data) {  
   const proxy = proxyManager.getProxy(data.canvasId);
   proxy.body = proxy;  // HACK!
   self.window = proxy;

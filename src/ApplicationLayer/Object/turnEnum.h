@@ -104,7 +104,7 @@ inline std::string turnType2Str(ETurnType tt){
         case ETurnType::TURN_S2D_45:
             return std::string("TURN_S2D_45");
         case ETurnType::TURN_S2D_135:
-            return std::string("TURN_135");
+            return std::string("TURN_S2D_135");
         case ETurnType::TURN_D2S_45:
             return std::string("TURN_D2S_45");
         case ETurnType::TURN_D2S_135:
@@ -166,3 +166,19 @@ inline bool isTurnStraight(ETurnType turn_type){
     }
 }
 
+inline bool isTurnCurve(ETurnType turn_type){
+    if(turn_type == ETurnType::TURN_90 ||
+       turn_type == ETurnType::TURN_L_90 ||
+       turn_type == ETurnType::TURN_180 ||
+       turn_type == ETurnType::TURN_S2D_45 ||
+       turn_type == ETurnType::TURN_S2D_135 ||
+       turn_type == ETurnType::TURN_D_90 ||
+       turn_type == ETurnType::TURN_D2S_45 ||
+       turn_type == ETurnType::TURN_D2S_135
+    ){
+        return true;
+    }
+    else {
+        return false;        
+    }
+}

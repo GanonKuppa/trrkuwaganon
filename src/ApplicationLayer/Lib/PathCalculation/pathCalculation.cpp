@@ -252,83 +252,210 @@ void HF_playPath(ETurnParamSet tp, std::vector<Path>& path_vec) {
     TurnParameter turn_p = module::TrajectoryInitializer::getInstance().getTurnParameter(tp);
     float wall2mouse_center_dist = module::ParameterManager::getInstance().wall2mouse_center_dist;
     float v_pre = 0.0f;
-    float v_fol = 0.0f;
-    bool is_start_section = true;
-
-    float x, v, a, v_max;
+    float v_fol = 0.0f;    
+    float x = 0.0f;
+    float a = 0.0f;    
+    float v_max = 0.0f;
+    float next_turn_pre_dist = 0.0f;
+    float pre_turn_fol_dist = 0.0f;
     ETurnDir dir;
 
     for (uint16_t i = 0; i < (uint16_t)path_vec.size(); i++) {
         if(path_vec[i].turn_type == ETurnType::STRAIGHT) {
-            if (is_start_section && path_vec[i+1].turn_type == ETurnType::STRAIGHT ) {
-                x = wall2mouse_center_dist + float(path_vec[i+1].block_num) * 0.045f;
+            // x
+            if (i == 0 && path_vec[i+1].turn_type == ETurnType::STRAIGHT ) {                
+                x = wall2mouse_center_dist + float(path_vec[i+1].block_num) * 0.045f + next_turn_pre_dist;
                 path_vec.erase(path_vec.begin() + i + 1);
-            } else if (is_start_section && path_vec[i+1].turn_type != ETurnType::STRAIGHT) {
+            } 
+            else if (i == 0 && path_vec[i+1].turn_type != ETurnType::STRAIGHT) {
                 x = wall2mouse_center_dist;
-            } else {
+            } 
+            else {
                 x = float(path_vec[i].block_num) * 0.045f;
             }
-            is_start_section = false;
 
+            if (i-1 >= 0 && path_vec[i-1].isTurnCurve()) {
+                pre_turn_fol_dist = module::TrajectoryInitializer::getInstance().getFolDist(tp ,path_vec[i-1].turn_type);
+            }
+            else {
+                pre_turn_fol_dist = 0.0f;
+            }
+
+            if(i+2 == (uint16_t)path_vec.size() && path_vec[i+1].isTurnCurve()){
+                next_turn_pre_dist = module::TrajectoryInitializer::getInstance().getPreDist(ETurnParamSet::SAFE0 ,path_vec[i+1].turn_type);                
+            }
+            else if (i+1 != (uint16_t)path_vec.size() && path_vec[i+1].isTurnCurve()) {
+                next_turn_pre_dist = module::TrajectoryInitializer::getInstance().getPreDist(tp ,path_vec[i+1].turn_type);
+            }
+            else {
+                next_turn_pre_dist = 0.0f;
+            }
+            x += pre_turn_fol_dist + next_turn_pre_dist;
+
+            // a
             a = turn_p.getAcc(ETurnType::STRAIGHT);
+            // v_max
             v_max = turn_p.getV(ETurnType::STRAIGHT);
-
-            if (i == 0) v_pre = 0.0f;
-            else v_pre = turn_p.getV(path_vec[i-1].turn_type);
-
-            if (i + 1 == (uint16_t)path_vec.size()) v_fol = 0.0f;
-            else v_fol = turn_p.getV(path_vec[i+1].turn_type);
+            // v_pre
+            if (i == 0) {
+                v_pre = 0.0f;
+            }
+            else {
+                v_pre = turn_p.getV(path_vec[i-1].turn_type);
+            }
+            // v_fol
+            if (i+1 == (uint16_t)path_vec.size()){
+                v_fol = 0.0f;
+            }
+            else if(i+2 == (uint16_t)path_vec.size() && path_vec[i+1].isTurnCurve()){
+                v_fol = module::TrajectoryInitializer::getInstance().getV(ETurnParamSet::SAFE0, path_vec[i+1].turn_type);
+            }
+            else {
+                v_fol = turn_p.getV(path_vec[i+1].turn_type);
+            }
             
-            StraightFactory::push(ETurnType::STRAIGHT_CENTER, x, v_pre, v_max, v_fol, a, a);
-            
+            if(i == 0 && path_vec[i+1].turn_type != ETurnType::STRAIGHT){
+                StraightFactory::push(ETurnType::STRAIGHT_CENTER, x, v_pre, v_fol, v_fol, a, a);            
+            }
+            else{
+                StraightFactory::push(ETurnType::STRAIGHT_CENTER, x, v_pre, v_max, v_fol, a, a);            
+            }
 
-        } else if(path_vec[i].turn_type == ETurnType::DIAGONAL) {
-        	a = turn_p.getAcc(ETurnType::DIAGONAL);
-            v_max = turn_p.getV(ETurnType::DIAGONAL);
+        } 
+        else if(path_vec[i].turn_type == ETurnType::DIAGONAL) {
+            // x
             x = float(path_vec[i].block_num) * 0.045f * 1.4142356f;
-            v_pre = turn_p.getV(path_vec[i-1].turn_type);
+            if (i-1 >= 0 && path_vec[i-1].isTurnCurve()) {
+                pre_turn_fol_dist = module::TrajectoryInitializer::getInstance().getFolDist(tp ,path_vec[i-1].turn_type);
+            } else {
+                pre_turn_fol_dist = 0.0f;
+            }
 
-            if (i + 1 == (uint16_t)path_vec.size()) v_fol = 0.0f;
-            else v_fol = turn_p.getV(path_vec[i+1].turn_type);
+            if(i+2 == (uint16_t)path_vec.size() && path_vec[i+1].isTurnCurve()){
+                next_turn_pre_dist = module::TrajectoryInitializer::getInstance().getPreDist(ETurnParamSet::SAFE0 ,path_vec[i+1].turn_type);                
+            }
+            else if (i+1 != (uint16_t)path_vec.size() && path_vec[i+1].isTurnCurve()) {
+                next_turn_pre_dist = module::TrajectoryInitializer::getInstance().getPreDist(tp ,path_vec[i+1].turn_type);                
+            } 
+            else {
+                next_turn_pre_dist = 0.0f;
+            }
+            x += pre_turn_fol_dist + next_turn_pre_dist;
+
+            // a
+        	a = turn_p.getAcc(ETurnType::DIAGONAL);
+            // v_max
+            v_max = turn_p.getV(ETurnType::DIAGONAL);
+            // v_pre
+            v_pre = turn_p.getV(path_vec[i-1].turn_type);
+            // v_fol
+            if (i + 1 == (uint16_t)path_vec.size()){
+                v_fol = 0.0f;
+            }
+            else if(i+2 == (uint16_t)path_vec.size() && path_vec[i+1].isTurnCurve()){
+                v_fol = module::TrajectoryInitializer::getInstance().getV(ETurnParamSet::SAFE0, path_vec[i+1].turn_type);
+            }
+            else {
+                v_fol = turn_p.getV(path_vec[i+1].turn_type);
+            }
             
             StraightFactory::push(ETurnType::DIAGONAL, x, v_pre, v_max, v_fol, a, a);            
 
-        } else {
-            v = turn_p.getV(path_vec[i].turn_type);
+        } 
+        else {
+            if(i + 1 == (uint16_t)path_vec.size()){ 
+                v_max = module::TrajectoryInitializer::getInstance().getV(ETurnParamSet::SAFE0 ,path_vec[i+1].turn_type);
+            }
+            else{
+                v_max = turn_p.getV(path_vec[i].turn_type);
+            }
+            
             dir = path_vec[i].turn_dir;
             
+            // v_pre
             if (i == 0){
                 v_pre = 0.0f;
             }
             else{
-                if(path_vec[i-1].turn_type != ETurnType::STRAIGHT){
+                if(path_vec[i-1].isTurnCurve()){
                     v_pre = turn_p.getV(path_vec[i-1].turn_type);
                 }
                 else{
                     v_pre = turn_p.getV(path_vec[i].turn_type);
                 }
             }
-            if (i + 1 == (uint16_t)path_vec.size()) v_fol = 0.0f;
-            else v_fol = turn_p.getV(path_vec[i+1].turn_type);
-            a = turn_p.getAcc(ETurnType::STRAIGHT);
-            float pre_dist = module::TrajectoryInitializer::getInstance().getPreDist(tp ,path_vec[i].turn_type);
-            float fol_dist = module::TrajectoryInitializer::getInstance().getFolDist(tp ,path_vec[i].turn_type);
-            float a_pre = std::max(a, std::fabs(v_pre * v_pre -  v * v) / (2.0f * pre_dist));
-            float a_fol = std::max(a, std::fabs(v_fol * v_fol -  v * v) / (2.0f * fol_dist));
-
-            if(path_vec[i].isStraightStart()) {
-                StraightFactory::push(ETurnType::STRAIGHT_CENTER, pre_dist, v_pre, v, v, a_pre, a_pre); 
-            } else {
-                StraightFactory::push(ETurnType::DIAGONAL, pre_dist, v_pre, v, v, a_pre, a_pre); 
+            
+            // v_fol
+            if(i + 1 == (uint16_t)path_vec.size()){ 
+                v_fol = 0.0f;
             }
-            CurveFactory::push(tp, path_vec[i].turn_type, dir);
-            if(path_vec[i].isStraightEnd()) {
-                StraightFactory::push(ETurnType::STRAIGHT_CENTER, fol_dist, v, v, v_fol, a_fol, a_fol);
-            } else {
-                StraightFactory::push(ETurnType::DIAGONAL, fol_dist, v, v, v_fol, a_fol, a_fol);
+            else{
+                if(path_vec[i+1].isTurnCurve()){
+                    v_fol = turn_p.getV(path_vec[i+1].turn_type);
+                }
+            }
+            
+            a = turn_p.getAcc(ETurnType::STRAIGHT); 
+
+            if(path_vec[i].isStraightStart() && path_vec[i-1].isTurnCurve()) {
+                float pre_fol_dist = module::TrajectoryInitializer::getInstance().getFolDist(tp ,path_vec[i-1].turn_type);
+                float now_pre_dist = 0.0f;
+                if(i + 1 == (uint16_t)path_vec.size()){
+                    now_pre_dist = module::TrajectoryInitializer::getInstance().getPreDist(ETurnParamSet::SAFE0 ,path_vec[i].turn_type);
+                }
+                else{
+                    now_pre_dist = module::TrajectoryInitializer::getInstance().getPreDist(tp ,path_vec[i].turn_type);
+                }
+
+                x = pre_fol_dist + now_pre_dist;
+                float a_pre = std::max(a, std::fabs(v_pre * v_pre -  v_max * v_max) / (2.0f * x));                
+                if(v_pre > v_max){
+                    StraightFactory::push(ETurnType::STRAIGHT_CENTER, x, v_pre, v_pre, v_max, a_pre, a_pre); 
+                }else{
+                    StraightFactory::push(ETurnType::STRAIGHT_CENTER, x, v_pre, v_max, v_max, a_pre, a_pre); 
+                }
+            } 
+            else if(path_vec[i].isDiagonalStart() && path_vec[i-1].isTurnCurve()) {
+                float pre_fol_dist = module::TrajectoryInitializer::getInstance().getFolDist(tp ,path_vec[i-1].turn_type);
+                float now_pre_dist = 0.0f;
+                if(i + 1 == (uint16_t)path_vec.size()){
+                    now_pre_dist = module::TrajectoryInitializer::getInstance().getPreDist(ETurnParamSet::SAFE0 ,path_vec[i].turn_type);
+                }
+                else{
+                    now_pre_dist = module::TrajectoryInitializer::getInstance().getPreDist(tp ,path_vec[i].turn_type);
+                }
+                                
+                x = pre_fol_dist + now_pre_dist;
+                float a_pre = std::max(a, std::fabs(v_pre * v_pre -  v_max * v_max) / (2.0f * x));
+
+                if(v_pre > v_max){
+                    StraightFactory::push(ETurnType::DIAGONAL, x, v_pre, v_pre, v_max, a_pre, a_pre); 
+                }else{
+                    StraightFactory::push(ETurnType::DIAGONAL, x, v_pre, v_max, v_max, a_pre, a_pre); 
+                }
             }
             
 
+            if(i + 1 == (uint16_t)path_vec.size()){ 
+                CurveFactory::push(ETurnParamSet::SAFE0, path_vec[i].turn_type, dir);
+            }
+            else{
+                CurveFactory::push(tp, path_vec[i].turn_type, dir);
+            }
+
+            if(path_vec[i].isStraightEnd() && i + 1 == (uint16_t)path_vec.size()) {
+                float now_fol_dist = module::TrajectoryInitializer::getInstance().getFolDist(ETurnParamSet::SAFE0 ,path_vec[i].turn_type);
+                x = now_fol_dist;
+                float a_fol = std::max(a, std::fabs(v_fol * v_fol -  v_max * v_max) / (2.0f * x));
+                StraightFactory::push(ETurnType::STRAIGHT_CENTER, x, v_max, v_max, v_fol, a_fol, a_fol);                
+            } 
+            else if(path_vec[i].isDiagonalEnd() && i + 1 == (uint16_t)path_vec.size()) {
+                float now_fol_dist = module::TrajectoryInitializer::getInstance().getFolDist(ETurnParamSet::SAFE0 ,path_vec[i].turn_type);
+                x = now_fol_dist;
+                float a_fol = std::max(a, std::fabs(v_fol * v_fol -  v_max * v_max) / (2.0f * x));
+                StraightFactory::push(ETurnType::DIAGONAL, x, v_max, v_max, v_fol, a_fol, a_fol);                
+            }
+            
         }
     }
     StopFactory::push(2.0f);

@@ -88,6 +88,23 @@ class Path {
         }
     }
 
+    bool isTurnCurve(){
+        if(turn_type == ETurnType::TURN_90 ||
+        turn_type == ETurnType::TURN_L_90 ||
+        turn_type == ETurnType::TURN_180 ||
+        turn_type == ETurnType::TURN_S2D_45 ||
+        turn_type == ETurnType::TURN_S2D_135 ||
+        turn_type == ETurnType::TURN_D_90 ||
+        turn_type == ETurnType::TURN_D2S_45 ||
+        turn_type == ETurnType::TURN_D2S_135
+        ){
+            return true;
+        }
+        else {
+            return false;        
+        }
+    }
+
     ~Path() {
 
     }

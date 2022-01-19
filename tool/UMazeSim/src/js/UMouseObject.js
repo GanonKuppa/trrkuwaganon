@@ -67,8 +67,8 @@ const geometry_robot_velo_cube = new THREE.Mesh(new THREE.BoxGeometry(0.003, 0.0
 const material_target_pos_contrail =  new THREE.MeshBasicMaterial({color: '#0000ff'});
 const material_target_velo_contrail =  new THREE.MeshBasicMaterial({color: '#0088ff'});
 
-let geometry_target_pos_contrail = new THREE.Geometry();;
-let geometry_target_velo_contrail = new THREE.Geometry();;
+let geometry_target_pos_contrail = new THREE.Geometry();
+let geometry_target_velo_contrail = new THREE.Geometry();
 const geometry_target_pos_cube = new THREE.Mesh(new THREE.BoxGeometry(0.003, 0.003, 0.003));
 const geometry_target_velo_cube = new THREE.Mesh(new THREE.BoxGeometry(0.003, 0.003, 0.003));
 
@@ -597,16 +597,26 @@ function setRobotColor(r, g, b){
 
 let x_robot_contrail_pre = 0.0;
 let y_robot_contrail_pre = 0.0;
+let robot_contrail_num = 0;
+let x_robot_contrail_origin = 0.0;
+let y_robot_contrail_origin = 0.0;
 function addPointRobotContrail(x, y, v){  
-  geometry_robot_pos_cube.position.set(y, 0.005, x);
+  if(robot_contrail_num == 1){
+    x_robot_contrail_origin = x;
+    y_robot_contrail_origin = y;
+    robot_pos_contrails_ref[robot_pos_contrails_ref.length-1].position.set(y_robot_contrail_origin, 0.0, x_robot_contrail_origin);
+    robot_velo_contrails_ref[robot_velo_contrails_ref.length-1].position.set(y_robot_contrail_origin, 0.0, x_robot_contrail_origin);
+  }
+
+  geometry_robot_pos_cube.position.set(y-y_robot_contrail_origin, 0.005, x-x_robot_contrail_origin);
   if(x != x_robot_contrail_pre || y != y_robot_contrail_pre){
-    geometry_robot_pos_contrail.mergeMesh(geometry_robot_pos_cube);    
-  } 
+    geometry_robot_pos_contrail.mergeMesh(geometry_robot_pos_cube);
+  }
   geometry_robot_pos_contrail.dynamic = true;
   geometry_robot_pos_contrail.elementsNeedUpdate = true;
   geometry_robot_pos_contrail.verticesNeedUpdate = true;
 
-  geometry_robot_velo_cube.position.set(y, 0.1 + v*0.1, x);
+  geometry_robot_velo_cube.position.set(y-y_robot_contrail_origin, 0.1 + v*0.1, x-x_robot_contrail_origin);
   if(x != x_robot_contrail_pre || y != y_robot_contrail_pre){ 
     geometry_robot_velo_contrail.mergeMesh(geometry_robot_velo_cube);
   }
@@ -616,11 +626,13 @@ function addPointRobotContrail(x, y, v){
 
   x_robot_contrail_pre = x;
   y_robot_contrail_pre = y;
+  robot_contrail_num ++;
 };
 
 
 let x_target_contrail_pre = 0.0;
 let y_target_contrail_pre = 0.0;
+let target_contrail_num = 0;
 function addPointTargetContrail(x, y, v){
   geometry_target_pos_cube.position.set(y, 0.005, x);
   if(x != x_target_contrail_pre || y != y_target_contrail_pre){
@@ -641,11 +653,13 @@ function addPointTargetContrail(x, y, v){
 
   x_target_contrail_pre = x;
   y_target_contrail_pre = y;
+  target_contrail_num ++;
 };
 
 
 function updateRobotContrail(scene) {
-
+  if( robot_contrail_num > 0 && robot_contrail_num < 60) return;
+  robot_contrail_num = 1;
   geometry_robot_pos_contrail = new THREE.Geometry();
   geometry_robot_velo_contrail = new THREE.Geometry();
   let mesh_robot_pos_contrail_ = new THREE.Mesh(geometry_robot_pos_contrail, material_robot_pos_contrail);
@@ -653,10 +667,12 @@ function updateRobotContrail(scene) {
   scene.add(mesh_robot_pos_contrail_);
   scene.add(mesh_robot_velo_contrail_);
   robot_pos_contrails_ref.push(mesh_robot_pos_contrail_);
-  robot_velo_contrails_ref.push(mesh_robot_velo_contrail_);
+  robot_velo_contrails_ref.push(mesh_robot_velo_contrail_);  
 }
 
 function updateTargetContrail(scene) {
+  if( target_contrail_num > 0 && target_contrail_num < 60) return;
+  target_contrail_num = 1;
 
   geometry_target_pos_contrail = new THREE.Geometry();
   geometry_target_velo_contrail = new THREE.Geometry();
@@ -669,13 +685,15 @@ function updateTargetContrail(scene) {
   target_velo_contrails_ref.push(mesh_target_velo_contrail_);
 }
 
-function removeContrail(scene) {
+function removeContrail(scene) {  
   robot_pos_contrails_ref.forEach(function(obj){
     let geometry = obj.geometry;
     let material = obj.material;
     geometry.dispose();
     material.dispose();
     scene.remove(obj);
+    robot_contrail_num = 0;
+    target_contrail_num = 0;
   });
 
   robot_velo_contrails_ref.forEach(function(obj){

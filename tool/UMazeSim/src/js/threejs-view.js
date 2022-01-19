@@ -27,7 +27,7 @@ function init(data) {   /* eslint-disable-line no-unused-vars */
   renderer.setClearColor(0xcccccc, 1.0);
 
 
-  const fov = 35;
+  const fov = 25;
   const aspect = 2; // the canvas default
   const near = 0.1;
   const far = 1000;
@@ -71,8 +71,8 @@ function init(data) {   /* eslint-disable-line no-unused-vars */
   function render() {
     
     if(animate_count % 60 == 0) fps_begin_time = ( performance || Date ).now();    
-    if(animate_count % 600 == 0) umobj.updateRobotContrail(scene);    
-    if(animate_count % 600 == 0) umobj.updateTargetContrail(scene);
+    umobj.updateRobotContrail(scene);    
+    umobj.updateTargetContrail(scene);
     
     if (resizeRendererToDisplaySize(renderer)) {
       camera.aspect = inputElement.clientWidth / inputElement.clientHeight;
@@ -90,7 +90,7 @@ function init(data) {   /* eslint-disable-line no-unused-vars */
       {
         "fps":fps,
         "maze_data":umobj.getMaze32()
-      }
+      };
       postMessageFunc(post_data);
 
     } 

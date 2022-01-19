@@ -275,16 +275,16 @@ namespace module {
         ;//257
         ;//258
         ;//259
-        registration<float>(260, shortest_3_v, "shortest_3_v", 0.7f); //260
-        registration<float>(261, shortest_3_v_d, "shortest_3_v_d", 0.7f); //261
-        registration<float>(262, shortest_3_v_90, "shortest_3_v_90", 0.7f); //262
-        registration<float>(263, shortest_3_v_l90, "shortest_3_v_l90", 0.7f); //263
-        registration<float>(264, shortest_3_v_180, "shortest_3_v_180", 0.7f); //264
-        registration<float>(265, shortest_3_v_d90, "shortest_3_v_d90", 0.7f); //265
-        registration<float>(266, shortest_3_v_45, "shortest_3_v_45", 0.7f); //266
-        registration<float>(267, shortest_3_v_135, "shortest_3_v_135", 0.7f); //267
-        registration<float>(268, shortest_3_a, "shortest_3_a", 4.0f); //268
-        registration<float>(269, shortest_3_a_diag, "shortest_3_a_diag", 4.0f); //269
+        registration<float>(260, shortest_3_v, "shortest_3_v", 3.0f); //260
+        registration<float>(261, shortest_3_v_d, "shortest_3_v_d", 2.0f); //261
+        registration<float>(262, shortest_3_v_90, "shortest_3_v_90", 1.0f); //262
+        registration<float>(263, shortest_3_v_l90, "shortest_3_v_l90", 1.1f); //263
+        registration<float>(264, shortest_3_v_180, "shortest_3_v_180", 1.05f); //264
+        registration<float>(265, shortest_3_v_d90, "shortest_3_v_d90", 0.8f); //265
+        registration<float>(266, shortest_3_v_45, "shortest_3_v_45", 0.9f); //266
+        registration<float>(267, shortest_3_v_135, "shortest_3_v_135", 0.8f); //267
+        registration<float>(268, shortest_3_a, "shortest_3_a", 10.0f); //268
+        registration<float>(269, shortest_3_a_diag, "shortest_3_a_diag", 5.0f); //269
         ;//270
         ;//271
         ;//272
@@ -295,15 +295,15 @@ namespace module {
         ;//277
         ;//278
         ;//279
-        registration<float>(280, shortest_4_v, "shortest_4_v", 0.8f); //280
-        registration<float>(281, shortest_4_v_d, "shortest_4_v_d", 0.8f); //281
-        registration<float>(282, shortest_4_v_90, "shortest_4_v_90", 0.8f); //282
-        registration<float>(283, shortest_4_v_l90, "shortest_4_v_l90", 0.8f); //283
-        registration<float>(284, shortest_4_v_180, "shortest_4_v_180", 0.8f); //284
+        registration<float>(280, shortest_4_v, "shortest_4_v", 3.0f); //280
+        registration<float>(281, shortest_4_v_d, "shortest_4_v_d", 2.0f); //281
+        registration<float>(282, shortest_4_v_90, "shortest_4_v_90", 1.0f); //282
+        registration<float>(283, shortest_4_v_l90, "shortest_4_v_l90", 1.1f); //283
+        registration<float>(284, shortest_4_v_180, "shortest_4_v_180", 1.05f); //284
         registration<float>(285, shortest_4_v_d90, "shortest_4_v_d90", 0.8f); //285
-        registration<float>(286, shortest_4_v_45, "shortest_4_v_45", 0.8f); //286
+        registration<float>(286, shortest_4_v_45, "shortest_4_v_45", 0.9f); //286
         registration<float>(287, shortest_4_v_135, "shortest_4_v_135", 0.8f); //287
-        registration<float>(288, shortest_4_a, "shortest_4_a", 5.0f); //288
+        registration<float>(288, shortest_4_a, "shortest_4_a", 10.0f); //288
         registration<float>(289, shortest_4_a_diag, "shortest_4_a_diag", 5.0f); //289        
     }
     
