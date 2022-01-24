@@ -55,7 +55,8 @@ namespace activity{
         module::Navigator::getInstance().startNavigation();
 
         module::Logger::getInstance().start();
-        module::Suction::getInstance().setDuty(0.4f);
+        float suction_duty = module::ParameterManager::getInstance().suction_duty_search;
+        module::Suction::getInstance().setDuty(suction_duty);
         hal::waitmsec(100);
     }
     
@@ -69,6 +70,7 @@ namespace activity{
         CtrlSetpointMsg ctrl_msg;
         NavStateMsg nav_msg;
         copyMsg(msg_id::NAV_STATE, &nav_msg);
+        copyMsg(msg_id::CTRL_SETPOINT, &ctrl_msg);
         ELoopStatus loop_status = ELoopStatus::CONTINUE;
         
         if(nav_msg.is_failsafe){

@@ -204,7 +204,7 @@ namespace module{
             //_wall_pidf.update(0.045f - _ws_msg.dist_r, 0.045f - _ws_msg.dist_l, true, true);
             // 壁制御量は曲率とみなし, 速度をかけることで角速度に変換
             float v_now = _pos_msg.v_xy_body_for_ctrl;
-            if(v_now < 0.05f) v_now = 0.05f;            
+            if(v_now < 0.05f) v_now = 0.05f;
             _setp_yawrate += v_now * _wall_pidf.getControlVal();
         }
         else{            
@@ -239,24 +239,29 @@ namespace module{
         }
 
         // 前壁姿勢位置補正
-        if(_turn_type == ETurnType::AHEAD_WALL_CORRECTION){
+        if(_turn_type == ETurnType::AHEAD_WALL_CORRECTION || _turn_type == ETurnType::AHEAD_WALL_YAW_CORRECTION){
             float dist_setp = 0.045f;
-            float diff_setp = 0.0f;    
             float wall_dist = _ws_msg.dist_a;
-            float wall_diff = _ws_msg.dist_l - _ws_msg.dist_r;
 
             _wall_dist_pidf.update(dist_setp, wall_dist); // 速度目標値
-            _wall_diff_pidf.update(diff_setp, wall_diff); // 角速度目標値
             _setp_v_xy_body = -_wall_dist_pidf.getControlVal();
-            //_setp_yawrate = _wall_diff_pidf.getControlVal();
         }
         else{
             _wall_dist_pidf.reset();
+        }
+
+        if(_turn_type == ETurnType::AHEAD_WALL_YAW_CORRECTION){
+            float diff_setp = 0.0f;    
+            float wall_diff = _ws_msg.dist_l - _ws_msg.dist_r;
+            _wall_diff_pidf.update(diff_setp, wall_diff); // 角速度目標値
+            _setp_yawrate = _wall_diff_pidf.getControlVal();
+        }
+        else{
             _wall_diff_pidf.reset();
         }
 
         // 角度制御
-        if(_wall_pidf.engaged()){//|| _turn_type == ETurnType::AHEAD_WALL_CORRECTION){
+        if(_wall_pidf.engaged() || _turn_type == ETurnType::AHEAD_WALL_YAW_CORRECTION){
             _yaw_pidf.reset();
         }
         else{            

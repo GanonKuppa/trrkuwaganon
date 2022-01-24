@@ -80,7 +80,11 @@ namespace activity{
         module::TrajectoryCommander::getInstance().reset(0.045f, 0.045f - wall2mouse_center_dist, 90.0f * DEG2RAD);
         module::PositionEstimator::getInstance().reset(0.045f, 0.045f - wall2mouse_center_dist, 90.0f * DEG2RAD);
         module::Navigator::getInstance().setNavMode(ENavMode::FASTEST);
-        StopFactory::push(1.0f);        
+        StopFactory::push(1.0f);
+
+        float suction_duty = module::ParameterManager::getInstance().suction_duty_shortest;
+        module::Suction::getInstance().setDuty(suction_duty);
+  
         module::Suction::getInstance().setDuty(1.0f);
         hal::waitmsec(1000);
         
@@ -132,6 +136,7 @@ namespace activity{
         CtrlSetpointMsg ctrl_msg;
         NavStateMsg nav_msg;
         copyMsg(msg_id::NAV_STATE, &nav_msg);
+        copyMsg(msg_id::CTRL_SETPOINT, &ctrl_msg);
         ELoopStatus loop_status = ELoopStatus::CONTINUE;
         
         if(nav_msg.is_failsafe){

@@ -24,7 +24,7 @@ namespace module {
         const uint16_t AD_RESOLUTION = 4096;
         const float REG_VOLTAGE = 3.0f;
         const float V_COEF = 30.0f/20.0f;
-        const float ALERT_VOL = 3.3f;
+        const float ALERT_VOL = 3.4f;
     };
 
     int usrcmd_batteryMonitor(int argc, char **argv);

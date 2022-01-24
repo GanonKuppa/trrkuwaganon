@@ -560,7 +560,7 @@ int main() {
         printf("-- Curve180_CW --\n");
         float delta_t = 0.001f;
         float t = 0.0f;
-        ETurnParamSet param_set = ETurnParamSet::SAFE1;
+        ETurnParamSet param_set = ETurnParamSet::SAFE;
         ETurnType turn_type = ETurnType::TURN_180;
         ETurnDir turn_dir = ETurnDir::CW;
 
@@ -601,7 +601,7 @@ int main() {
         printf("-- Curve180_CCW --\n");
         float delta_t = 0.001f;
         float t = 0.0f;
-        ETurnParamSet param_set = ETurnParamSet::SAFE1;
+        ETurnParamSet param_set = ETurnParamSet::SAFE;
         ETurnType turn_type = ETurnType::TURN_180;
         ETurnDir turn_dir = ETurnDir::CCW;
 

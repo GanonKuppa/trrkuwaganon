@@ -42,11 +42,11 @@ int main() {
 
     sim::initSimConnection();
     sim::setReload();
-    hal::waitmsec(4000);
+    hal::waitmsec(1000);
 
     Maze maze;
     Maze maze_gt;    
-    maze_archive::setMaze(maze_gt, maze_archive::EMazeName::AllJapan2008Final_HF);
+    maze_archive::setMaze(maze_gt, maze_archive::EMazeName::AllJapan2018Final_HF);
     sim::setWallsWithoutOuter32(maze_gt.walls_vertical, maze_gt.walls_horizontal, maze.walls_vertical, maze.walls_horizontal);
 
     maze.init();
@@ -65,7 +65,7 @@ int main() {
     PRINTF_ASYNC("=========== 1st run ============\n");
     while(real_time < 600.0f) {
         if(real_time > 30.0f && (coor_x == 0 && coor_y == 0)){
-            StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f, v, v, 0.0f, a, a);  
+            StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f, v, v, 0.0f, a, a);
             break;
         }
 
@@ -102,10 +102,10 @@ int main() {
             }
 
             if(rot_times == 0) {
-                StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.09f, v);
+                StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.09f, v+0.01f);
             }
             else if(rot_times == 4) {
-                StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f, v, v, 0.0f, a, a);                      
+                StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f, v, v, 0.01f, a, a);                      
                 SpinTurnFactory::push(180.0f * DEG2RAD, yawrate_max, yawacc);
                 StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f, 0.0f, v, v, a, a);
                  
@@ -119,12 +119,20 @@ int main() {
         }
         
         tick_count++;
+        if(tick_count % 10000 == 0) PRINTF_ASYNC("time:%f, ETrajType:%s\n", real_time, trajType2Str(setp_msg.traj_type).c_str());
     }
 
     while(setp_msg.traj_type != ETrajType::NONE){
         trajCommander.update0();
+        copyMsg(msg_id::CTRL_SETPOINT, &setp_msg);
         real_time += delta_t;
+
+        if(tick_count % 30 == 0) {
+            sim::setRobotPos(setp_msg.x, setp_msg.y, setp_msg.yaw*RAD2DEG, setp_msg.v_xy_body);
+            sim::addPointRobotContrail(setp_msg.x, setp_msg.y, setp_msg.yaw*RAD2DEG, setp_msg.v_xy_body);
+        }
         hal::waitmsec(1);
+        tick_count++;
     }
     PRINTF_ASYNC("1st run end time:%f\n", real_time);
 

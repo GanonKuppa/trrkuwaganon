@@ -59,6 +59,8 @@ namespace module {
         float search_limit_time_sec; //15
         uint8_t logger_skip_mod; //16
         float wall2mouse_center_dist; //17
+        float suction_duty_search; //18
+        float suction_duty_shortest; //19
 
         float duty_coef_left_p; //30
         float duty_offset_left_p; //31

@@ -51,14 +51,14 @@ class Maze {
 
     Wall readWall(uint8_t x, uint8_t y);
     
-    bool existAWall(uint8_t x, uint8_t y, EAzimuth dir);
-    bool existRWall(uint8_t x, uint8_t y, EAzimuth dir);
-    bool existLWall(uint8_t x, uint8_t y, EAzimuth dir);
+    bool existsAWall(uint8_t x, uint8_t y, EAzimuth dir);
+    bool existsRWall(uint8_t x, uint8_t y, EAzimuth dir);
+    bool existsLWall(uint8_t x, uint8_t y, EAzimuth dir);
 
     bool watchedRWall(uint8_t x, uint8_t y, EAzimuth dir);    
     bool watchedLWall(uint8_t x, uint8_t y, EAzimuth dir);
 
-    bool isExistPath(uint8_t x, uint8_t y);
+    bool existsGoalPath(uint8_t x, uint8_t y);
 
     int8_t calcRotTimes(EAzimuth dest_dir, EAzimuth my_dir);
 

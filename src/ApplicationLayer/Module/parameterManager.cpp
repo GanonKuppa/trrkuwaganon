@@ -24,17 +24,17 @@ namespace module {
         registration<float>(6, test_run_a, "test_run_a", 4.0f); //6
         registration<float>(7, test_run_x, "test_run_x", 1.0f); //7
         registration<uint8_t>(8, test_run_wall_flag, "test_run_wall_flag", 1); //8
-        registration<float>(9, v_search_run, "v_search_run", 0.3f); //9
-        registration<float>(10, a_search_run, "a_search_run", 4.0f); //10
+        registration<float>(9, v_search_run, "v_search_run", 0.48f); //9
+        registration<float>(10, a_search_run, "a_search_run", 5.0f); //10
         registration<float>(11, spin_yawrate_max, "spin_yawrate_max", 10000.0f); //11
         registration<float>(12, spin_yawacc, "spin_yawacc", 5000.0f); //12
         registration<uint8_t>(13, goal_x, "goal_x", 7); //13
         registration<uint8_t>(14, goal_y, "goal_y", 7); //14
         registration<float>(15, search_limit_time_sec, "search_limit_time_sec", 1500.0f); //15
-        registration<uint8_t>(16, logger_skip_mod, "logger_skip_mod", 0); //16
+        registration<uint8_t>(16, logger_skip_mod, "logger_skip_mod", 1); //16
         registration<float>(17, wall2mouse_center_dist, "wall2mouse_center_dist", 0.01f); //17
-        ;//18
-        ;//19
+        registration<float>(18, suction_duty_search, "suction_duty_search", 0.5f); //18
+        registration<float>(19, suction_duty_shortest, "suction_duty_shortest", 1.0f); //19
         ;//20
         ;//21
         ;//22

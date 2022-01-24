@@ -70,6 +70,7 @@ namespace module{
     
     void Navigator::setNavMode(ENavMode mode){
         _mode = mode;
+        _is_failsafe = false;
     }
 
     void Navigator::setNavSubMode(ENavSubMode sub_mode){
@@ -104,7 +105,7 @@ namespace module{
         _lock_guard = false;
     }
     
-    void Navigator::update1(){
+    void Navigator::update0(){
         if(_lock_guard) return;
 
         // パラメータの更新
@@ -118,15 +119,24 @@ namespace module{
         _is_failsafe = _isFailsafe();
         
         if(_is_failsafe){
-            _navigating = false;            
+            _navigating = false;
         }
 
         if(!is_failsafe_pre && _is_failsafe){
             PRINTF_PICKLE("!!!!FAILSAFE!!!!      | cor_setp:(%6.3f, %6.3f)| x_setp:%6.3f, x:%6.3f |y_setp %6.3f, y:%6.3f |aout_err:%d\n",_x_setp/0.09f,_y_setp/0.09f, _x_setp, _x, _y_setp, _y, _is_actuator_error);
         }
-
-
-        
+        // LEDの制御
+        if(_navigating){
+            if(_inReadWallArea(0.078f, 0.08f)){
+                module::LedController::getInstance().turnFcled(1, 1, 0);
+            }
+            else if(_inReadWallArea(_read_wall_offset1, _read_wall_offset2)){
+                module::LedController::getInstance().turnFcled(1, 1, 1);
+            }
+            else{
+                module::LedController::getInstance().turnFcled(0, 0, 0);
+            }        
+        }
         // 現在区画の更新
         _x_cur = (uint8_t)(_x / 0.09f);
         _y_cur = (uint8_t)(_y / 0.09f);
@@ -151,14 +161,14 @@ namespace module{
 
             // 迷路の壁情報更新
             if(!_maze.isReached(_x_cur, _y_cur)){                               
-                PRINTF_PICKLE("UPDATE_WALL          | x_setp:%6.3f, y_setp:%6.3f | x:%6.3f, y:%6.3f | azimuth:%c\n",_x_setp/0.09f, _y_setp/0.09f, _x/0.09f, _y/0.09f, azimuth2Char(_azimuth));
+                //PRINTF_PICKLE("UPDATE_WALL          | x_setp:%6.3f, y_setp:%6.3f | x:%6.3f, y:%6.3f | azimuth:%c\n",_x_setp/0.09f, _y_setp/0.09f, _x/0.09f, _y/0.09f, azimuth2Char(_azimuth));
                 WallSensorMsg ws_msg_temp = _ws_msg;
                 ws_msg_temp.dist_l = _pre_read_l_wall_dist;
                 ws_msg_temp.dist_r = _pre_read_r_wall_dist;
                 ws_msg_temp.is_left = _is_pre_read_l_wall;
                 ws_msg_temp.is_right = _is_pre_read_r_wall;                
-                PRINTF_PICKLE("  dist: %.3f, %.3f, %.3f, %.3f\n", _ws_msg.dist_al, _ws_msg.dist_l, _ws_msg.dist_r, _ws_msg.dist_ar);
-                PRINTF_PICKLE("        %.3f, %.3f, %.3f, %.3f\n", ws_msg_temp.dist_al, ws_msg_temp.dist_l, ws_msg_temp.dist_r, ws_msg_temp.dist_ar);
+                //PRINTF_PICKLE("  dist: %.3f, %.3f, %.3f, %.3f\n", _ws_msg.dist_al, _ws_msg.dist_l, _ws_msg.dist_r, _ws_msg.dist_ar);
+                //PRINTF_PICKLE("        %.3f, %.3f, %.3f, %.3f\n", ws_msg_temp.dist_al, ws_msg_temp.dist_l, ws_msg_temp.dist_r, ws_msg_temp.dist_ar);
                 _maze.updateWall(_x_cur, _y_cur, _azimuth, ws_msg_temp);
             }
 
@@ -201,7 +211,6 @@ namespace module{
             _nav_cmd_queue.pop_front();
             _lock_guard = false;
             if(cmd == ENavCommand::DO_FIRST_MOVE){    
-                module::LedController::getInstance().flashFcled(1, 0, 0, 0.5, 0.5);
                 float target_dist = _wall2mouse_center_dist + 0.045f + _read_wall_offset2;
                 StraightFactory::push(ETurnType::STRAIGHT_CENTER, target_dist, 0.0, _v, _v, _a, _a);
                 PRINTF_PICKLE("DO_FIRST_MOVE        | x_setp:%6.3f, y_setp:%6.3f | x:%6.3f, y:%6.3f\n",_x_setp/0.09f, _y_setp/0.09f, _x/0.09f, _y/0.09f);
@@ -216,17 +225,17 @@ namespace module{
                 } 
                 else if (std::abs(rot_times) == 4) {
                     //_nav_cmd_queue.push_back(ENavCommand::SAVE_MAZE);   
-                    if(_maze.existAWall(_x_cur, _y_cur, _azimuth)){
-                        StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2, _v, _v, 0.0f, _a, _a);                        
-                        AheadWallCorrectionFactory::push(0.3f, 0.1f);
-                        if(_maze.existRWall(_x_cur, _y_cur, _azimuth)){
+                    if(_maze.existsAWall(_x_cur, _y_cur, _azimuth)){
+                        StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2 - 0.02f, _v, _v, _v, _a, _a);                        
+                        AheadWallCorrectionFactory::push(0.3f, 0.05f);
+                        if(_maze.existsRWall(_x_cur, _y_cur, _azimuth)){
                             SpinTurnFactory::push(-90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
-                            AheadWallCorrectionFactory::push(0.3f, 0.1f);
+                            AheadWallCorrectionFactory::push(0.5f, 0.1f, true);
                             SpinTurnFactory::push(-90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
                         }
-                        else if(_maze.existLWall(_x_cur, _y_cur, _azimuth)){
+                        else if(_maze.existsLWall(_x_cur, _y_cur, _azimuth)){
                             SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
-                            AheadWallCorrectionFactory::push(0.3f, 0.1f);
+                            AheadWallCorrectionFactory::push(0.5f, 0.1f, true);
                             SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
                         }
                         else{
@@ -370,8 +379,8 @@ namespace module{
     void Navigator::_updateWallEnable(){
         // 迷路の壁が現在の位置から見えるかの判定
         if(_mode == ENavMode::SEARCH || _mode == ENavMode::FASTEST){
-            _r_wall_enable = _existRWall(_x, _y, _azimuth) && _ws_msg.is_right_ctrl;
-            _l_wall_enable = _existLWall(_x, _y, _azimuth) && _ws_msg.is_left_ctrl;
+            _r_wall_enable = _existsRWall(_x, _y, _azimuth) && _ws_msg.is_right_ctrl;
+            _l_wall_enable = _existsLWall(_x, _y, _azimuth) && _ws_msg.is_left_ctrl;
         }
         else{
             _r_wall_enable = _ws_msg.is_right_ctrl;
@@ -379,14 +388,15 @@ namespace module{
         }
         
         // 前壁が近すぎる場合は壁制御を禁止
-        if(_ws_msg.dist_a < 0.06f){
+        if(_ws_msg.dist_al < 0.08f && _ws_msg.dist_ar < 0.08f){
             _r_wall_enable = false;
             _l_wall_enable = false;
         }
+        
         // 柱を見ている際は柱に近づき過ぎている場合のみ壁制御をかける
         if(_watchedPillar(_x, _y, _azimuth)){
-            if(_ws_msg.dist_r > 0.045f) _r_wall_enable = false;
-            if(_ws_msg.dist_l > 0.045f) _l_wall_enable = false;
+            if(_ws_msg.dist_r > 0.035f) _r_wall_enable = false;
+            if(_ws_msg.dist_l > 0.035f) _l_wall_enable = false;
         }
     }
 
@@ -417,8 +427,8 @@ namespace module{
         float x_thr = 0.045f;
         float y_thr = 0.045f;
         if(_mode == ENavMode::SEARCH){
-            x_thr = 0.045f;
-            y_thr = 0.045f;
+            x_thr = 0.1f;
+            y_thr = 0.1f;
         }
         else{
             x_thr = 0.1f;
@@ -426,6 +436,7 @@ namespace module{
         }
         
         return (_turn_type != ETurnType::AHEAD_WALL_CORRECTION &&
+                _turn_type != ETurnType::AHEAD_WALL_YAW_CORRECTION &&
             _ctrl_mode == ECtrlMode::VEHICLE &&
            (std::fabs(_x - _x_setp) > x_thr || 
             std::fabs(_y - _y_setp) > y_thr //||
@@ -447,7 +458,7 @@ namespace module{
         else return false;        
     }
 
-    bool Navigator::_existRWall(float x, float y, EAzimuth azimuth) {
+    bool Navigator::_existsRWall(float x, float y, EAzimuth azimuth) {
         // マウスと同じ角度の座標系における区画の入口からの距離
         float fmod_x = fmodf(x, 0.09f);
         float fmod_y = fmodf(y, 0.09f);
@@ -465,8 +476,8 @@ namespace module{
             dist = 0.09f - fmod_y;
         }
 
-        uint8_t x_int = floorf(x);
-        uint8_t y_int = floorf(y);
+        uint8_t x_int = (uint8_t)(x / 0.09f);
+        uint8_t y_int = (uint8_t)(y / 0.09f);
         if(dist > 0.045f) {
             if (azimuth == EAzimuth::E) x_int++;
             else if (azimuth == EAzimuth::N) y_int++;
@@ -478,11 +489,11 @@ namespace module{
             return true;
         }
         else{
-            return _maze.existRWall(x_int, y_int, azimuth);
+            return _maze.existsRWall(x_int, y_int, azimuth);
         }
     }
 
-    bool Navigator::_existLWall(float x, float y, EAzimuth azimuth) {
+    bool Navigator::_existsLWall(float x, float y, EAzimuth azimuth) {
         // マウスと同じ角度の座標系における区画の入口からの距離
         float fmod_x = fmodf(x, 0.09f);
         float fmod_y = fmodf(y, 0.09f);
@@ -500,8 +511,8 @@ namespace module{
             dist = 0.09f - fmod_y;
         }
 
-        uint8_t x_int = floorf(x);
-        uint8_t y_int = floorf(y);
+        uint8_t x_int = (uint8_t)(x / 0.09f);
+        uint8_t y_int = (uint8_t)(y / 0.09f);
         if(dist > 0.045f) {
             if (azimuth == EAzimuth::E) x_int++;
             else if (azimuth == EAzimuth::N) y_int++;
@@ -513,7 +524,7 @@ namespace module{
             return true;
         }
         else{
-            return _maze.existLWall(x_int, y_int, azimuth);
+            return _maze.existsLWall(x_int, y_int, azimuth);
         }
     }
 
@@ -535,7 +546,7 @@ namespace module{
             dist = 0.09f - fmod_y;
         }
         
-        if(dist > 0.045f && dist < 0.06f){
+        if(dist > 0.05f && dist < 0.065f){
             return true;
         }
         else{
@@ -571,6 +582,55 @@ namespace module{
         PRINTF_PICKLE("         %c%-5d  \n\n", r_s, p_s);
     }
 
+    void Navigator::debugWall(uint8_t x, uint8_t y){
+        Wall wall = _maze.readWall(x, y);
+        char wall_e = (wall.E == 1 ? '|' : ' ');
+        char wall_n = (wall.N == 1 ? '-' : ' ');
+        char wall_w = (wall.W == 1 ? '|' : ' ');
+        char wall_s = (wall.S == 1 ? '-' : ' ');
+        uint16_t p_e = 0xffff;
+        uint16_t p_n = 0xffff;
+        uint16_t p_w = 0xffff;
+        uint16_t p_s = 0xffff;
+        if(wall.E == 0 && wall.EF == 1 && x != 31) p_e = _maze.p_map[x+1][y];
+        if(wall.N == 0 && wall.NF == 1 && y != 31) p_n = _maze.p_map[x][y+1];
+        if(wall.W == 0 && wall.WF == 1 && x != 0) p_w = _maze.p_map[x-1][y];
+        if(wall.S == 0 && wall.SF == 1 && y != 0) p_s = _maze.p_map[x][y-1];
+        char r_e = (_maze.isReached(x+1, y)   == 1 ? 'R' : 'N');
+        char r_n = (_maze.isReached(x  , y+1) == 1 ? 'R' : 'N');
+        char r_w = (_maze.isReached(x-1, y)   == 1 ? 'R' : 'N');
+        char r_s = (_maze.isReached(x  , y-1) == 1 ? 'R' : 'N');
+
+        PRINTF_ASYNC("\n");
+        PRINTF_ASYNC("   (%2d, %2d)\n", x, y);
+        PRINTF_ASYNC("         %c%-5d \n", r_n, p_n);
+        PRINTF_ASYNC("          + %c +\n", wall_n);
+        PRINTF_ASYNC("   %c%-5d %c %c %c %c%-5d\n", r_w, p_w, wall_w, azimuth2Char(_azimuth), wall_e, r_e, p_e);
+        PRINTF_ASYNC("          + %c +  \n", wall_s);
+        PRINTF_ASYNC("         %c%-5d  \n\n", r_s, p_s);
+        
+        PRINTF_ASYNC("  ---------\n");
+        PRINTF_ASYNC("  maze.existsLWall(%d, %d, E) = %d\n", x, y, _maze.existsLWall(x, y, EAzimuth::E));
+        PRINTF_ASYNC("  maze.existsRWall(%d, %d, E)  = %d\n", x, y, _maze.existsRWall(x, y, EAzimuth::E));
+        PRINTF_ASYNC("  maze.watchedLWall(%d, %d, E) = %d\n", x, y, _maze.watchedLWall(x, y, EAzimuth::E));
+        PRINTF_ASYNC("  maze.watchedRWall(%d, %d, E) = %d\n", x, y, _maze.watchedRWall(x, y, EAzimuth::E));
+        PRINTF_ASYNC("  ---------\n");       
+        PRINTF_ASYNC("  maze.existsLWall(%d, %d, N) = %d\n", x, y, _maze.existsLWall(x, y, EAzimuth::N));
+        PRINTF_ASYNC("  maze.existsRWall(%d, %d, N) = %d\n", x, y, _maze.existsRWall(x, y, EAzimuth::N));
+        PRINTF_ASYNC("  maze.watchedLWall(%d, %d, N) = %d\n", x, y, _maze.watchedLWall(x, y, EAzimuth::N));
+        PRINTF_ASYNC("  maze.watchedRWall(%d, %d, N) = %d\n", x, y, _maze.watchedRWall(x, y, EAzimuth::N));
+        PRINTF_ASYNC("  ---------\n");
+        PRINTF_ASYNC("  maze.existsLWall(%d, %d, W) = %d\n", x, y, _maze.existsLWall(x, y, EAzimuth::W));
+        PRINTF_ASYNC("  maze.existsRWall(%d, %d, W) = %d\n", x, y, _maze.existsRWall(x, y, EAzimuth::W));
+        PRINTF_ASYNC("  maze.watchedLWall(%d, %d, W) = %d\n", x, y, _maze.watchedLWall(x, y, EAzimuth::W));
+        PRINTF_ASYNC("  maze.watchedRWall(%d, %d, W) = %d\n", x, y, _maze.watchedRWall(x, y, EAzimuth::W));
+        PRINTF_ASYNC("  ---------\n");
+        PRINTF_ASYNC("  maze.existsLWall(%d, %d, S) = %d\n", x, y, _maze.existsLWall(x, y, EAzimuth::S));
+        PRINTF_ASYNC("  maze.existsRWall(%d, %d, S) = %d\n", x, y, _maze.existsRWall(x, y, EAzimuth::S));
+        PRINTF_ASYNC("  maze.watchedLWall(%d, %d, S) = %d\n", x, y, _maze.watchedLWall(x, y, EAzimuth::S));
+        PRINTF_ASYNC("  maze.watchedRWall(%d, %d, S) = %d\n", x, y, _maze.watchedRWall(x, y, EAzimuth::S));
+    }
+
 
     void Navigator::_publish(){
         NavStateMsg msg;            
@@ -590,6 +650,7 @@ namespace module{
         if (ntlibc_strcmp(argv[1], "help") == 0) {
             PRINTF_ASYNC("  test_pmap :\r\n");
             PRINTF_ASYNC("  printMaze :\r\n");
+            PRINTF_ASYNC("  debugWall <x_cor> <y_cor> :\r\n");
             return 0;
         }
 
@@ -600,6 +661,23 @@ namespace module{
 
         if (ntlibc_strcmp(argv[1], "printMaze") == 0) {
             Navigator::getInstance().printMaze();
+            return 0;
+        }
+
+        if (ntlibc_strcmp(argv[1], "debugWall") == 0) {
+            if(argc != 4){
+                PRINTF_ASYNC("  invalid param num!\n");
+                return -1;
+            }
+
+            std::string x_str(argv[2]);
+            uint8_t x = std::stoi(x_str);
+
+            std::string y_str(argv[3]);
+            uint8_t y = std::stoi(y_str);
+
+
+            Navigator::getInstance().debugWall(x, y);
             return 0;
         }
 

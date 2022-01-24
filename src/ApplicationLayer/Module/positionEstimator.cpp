@@ -17,6 +17,9 @@
 #include "wallSensorMsg.h"
 #include "navStateMsg.h"
 
+// Module
+#include "parameterManager.h"
+
 // Obj
 #include "navigationEnum.h"
 
@@ -129,7 +132,7 @@ namespace module {
         _v_xy_body_ave = v_sum / (float)ACC_Y_AVERAGE_NUM;
         _v_xy_body_cmp = _v_xy_body_ave + acc_y_sum * (_delta_t * 0.5f);
         _v_xy_body_for_odom = _v_xy_body_enc;
-        _v_xy_body_for_ctrl = _v_xy_body_enc;
+        _v_xy_body_for_ctrl = _v_xy_body_ave;
         
         // 加速度積分速度算出
         _v_xy_body_acc += imu_msg.acc_y * _delta_t;
@@ -165,8 +168,8 @@ namespace module {
         }
 
 
-        // 壁中心判定
-        if((_turn_type == ETurnType::STRAIGHT_CENTER || _turn_type == ETurnType::STRAIGHT_CENTER) && 
+        // 壁中心判定による補正
+        if((_turn_type == ETurnType::STRAIGHT_CENTER || _turn_type == ETurnType::STRAIGHT_CENTER_EDGE) && 
             ws_msg.is_on_wall_center &&
             !ws_msg.is_ahead && 
             _v_xy_body_for_odom > 0.1f && 
@@ -177,20 +180,25 @@ namespace module {
         else{
             _on_wall_center_dist = 0.0f;
         }
+        _onWallCenterCorrection();
 
         // 前壁補正時に位置, 方位を強制書き換え
-        if(turn_type_pre == ETurnType::AHEAD_WALL_CORRECTION && _turn_type != ETurnType::AHEAD_WALL_CORRECTION){
-            _aheadWallCorrection();
+        if( (turn_type_pre == ETurnType::AHEAD_WALL_CORRECTION || turn_type_pre == ETurnType::AHEAD_WALL_YAW_CORRECTION) && 
+           !(_turn_type == ETurnType::AHEAD_WALL_CORRECTION || _turn_type == ETurnType::AHEAD_WALL_YAW_CORRECTION)  ){
+            bool is_correct_yaw = (turn_type_pre == ETurnType::AHEAD_WALL_YAW_CORRECTION);
+            _aheadWallCorrection(is_correct_yaw);
         }
 
         // 迷路の壁読み時に前壁からの距離で位置を補正
         bool in_read_wall_area = nav_msg.in_read_wall_area;
-        if(!in_read_wall_area && _in_read_wall_area_pre && ws_msg.is_ahead && nav_msg.mode == ENavMode::SEARCH){
+        if(!_in_read_wall_area_pre && in_read_wall_area && ws_msg.is_ahead && nav_msg.mode == ENavMode::SEARCH){
             _aheadWallCorrectionOnWallRead(ws_msg.dist_a);
         }
         _in_read_wall_area_pre = in_read_wall_area;
+        
 
-        _onWallCenterCorrection();
+        if(ws_msg.is_corner_l && ctrl_msg.traj_type == ETrajType::STRAIGHT)_cornerLCorrection();
+        if(ws_msg.is_corner_r && ctrl_msg.traj_type == ETrajType::STRAIGHT)_cornerRCorrection();
 
         _publish_vehicle_position();
         _publish_vehicle_attitude();
@@ -202,26 +210,44 @@ namespace module {
         float yaw_pre = _yaw;
 
         float ang = _yaw * RAD2DEG;
-        if(_on_wall_center_dist > 0.06f) {            
+        if(_on_wall_center_dist > 0.03f && _on_wall_center_dist <= 0.06f) {
+            if(ang >= 315.0 || ang < 45.0) {
+                _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;                
+            } 
+            else if(ang >= 45.0 && ang < 135.0) {
+                _x = (uint8_t)(_x / 0.09f) * 0.09f + 0.09f/2.0f;                
+            } 
+            else if(ang >= 135.0f && ang < 225.0f) {
+                _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;                
+            } 
+            else if(ang >= 225.0f && ang < 315.0f) {
+                _x = (uint8_t)(_x / 0.09f) * 0.09f + 0.09f/2.0f;                
+            }            
+            //PRINTF_PICKLE("ON_WALL_CENTER | x:%6.3f, x_pre:%6.3f, y:%6.3f, y_pre:%6.3f yaw:%6.3f, yaw_pre:%6.3f\n", _x, x_pre, _y, y_pre, _yaw*RAD2DEG, yaw_pre*RAD2DEG);
+        }
+        else if(_on_wall_center_dist > 0.06f){
             if(ang >= 315.0 || ang < 45.0) {
                 _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;
                 _yaw = 0.0 * DEG2RAD;
-            } else if(ang >= 45.0 && ang < 135.0) {
+            } 
+            else if(ang >= 45.0 && ang < 135.0) {
                 _x = (uint8_t)(_x / 0.09f) * 0.09f + 0.09f/2.0f;
                 _yaw = 90.0f * DEG2RAD;
-            } else if(ang >= 135.0f && ang < 225.0f) {
+            } 
+            else if(ang >= 135.0f && ang < 225.0f) {
                 _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;
                 _yaw = 180.0 * DEG2RAD;
-            } else if(ang >= 225.0f && ang < 315.0f) {
+            } 
+            else if(ang >= 225.0f && ang < 315.0f) {
                 _x = (uint8_t)(_x / 0.09f) * 0.09f + 0.09f/2.0f;
                 _yaw = 270.0f * DEG2RAD;
             }
-            _on_wall_center_dist = 0.0f;
-            PRINTF_PICKLE("ON_WALL_CENTER | x:%6.3f, x_pre:%6.3f, y:%6.3f, y_pre:%6.3f yaw:%6.3f, yaw_pre:%6.3f\n", _x, x_pre, _y, y_pre, _yaw*RAD2DEG, yaw_pre*RAD2DEG);
+            _on_wall_center_dist = 0.02f;
+            //PRINTF_PICKLE("ON_WALL_CENTER YAW| x:%6.3f, x_pre:%6.3f, y:%6.3f, y_pre:%6.3f yaw:%6.3f, yaw_pre:%6.3f\n", _x, x_pre, _y, y_pre, _yaw*RAD2DEG, yaw_pre*RAD2DEG);            
         }
     }
 
-    void PositionEstimator::_aheadWallCorrection() {
+    void PositionEstimator::_aheadWallCorrection(bool is_correct_yaw) {
         float x_pre = _x;
         float y_pre = _y;
         float yaw_pre = _yaw;
@@ -229,19 +255,18 @@ namespace module {
         float ang = _yaw * RAD2DEG;
         if(ang >= 315.0 || ang < 45.0) {
             _x = (uint8_t)(_x / 0.09f) * 0.09f + 0.09f/2.0f;
-            _yaw = 0.0 * DEG2RAD;
+            if(is_correct_yaw) _yaw = 0.0 * DEG2RAD;
         } else if(ang >= 45.0 && ang < 135.0) {
             _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;
-            _yaw = 90.0f * DEG2RAD;
+            if(is_correct_yaw) _yaw = 90.0f * DEG2RAD;
         } else if(ang >= 135.0f && ang < 225.0f) {
             _x = (uint8_t)(_x / 0.09f) * 0.09f + 0.09f/2.0f;
-            _yaw = 180.0 * DEG2RAD;
+            if(is_correct_yaw) _yaw = 180.0 * DEG2RAD;
         } else if(ang >= 225.0f && ang < 315.0f) {
             _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;
-            _yaw = 270.0f * DEG2RAD;
-        }
-        _on_wall_center_dist = 0.0f;
-        PRINTF_PICKLE("AHEAD_WALL_CORRECTION | x:%6.3f, x_pre:%6.3f, y:%6.3f, y_pre:%6.3f yaw:%6.3f, yaw_pre:%6.3f\n", _x, x_pre, _y, y_pre, _yaw*RAD2DEG, yaw_pre*RAD2DEG);
+            if(is_correct_yaw) _yaw = 270.0f * DEG2RAD;
+        }        
+        //PRINTF_PICKLE("AHEAD_WALL_CORRECTION | x:%6.3f, x_pre:%6.3f, y:%6.3f, y_pre:%6.3f yaw:%6.3f, yaw_pre:%6.3f\n", _x, x_pre, _y, y_pre, _yaw*RAD2DEG, yaw_pre*RAD2DEG);
     }
 
     void PositionEstimator::_aheadWallCorrectionOnWallRead(float dist_a) {
@@ -255,6 +280,39 @@ namespace module {
         } else if(ang >= 225.0f && ang < 315.0f) {
             _y = (uint8_t)(_y / 0.09f) * 0.09f + dist_a;            
         }
+    }
+
+
+    void PositionEstimator::_cornerLCorrection() {
+        ParameterManager& pm = ParameterManager::getInstance();
+        float ang = _yaw * RAD2DEG;
+        float ok_ang = 3.0f;
+        
+        if(ang >= 360.0f - ok_ang || ang < ok_ang) {
+            _x = (uint8_t)((_x) / 0.09f) * 0.09f + 0.09f - (float)pm.wall_corner_read_offset_l;
+        } else if(ang >= 90.0f - ok_ang && ang < 90.0f + ok_ang) {
+            _y = (uint8_t)((_y) / 0.09f) * 0.09f + 0.09f - (float)pm.wall_corner_read_offset_l;
+        } else if(ang >= 180.0f - ok_ang && ang < 180.0f + ok_ang) {
+            _x = (uint8_t)((_x) / 0.09f) * 0.09f + (float)pm.wall_corner_read_offset_l;
+        } else if(ang >= 270.0f - ok_ang && ang < 270.0f + ok_ang) {
+            _y = (uint8_t)((_y) / 0.09f) * 0.09f + (float)pm.wall_corner_read_offset_l;
+        }
+    }
+
+    void PositionEstimator::_cornerRCorrection() {
+        ParameterManager& pm = ParameterManager::getInstance();
+        float ang = _yaw * RAD2DEG;
+        float ok_ang = 3.0f;
+
+        if(ang >= 360.0f - ok_ang || ang < ok_ang) {
+            _x = (uint8_t)((_x) / 0.09f) * 0.09f + 0.09f - (float)pm.wall_corner_read_offset_r;
+        } else if(ang >= 90.0f - ok_ang && ang < 90.0f + ok_ang) {
+            _y = (uint8_t)((_y) / 0.09f) * 0.09f + 0.09f - (float)pm.wall_corner_read_offset_r;
+        } else if(ang >= 180.0f - ok_ang && ang < 180.0f + ok_ang) {
+            _x = (uint8_t)((_x) / 0.09) * 0.09f + (float)pm.wall_corner_read_offset_r;
+        } else if(ang >= 270.0f - ok_ang && ang < 270.0f + ok_ang) {
+            _y = (uint8_t)((_y) / 0.09f) * 0.09f + (float)pm.wall_corner_read_offset_r;
+        }        
     }
 
 

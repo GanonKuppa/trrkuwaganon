@@ -20,11 +20,12 @@ namespace module {
         void setNavSubMode(ENavSubMode sub_mode);
         void startNavigation();
         void endNavigation();
-        void update1();
+        void update0();
         void updateInMainLoop();
         Maze& getMazeRef();              
         void testPmap();
-        void printMaze();        
+        void printMaze();
+        void debugWall(uint8_t x, uint8_t y);
         
       private:
         friend class BaseModule<Navigator>;
@@ -88,13 +89,14 @@ namespace module {
         bool _isFailsafe();
         bool _inReadWallArea(float offset_pre, float offset_fol);
 
-        bool _existRWall(float x, float y, EAzimuth azimuth);
-        bool _existLWall(float x, float y, EAzimuth azimuth);
+        bool _existsRWall(float x, float y, EAzimuth azimuth);
+        bool _existsLWall(float x, float y, EAzimuth azimuth);
         bool _watchedPillar(float x, float y, EAzimuth azimuth);
         void _printWall();
         
         void _publish();
         const float DEG2RAD = 3.14159265f / 180.0f;
+
     };
 
     int usrcmd_navigator(int argc, char **argv);

@@ -164,22 +164,22 @@ void CurveFactory::pushWithStraight(ETurnParamSet param_set , ETurnType turn_typ
 };
 
 // AheadWallCorrectionFactory
-std::unique_ptr<BaseTrajectory> AheadWallCorrectionFactory::create(float stop_time){
-    std::unique_ptr<BaseTrajectory> traj = std::make_unique<AheadWallCorrectionTrajectory>(stop_time);
+std::unique_ptr<BaseTrajectory> AheadWallCorrectionFactory::create(float stop_time, bool is_yaw_correct){
+    std::unique_ptr<BaseTrajectory> traj = std::make_unique<AheadWallCorrectionTrajectory>(stop_time, is_yaw_correct);
     return traj;
 }
 
-std::unique_ptr<BaseTrajectory> AheadWallCorrectionFactory::create(float stop_time, float calm_time){
-    std::unique_ptr<BaseTrajectory> traj = std::make_unique<AheadWallCorrectionTrajectory>(stop_time, calm_time);
+std::unique_ptr<BaseTrajectory> AheadWallCorrectionFactory::create(float stop_time, float calm_time, bool is_yaw_correct){
+    std::unique_ptr<BaseTrajectory> traj = std::make_unique<AheadWallCorrectionTrajectory>(stop_time, calm_time, is_yaw_correct);
     return traj;
 }
 
-void AheadWallCorrectionFactory::push(float stop_time){
-    auto traj = create(stop_time);
+void AheadWallCorrectionFactory::push(float stop_time, bool is_yaw_correct){
+    auto traj = create(stop_time, is_yaw_correct);
     module::TrajectoryCommander::getInstance().push(std::move(traj));
 }
 
-void AheadWallCorrectionFactory::push(float stop_time, float calm_time){
-    auto traj = create(stop_time, calm_time);
+void AheadWallCorrectionFactory::push(float stop_time, float calm_time, bool is_yaw_correct){
+    auto traj = create(stop_time, calm_time, is_yaw_correct);
     module::TrajectoryCommander::getInstance().push(std::move(traj));
 }

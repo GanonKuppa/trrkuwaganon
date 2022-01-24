@@ -6,14 +6,17 @@ namespace module{
 
     class Suction : public BaseModule<Suction>{
       public:    
-        void update();
+        void updateEvery();
         float getDuty();
         void setDuty(float duty);
+        void useBuzzer(float time);
         void debug();
       private:
-        float _duty;
-        float _on_time;
-        const float MAX_ON_TIME = 20.0;
+        float _duty;        
+        float _voltage;
+        float _buzzer_on_time;
+        float _buzzer_save_duty;
+        bool _used_buzzer;
 
         friend class BaseModule<Suction>;
         Suction();

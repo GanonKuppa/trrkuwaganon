@@ -30,7 +30,7 @@
 // SilsUtil
 #include "sendData2Sim.h"
 
-int main() {        
+int main() {
     constexpr float DEG2RAD = 3.14159265f / 180.0f;
     constexpr float RAD2DEG = 180.0f/ 3.14159265f;
 

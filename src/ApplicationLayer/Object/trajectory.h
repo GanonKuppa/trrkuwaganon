@@ -131,11 +131,9 @@ class CurveTrajectory : public BaseTrajectory {
 
 class AheadWallCorrectionTrajectory : public BaseTrajectory {
   public:
-    AheadWallCorrectionTrajectory(float stop_time);
-    AheadWallCorrectionTrajectory(float stop_time, float x, float y, float yaw);
-    AheadWallCorrectionTrajectory(float stop_time, float calm_time);
-    AheadWallCorrectionTrajectory(float stop_time, float calm_time, float x, float y, float yaw);
-
+    AheadWallCorrectionTrajectory(float stop_time, bool is_yaw_correct = false);
+    AheadWallCorrectionTrajectory(float stop_time, float calm_time, bool is_yaw_correct = false);
+    
 
     virtual float getEndX();
     virtual float getEndY();

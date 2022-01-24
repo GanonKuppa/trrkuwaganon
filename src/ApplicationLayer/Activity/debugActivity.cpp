@@ -169,7 +169,12 @@ namespace activity{
             StopFactory::push(2.0f);
         }
         else if(mode == 7){
-            AheadWallCorrectionFactory::push(30.0f);
+            float yawrate_max = pm.spin_yawrate_max * DEG2RAD;
+            float yawacc = pm.spin_yawacc * DEG2RAD;
+            AheadWallCorrectionFactory::push(30.0f, true);
+            SpinTurnFactory::push(180.0f * DEG2RAD, yawrate_max, yawacc);
+            StopFactory::push(2.0f);
+
         }
         
         module::Logger::getInstance().start();        

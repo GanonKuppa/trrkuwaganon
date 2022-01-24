@@ -8,6 +8,7 @@
 #include "pseudoDial.h"
 #include "seManager.h"
 #include "navigator.h"
+#include "parameterManager.h"
 
 // Activity
 #include "activityFactory.h"
@@ -52,7 +53,6 @@ namespace activity {
         module::LedController::getInstance().turnFcled(0,0,0);
         hal::waitmsec(100);
 
-
         _turnFcled(_mode, false);
     }
 
@@ -73,7 +73,7 @@ namespace activity {
         DialPositionMsg dp_msg;        
 
         copyMsg(msg_id::GAMEPAD, &gp_msg);
-        copyMsg(msg_id::DIAL_POSITION, &dp_msg);
+        copyMsg(msg_id::DIAL_POSITION, &dp_msg);        
         uint8_t mode_pre = _mode;
         if(gp_msg.connected){
             if(gp_msg.cross_y == 1){
@@ -97,23 +97,24 @@ namespace activity {
         else{
             _mode = dp_msg.dial_pos_l;
 
-            if(dp_msg.dial_pos_r  == 4 && dp_msg.same_pos_time_r > 0.1f) {
+            if(dp_msg.dial_pos_r  == 4 && dp_msg.same_pos_time_r > 0.1f) {                
                 return ELoopStatus::FINISH;
             }
 
         } 
 
-        bool able_goal = false;//m.maze.isExistPath(pm.goal_x, pm.goal_y);
+        module::ParameterManager& pm = module::ParameterManager::getInstance();
+        bool exists_goal_path = module::Navigator::getInstance().getMazeRef().existsGoalPath(pm.goal_x, pm.goal_y);
         if(_mode != mode_pre){
-            _turnFcled(_mode, able_goal);
+            _turnFcled(_mode, exists_goal_path);
         }
         return ELoopStatus::CONTINUE;
     }
 
-    void ModeSelectActivity::_turnFcled(uint8_t mode, bool able_goal) {
+    void ModeSelectActivity::_turnFcled(uint8_t mode, bool exists_goal_path) {
         module::LedController& fcled = module::LedController::getInstance();
 
-        if(able_goal) {
+        if(exists_goal_path) {
             if      (mode == 0) fcled.turnFcled(0, 0, 0);            // BLACK
             else if (mode == 1) fcled.flashFcled(1, 0, 0, 0.4, 0.1); // RED
             else if (mode == 2) fcled.flashFcled(0, 1, 0, 0.4, 0.1); // GREEN

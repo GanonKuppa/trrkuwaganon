@@ -19,7 +19,9 @@ namespace module {
                 
         PositionEstimator();
         void _onWallCenterCorrection();
-        void _aheadWallCorrection();
+        void _aheadWallCorrection(bool is_correct_yaw);
+        void _cornerLCorrection();
+        void _cornerRCorrection();
         void _publish_vehicle_position();
         void _publish_vehicle_attitude();
         void _aheadWallCorrectionOnWallRead(float dist_a);
@@ -64,7 +66,7 @@ namespace module {
 
         std::deque<float> _acc_y_list;
         std::deque<float> _v_enc_list;
-        const uint8_t ACC_Y_AVERAGE_NUM = 30;
+        const uint8_t ACC_Y_AVERAGE_NUM = 10;
         const float PI = 3.14159265f;
         const float DEG2RAD = PI/180.0f;
         const float RAD2DEG = 180.0f/PI;

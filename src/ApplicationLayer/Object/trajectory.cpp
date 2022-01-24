@@ -7,6 +7,7 @@
 #include "vehiclePositionMsg.h"
 #include "vehicleAttitudeMsg.h"
 #include "ctrlSetpointMsg.h"
+#include "wallSensorMsg.h"
 
 // Mod
 #include "trajectoryInitializer.h"
@@ -182,7 +183,7 @@ void StraightTrajectory::update() {
 
     float x_bre = 0.0f;
     float dist = _target_dist;
-    if(_target_dist > (0.09f + 0.045f) && _turn_type == ETurnType::STRAIGHT_CENTER_EDGE){
+    if(_target_dist > (0.09f + 0.045f) && _v_end > 0.3f){
         dist = _target_dist - 0.045f;
     }else{
         dist = _target_dist - 0.0025f;
@@ -220,13 +221,15 @@ void StraightTrajectory::update() {
     
 bool StraightTrajectory::isEnd() {
     VehiclePositionMsg pos_msg;
+    WallSensorMsg ws_msg;
     copyMsg(msg_id::VEHICLE_POSITION, &pos_msg);
+    copyMsg(msg_id::WALL_SENSOR, &ws_msg);
     float res_dist = _calcResidualDist(pos_msg.x, pos_msg.y);
     if ( 
 #ifndef SILS
     res_dist <= 0.0f && _cumulative_dist >= _target_dist
 #else
-    _cumulative_dist >= _target_dist
+    _cumulative_dist >= _target_dist || ws_msg.dist_a < 0.045f;
 #endif    
     ) {
         _x = getEndX();
@@ -462,55 +465,36 @@ bool CurveTrajectory::isEnd(){
 }
 
 //-- AheadWallCorrection
-AheadWallCorrectionTrajectory::AheadWallCorrectionTrajectory(float stop_time) :
+AheadWallCorrectionTrajectory::AheadWallCorrectionTrajectory(float stop_time, bool is_yaw_correct) :
     BaseTrajectory(){
     _traj_type = ETrajType::AHEAD_WALL_CORRECTION;
-    _turn_type = ETurnType::AHEAD_WALL_CORRECTION;
+    if(is_yaw_correct){
+        _turn_type = ETurnType::AHEAD_WALL_YAW_CORRECTION;
+    }
+    else{
+        _turn_type = ETurnType::AHEAD_WALL_CORRECTION;
+    }
     _turn_dir = ETurnDir::NO_TURN;
     _stop_time = stop_time;
     _calm_time = stop_time;
 }
 
-AheadWallCorrectionTrajectory::AheadWallCorrectionTrajectory(float stop_time, float x, float y, float yaw) : 
-    BaseTrajectory(){
-    _x = x;
-    _y = y;
-    _yaw = yaw;
-    _x_0 = x;
-    _y_0 = y;
-    _yaw_0 = yaw;
-    _traj_type = ETrajType::AHEAD_WALL_CORRECTION;
-    _turn_type = ETurnType::AHEAD_WALL_CORRECTION;
-    _turn_dir = ETurnDir::NO_TURN;
-    _stop_time = stop_time;
-    _calm_time = stop_time;
-}
-
-AheadWallCorrectionTrajectory::AheadWallCorrectionTrajectory(float stop_time, float calm_time) :
+AheadWallCorrectionTrajectory::AheadWallCorrectionTrajectory(float stop_time, float calm_time, bool is_yaw_correct) :
     BaseTrajectory(){
     _traj_type = ETrajType::AHEAD_WALL_CORRECTION;
-    _turn_type = ETurnType::AHEAD_WALL_CORRECTION;
+    if(is_yaw_correct){
+        _turn_type = ETurnType::AHEAD_WALL_YAW_CORRECTION;
+    }
+    else{
+        _turn_type = ETurnType::AHEAD_WALL_CORRECTION;
+    }
+    //_turn_type = ETurnType::AHEAD_WALL_CORRECTION;
     _turn_dir = ETurnDir::NO_TURN;
     _stop_time = stop_time;
     _calm_time = calm_time;
     _cumulative_calm_t = 0.0f;
 }
 
-AheadWallCorrectionTrajectory::AheadWallCorrectionTrajectory(float stop_time, float calm_time, float x, float y, float yaw) : 
-    BaseTrajectory(){
-    _x = x;
-    _y = y;
-    _yaw = yaw;
-    _x_0 = x;
-    _y_0 = y;
-    _yaw_0 = yaw;
-    _traj_type = ETrajType::AHEAD_WALL_CORRECTION;
-    _turn_type = ETurnType::AHEAD_WALL_CORRECTION;
-    _turn_dir = ETurnDir::NO_TURN;
-    _stop_time = stop_time;
-    _calm_time = calm_time;
-    _cumulative_calm_t = 0.0f;
-}
 
 float AheadWallCorrectionTrajectory::getEndX() {
     return _x_0;
@@ -540,6 +524,20 @@ void AheadWallCorrectionTrajectory::update() {
     // 0.001745 * 10 = 1.0deg/sec;
     if(std::fabs(pos_msg.v_xy_body_for_odom) < 0.05f && std::fabs(att_msg.yawrate) < 0.001745f * 10.0f) _cumulative_calm_t += _delta_t;
     else _cumulative_calm_t = 0.0f;
+
+    constexpr float RAD2DEG = 180.0f / 3.14159265f;
+    float ang = _yaw * RAD2DEG;
+    if(ang >= 315.0 || ang < 45.0) {
+        _x = (uint8_t)(_x / 0.09f) * 0.09f + 0.09f/2.0f;
+    } else if(ang >= 45.0 && ang < 135.0) {
+        _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;
+    } else if(ang >= 135.0f && ang < 225.0f) {
+        _x = (uint8_t)(_x / 0.09f) * 0.09f + 0.09f/2.0f;
+    } else if(ang >= 225.0f && ang < 315.0f) {
+        _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;
+    }        
+    _x_0 = _x;
+    _y_0 = _y;    
 }
 
 bool AheadWallCorrectionTrajectory::isEnd() {

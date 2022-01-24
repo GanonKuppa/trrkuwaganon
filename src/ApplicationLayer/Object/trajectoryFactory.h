@@ -35,8 +35,8 @@ class CurveFactory{
 
 class AheadWallCorrectionFactory{
   public:  
-    static std::unique_ptr<BaseTrajectory> create(float stop_time);
-    static std::unique_ptr<BaseTrajectory> create(float stop_time, float calm_time);
-    static void push(float stop_time);
-    static void push(float stop_time, float calm_time);
+    static std::unique_ptr<BaseTrajectory> create(float stop_time, bool is_yaw_correct = false);
+    static std::unique_ptr<BaseTrajectory> create(float stop_time, float calm_time, bool is_yaw_correct = false);
+    static void push(float stop_time, bool is_yaw_correct = false);
+    static void push(float stop_time, float calm_time, bool is_yaw_correct = false);
 };

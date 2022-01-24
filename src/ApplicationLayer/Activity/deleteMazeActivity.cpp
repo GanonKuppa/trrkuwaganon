@@ -37,7 +37,7 @@ namespace activity{
         if(mode == 1){
             module::Navigator::getInstance().getMazeRef().init();
             //hal::enterCriticalSection();            
-            module::Navigator::getInstance().getMazeRef().writeMazeData2Flash();                        
+            module::Navigator::getInstance().getMazeRef().writeMazeData2Flash();                
             //hal::leaveCriticalSection();
             
             module::LedController::getInstance().turnFcled(0,0,1);

@@ -111,9 +111,8 @@ namespace hal {
         return len;
     }
 
-
-    static std::deque<uint8_t> _pickleBuf;//塩漬け用データバッファ
-    static const int PICKLE_BUF_MAX = 4096 * 2;
+    constexpr int PICKLE_BUF_MAX = 4096 * 2;
+    static std::deque<uint8_t> _pickleBuf(PICKLE_BUF_MAX);//塩漬け用データバッファ
     static uint8_t _lock_guard_pickle = false;
 
     void initPickle(){

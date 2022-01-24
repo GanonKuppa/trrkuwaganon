@@ -158,7 +158,7 @@ Wall Maze::readWall(uint8_t x, uint8_t y) {
     return wall;
 };
 
-bool Maze::existAWall(uint8_t x, uint8_t y, EAzimuth dir ) {
+bool Maze::existsAWall(uint8_t x, uint8_t y, EAzimuth dir ) {
     Wall wall = readWall(x, y);
     if(dir == EAzimuth::E) return wall.E && wall.EF;
     else if(dir == EAzimuth::N) return wall.N && wall.NF;
@@ -167,7 +167,7 @@ bool Maze::existAWall(uint8_t x, uint8_t y, EAzimuth dir ) {
     else return false;
 }
 
-bool Maze::existRWall(uint8_t x, uint8_t y, EAzimuth dir) {
+bool Maze::existsRWall(uint8_t x, uint8_t y, EAzimuth dir) {
     Wall wall = readWall(x, y);
     if(dir == EAzimuth::E) return wall.S && wall.SF;
     else if(dir == EAzimuth::N) return wall.E && wall.EF;
@@ -176,7 +176,7 @@ bool Maze::existRWall(uint8_t x, uint8_t y, EAzimuth dir) {
     else return false;
 }
 
-bool Maze::existLWall(uint8_t x, uint8_t y, EAzimuth dir) {
+bool Maze::existsLWall(uint8_t x, uint8_t y, EAzimuth dir) {
     Wall wall = readWall(x, y);
     if(dir == EAzimuth::E) return wall.N && wall.NF;
     else if(dir == EAzimuth::N) return wall.W && wall.WF;
@@ -203,8 +203,11 @@ bool Maze::watchedLWall(uint8_t x, uint8_t y, EAzimuth dir) {
     else return false;
 }
 
-bool Maze::isExistPath(uint8_t x, uint8_t y) {
-    if(p_map[x][y] == 0xffff) return false;
+bool Maze::existsGoalPath(uint8_t x, uint8_t y) {
+    
+    makeFastestMap(x, y);
+
+    if(p_map[0][0] == 0xffff) return false;
     else return true;
 }
 

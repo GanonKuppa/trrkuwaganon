@@ -70,7 +70,7 @@ namespace module{
         _pidf.setIntegralSaturationEnable(true);
         _pidf.setIntegralSaturation(_i_limit);
         _pidf.update(_target_temp, _temp);
-        _duty = _pidf.getControlVal();
+        _duty = _pidf.getControlVal() * _voltage / 4.2f;
         if(_duty < 0.0f){
             _duty = 0.0f;
             _pidf.reset();
@@ -109,25 +109,25 @@ namespace module{
 
     void Heater::debug(){
         PRINTF_ASYNC("  ------------------------\n");
-        PRINTF_ASYNC("  p              : %f\n", _p);
-        PRINTF_ASYNC("  i              : %f\n", _i);
-        PRINTF_ASYNC("  i_limit        : %f\n", _i_limit);
-        PRINTF_ASYNC("  limit          : %f\n", _limit);
+        PRINTF_ASYNC("  p                 : %f\n", _p);
+        PRINTF_ASYNC("  i                 : %f\n", _i);
+        PRINTF_ASYNC("  i_limit           : %f\n", _i_limit);
+        PRINTF_ASYNC("  limit             : %f\n", _limit);
         PRINTF_ASYNC("  ------------------------\n");        
-        PRINTF_ASYNC("  target_temp    : %f\n", _target_temp);
-        PRINTF_ASYNC("  temp           : %f\n", _temp);
+        PRINTF_ASYNC("  target_temp       : %f\n", _target_temp);
+        PRINTF_ASYNC("  temp              : %f\n", _temp);
         PRINTF_ASYNC("  ------------------------\n");        
-        PRINTF_ASYNC("  duty           : %f\n", _duty);
-        PRINTF_ASYNC("  duty_p         : %f\n", _pidf.getPVal());
-        PRINTF_ASYNC("  duty_i         : %f\n", _pidf.getIVal());
+        PRINTF_ASYNC("  duty (4.2V = 100%): %f\n", _duty);
+        PRINTF_ASYNC("  duty_p            : %f\n", _pidf.getPVal());
+        PRINTF_ASYNC("  duty_i            : %f\n", _pidf.getIVal());
         PRINTF_ASYNC("  ------------------------\n");
-        PRINTF_ASYNC("  current_ave    : %f\n", _current_ave);
+        PRINTF_ASYNC("  current_ave       : %f\n", _current_ave);
     }
 
     int usrcmd_heater(int argc, char **argv){
         if (ntlibc_strcmp(argv[1], "help") == 0) {
-            PRINTF_ASYNC("  status :\r\n");
-            PRINTF_ASYNC("  eval   :\r\n");
+            PRINTF_ASYNC("  status      :\r\n");
+            PRINTF_ASYNC("  eval <num>  : Evaluation time is num * 0.25sec \r\n");
             return 0;
         }
 

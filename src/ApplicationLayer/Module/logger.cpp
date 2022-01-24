@@ -22,9 +22,11 @@
 #include "vehicleAttitudeMsg.h"
 #include "vehiclePositionMsg.h"
 #include "parameterManager.h"
+#include "wheelOdometryMsg.h"
+#include "navStateMsg.h"
 
 #if FULL_PARAM
-static float _log_data[1500][40];
+static float _log_data[1500][41];
 #else
 static float _log_data[3000][22];
 #endif
@@ -83,7 +85,8 @@ namespace module {
             "wall_p,"
             "wall_i,"
             "wall_d,"
-            "voltage"            
+            "voltage,"
+            "turn_type,"
     #endif
                 "\n"
         );
@@ -100,7 +103,7 @@ namespace module {
                         "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f,"
                         "%f, %f, %f, %f, %f, %f, %f, %f, %f,"
                         "%f, %f, %f, %f, %f, %f, %f,"
-                        "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n",
+                        "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n",
                         _log_data[i][0],
                         _log_data[i][1], _log_data[i][2],_log_data[i][3],_log_data[i][4],_log_data[i][5],
                         _log_data[i][6], _log_data[i][7],_log_data[i][8],_log_data[i][9],_log_data[i][10],
@@ -108,7 +111,7 @@ namespace module {
                         _log_data[i][16], _log_data[i][17],_log_data[i][18],_log_data[i][19],_log_data[i][20],
                         _log_data[i][21], _log_data[i][22],_log_data[i][23],_log_data[i][24],_log_data[i][25],
                         _log_data[i][26], _log_data[i][27],_log_data[i][28],_log_data[i][29],_log_data[i][30],
-                        _log_data[i][31], _log_data[i][32],_log_data[i][33],_log_data[i][34],_log_data[i][35],_log_data[i][36],_log_data[i][37],_log_data[i][38],_log_data[i][39]
+                        _log_data[i][31], _log_data[i][32],_log_data[i][33],_log_data[i][34],_log_data[i][35],_log_data[i][36],_log_data[i][37],_log_data[i][38],_log_data[i][39],_log_data[i][40]
             );
             hal::waitmsec(1);
 
@@ -178,6 +181,8 @@ namespace module {
             WallSensorMsg ws_msg;
             VehicleAttitudeMsg att_msg;
             VehiclePositionMsg pos_msg;
+            WheelOdometryMsg wodo_msg;
+            NavStateMsg nav_msg;
 
             copyMsg(msg_id::ACTUATOR_OUTPUT, &aout_msg);
             copyMsg(msg_id::BATTERY_INFO, &bat_msg);
@@ -187,6 +192,9 @@ namespace module {
             copyMsg(msg_id::WALL_SENSOR, &ws_msg);
             copyMsg(msg_id::VEHICLE_ATTITUDE, &att_msg);
             copyMsg(msg_id::VEHICLE_POSITION, &pos_msg);
+            copyMsg(msg_id::WHEEL_ODOMETRY, &wodo_msg);
+            copyMsg(msg_id::NAV_STATE, &nav_msg);
+
 
             constexpr float RAD2DEG = 180.0f / 3.14159265f;
             _log_data[_data_num][0] = (float)(hal::getElapsedMsec() - _start_time_ms)/1000.0f;
@@ -205,7 +213,7 @@ namespace module {
             _log_data[_data_num][12] = pos_msg.y / 0.09f;
             _log_data[_data_num][13] = att_msg.beta * RAD2DEG;
 
-            _log_data[_data_num][14] = ctrl_msg.v_xy_body;
+            _log_data[_data_num][14] = pid_msg.setp_v_xy_body;
             _log_data[_data_num][15] = ctrl_msg.x / 0.09f;
             _log_data[_data_num][16] = ctrl_msg.y / 0.09f;
             _log_data[_data_num][17] = ctrl_msg.a_xy_body;
@@ -232,6 +240,7 @@ namespace module {
             _log_data[_data_num][37] = pid_msg.wall_i;
             _log_data[_data_num][38] = pid_msg.wall_d;
             _log_data[_data_num][39] = bat_msg.voltage;
+            _log_data[_data_num][40] = nav_msg.r_wall_enable + nav_msg.l_wall_enable * 2;//(uint8_t)ctrl_msg.turn_type;
     #endif
             _data_num++;
         }

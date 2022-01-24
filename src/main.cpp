@@ -65,18 +65,19 @@ void timerInterrupt0() {
     {        
         module::Shell::getInstance().cycleEvery();
         module::Heater::getInstance().cycleEvery();
+        module::Suction::getInstance().cycleEvery();
     }
     // スロット0
     if (int_tick_count % 4 == 0) {        
         module::TrajectoryCommander::getInstance().cycle0();
         module::ImuDriver::getInstance().cycle0();
-        module::WheelOdometry::getInstance().cycle0();
+        module::WheelOdometry::getInstance().cycle0();            
         module::PositionEstimator::getInstance().cycle0();
         module::ControlMixer::getInstance().cycle0();
         module::BatteryMonitor::getInstance().cycle0();
         module::PowerTransmission::getInstance().cycle0();
         module::Shell::getInstance().cycle0();        
-        module::Navigator::getInstance().cycle1();
+        module::Navigator::getInstance().cycle0();
         module::WallSensor::getInstance().cycle0();
         hal::setSlot0Time(hal::hrtGetElapsedUsec());
     }

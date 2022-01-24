@@ -1,5 +1,6 @@
 
 #include "hal_ad.h"
+#include "hal_timer.h"
 #include "debugLog.h"
 
 #include "batteryMonitor.h"
@@ -10,13 +11,14 @@
 
 
 namespace module {
-    BatteryMonitor::BatteryMonitor(){
+    BatteryMonitor::BatteryMonitor():    
+    _voltage(4.2f),
+    _voltage_ave(4.2f),
+    _is_low_voltage(false),
+    _count(0)
+    {
     	setModuleName("BatteryMonitor");
         
-        _count = 0;
-    	_voltage = 4.2f;
-    	_voltage_ave = 4.2f;
-
         for (uint8_t i = 0; i < BUFF_SIZE; i++) {
             _buff.push_front(4.2);
         }
@@ -43,7 +45,7 @@ namespace module {
 
         _count ++;
         if(_count > count_500msec) _count = 0;        
-        _lowVoltageCheck();
+        if(hal::getElapsedSec() > 5) _lowVoltageCheck();
         _publish();
 
     }
@@ -53,7 +55,7 @@ namespace module {
     }
 
     void BatteryMonitor::_lowVoltageCheck() {
-        if(_voltage_ave < ALERT_VOL) {
+        if(_voltage_ave < ALERT_VOL && _voltage < ALERT_VOL) {
              _is_low_voltage = true;
         }
         else{
@@ -65,6 +67,7 @@ namespace module {
         PRINTF_ASYNC("  ================\n");
         PRINTF_ASYNC("  now:%f \n", _voltage);
         PRINTF_ASYNC("  ave %f \n", _voltage_ave);
+        PRINTF_ASYNC("  is_low_voltage %d \n", _is_low_voltage);
     }
 
     void BatteryMonitor::evalBatteryLife(){

@@ -62,8 +62,7 @@ namespace module {
     void TrajectoryInitializer::_init(){
         ParameterManager& pm = ParameterManager::getInstance();
         _turnParamSet[ETurnParamSet::SEARCH] = TurnParameter(pm.v_search_run, pm.a_search_run);
-        _turnParamSet[ETurnParamSet::SAFE0] = TurnParameter(0.4f, 3.0f);
-        _turnParamSet[ETurnParamSet::SAFE1] = TurnParameter(1.0f, 0.5f, 0.5f, 4.0f);
+        _turnParamSet[ETurnParamSet::SAFE] = TurnParameter(0.4f, 3.0f);
         _turnParamSet[ETurnParamSet::FAST0] = TurnParameter(
                 pm.shortest_0_v, 
                 pm.shortest_0_v_d,
@@ -247,7 +246,7 @@ namespace module {
     
     void TrajectoryInitializer::debugPreCalcs(){
         ETurnType turnList[8] = {ETurnType::TURN_90, ETurnType::TURN_L_90, ETurnType::TURN_180, ETurnType::TURN_S2D_45, ETurnType::TURN_S2D_135, ETurnType::TURN_D2S_45, ETurnType::TURN_D2S_135, ETurnType::TURN_D_90};
-        ETurnParamSet paramSetList[8] = {ETurnParamSet::SEARCH, ETurnParamSet::SAFE0, ETurnParamSet::SAFE1, ETurnParamSet::FAST0, ETurnParamSet::FAST1, ETurnParamSet::FAST2, ETurnParamSet::FAST3, ETurnParamSet::FAST4};
+        ETurnParamSet paramSetList[7] = {ETurnParamSet::SEARCH, ETurnParamSet::SAFE, ETurnParamSet::FAST0, ETurnParamSet::FAST1, ETurnParamSet::FAST2, ETurnParamSet::FAST3, ETurnParamSet::FAST4};
         PRINTF_ASYNC("--- turnPreCalcs --- \n");
         for(auto turn : turnList){
             PRINTF_ASYNC("  --- %s --- \n", turnType2Str(turn).c_str());

@@ -31,6 +31,7 @@ enum class ETurnType : uint8_t{
     TURN_D2S_135,    
     CIRCULAR,
     AHEAD_WALL_CORRECTION,
+    AHEAD_WALL_YAW_CORRECTION,
     NONE
 };
 
@@ -42,8 +43,7 @@ enum class ETurnDir : int8_t{
 
 enum class ETurnParamSet : uint8_t{
     SEARCH = 1,
-    SAFE0,
-    SAFE1,
+    SAFE,    
     FAST0,
     FAST1,
     FAST2,
@@ -132,10 +132,8 @@ inline std::string turnParamSet2Str(ETurnParamSet tp){
     switch (tp) {
         case ETurnParamSet::SEARCH:
             return std::string("SEARCH");
-        case ETurnParamSet::SAFE0:
-            return std::string("SAFE0");
-        case ETurnParamSet::SAFE1:
-            return std::string("SAFE1");
+        case ETurnParamSet::SAFE:
+            return std::string("SAFE");
         case ETurnParamSet::FAST0:
             return std::string("FAST0");
         case ETurnParamSet::FAST1:
