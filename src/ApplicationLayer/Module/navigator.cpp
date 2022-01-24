@@ -230,12 +230,12 @@ namespace module{
                         AheadWallCorrectionFactory::push(0.3f, 0.05f);
                         if(_maze.existsRWall(_x_cur, _y_cur, _azimuth)){
                             SpinTurnFactory::push(-90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
-                            AheadWallCorrectionFactory::push(0.5f, 0.1f, true);
+                            AheadWallCorrectionFactory::push(0.3f, 0.1f, true);
                             SpinTurnFactory::push(-90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
                         }
                         else if(_maze.existsLWall(_x_cur, _y_cur, _azimuth)){
                             SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
-                            AheadWallCorrectionFactory::push(0.5f, 0.1f, true);
+                            AheadWallCorrectionFactory::push(0.3f, 0.1f, true);
                             SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
                         }
                         else{

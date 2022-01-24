@@ -35,7 +35,7 @@ namespace module {
         registration<float>(17, wall2mouse_center_dist, "wall2mouse_center_dist", 0.01f); //17
         registration<float>(18, suction_duty_search, "suction_duty_search", 0.5f); //18
         registration<float>(19, suction_duty_shortest, "suction_duty_shortest", 1.0f); //19
-        ;//20
+        registration<float>(20, ahead_wall_diff_target, "ahead_wall_diff_target", 0.0f); //20
         ;//21
         ;//22
         ;//23

@@ -251,9 +251,12 @@ namespace module{
         }
 
         if(_turn_type == ETurnType::AHEAD_WALL_YAW_CORRECTION){
-            float diff_setp = 0.0f;    
-            float wall_diff = _ws_msg.dist_l - _ws_msg.dist_r;
+            float diff_setp = pm.ahead_wall_diff_target;
+            float wall_diff = _ws_msg.dist_al - _ws_msg.dist_ar;
             _wall_diff_pidf.update(diff_setp, wall_diff); // 角速度目標値
+            if(_ws_msg.dist_a < 0.032f){
+                _wall_diff_pidf.reset();
+            }
             _setp_yawrate = _wall_diff_pidf.getControlVal();
         }
         else{

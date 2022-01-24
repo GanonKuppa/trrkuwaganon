@@ -61,6 +61,7 @@ namespace module {
         float wall2mouse_center_dist; //17
         float suction_duty_search; //18
         float suction_duty_shortest; //19
+        float ahead_wall_diff_target; //20
 
         float duty_coef_left_p; //30
         float duty_offset_left_p; //31
