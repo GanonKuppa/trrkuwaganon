@@ -74,6 +74,9 @@ namespace module {
         const float _afrer_curve_beta_expiration_time = 0.050f;
         float _beta_expiration_time;
         float _on_wall_center_dist;
+        float _corner_r_cool_down_dist;
+        float _corner_l_cool_down_dist;
+
 
         bool _in_read_wall_area_pre;
 

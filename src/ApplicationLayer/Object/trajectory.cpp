@@ -131,7 +131,7 @@ StraightTrajectory::StraightTrajectory(ETurnType turn_type, float target_dist, f
     _a_dec = a_dec;
     _target_dist = target_dist;
     _v_end = v_end;
-    _v_min = 0.1f;
+    _v_min = 0.05f;
     _v_max = v_max;
     _v_0 = v_0;
     _v_xy_body = v_0;
@@ -186,7 +186,7 @@ void StraightTrajectory::update() {
     if(_target_dist > (0.09f + 0.045f) && _v_end > 0.3f){
         dist = _target_dist - 0.045f;
     }else{
-        dist = _target_dist - 0.0025f;
+        dist = _target_dist - 0.005f;
     }
 
     if (_a_dec != 0.0f){

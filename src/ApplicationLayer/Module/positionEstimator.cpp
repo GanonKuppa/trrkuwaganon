@@ -56,6 +56,8 @@ namespace module {
     _turn_type(ETurnType::NONE),
 	_beta_expiration_time(0.0f),
     _on_wall_center_dist(0.0f),
+    _corner_r_cool_down_dist(0.0f),
+    _corner_l_cool_down_dist(0.0f),
     _in_read_wall_area_pre(false)
     {        
         setModuleName("PositionEstimator");
@@ -103,6 +105,7 @@ namespace module {
         float a_body_z_pre = _a_body_z;
         float beta_pre = _beta;
         ETurnType turn_type_pre = _turn_type;
+        ParameterManager& pm = ParameterManager::getInstance();
 
         _turn_type = ctrl_msg.turn_type;
 
@@ -197,8 +200,21 @@ namespace module {
         _in_read_wall_area_pre = in_read_wall_area;
         
 
-        if(ws_msg.is_corner_l && ctrl_msg.traj_type == ETrajType::STRAIGHT)_cornerLCorrection();
-        if(ws_msg.is_corner_r && ctrl_msg.traj_type == ETrajType::STRAIGHT)_cornerRCorrection();
+        if(pm.corner_correction_enable && ws_msg.is_corner_l && ctrl_msg.traj_type == ETrajType::STRAIGHT){
+            if(_corner_l_cool_down_dist > 0.035f && _v_xy_body_for_odom < 1.0f) _cornerLCorrection();
+            _corner_l_cool_down_dist = 0.0f;
+        }
+        else{
+            _corner_l_cool_down_dist += _v_xy_body_for_odom * _delta_t;
+        }
+
+        if(pm.corner_correction_enable && ws_msg.is_corner_r && ctrl_msg.traj_type == ETrajType::STRAIGHT){
+            if(_corner_r_cool_down_dist > 0.035f && _v_xy_body_for_odom < 1.2f) _cornerRCorrection();
+            _corner_r_cool_down_dist = 0.0f;
+        }
+        else{
+            _corner_r_cool_down_dist += _v_xy_body_for_odom * _delta_t;
+        }
 
         _publish_vehicle_position();
         _publish_vehicle_attitude();
@@ -286,7 +302,7 @@ namespace module {
     void PositionEstimator::_cornerLCorrection() {
         ParameterManager& pm = ParameterManager::getInstance();
         float ang = _yaw * RAD2DEG;
-        float ok_ang = 3.0f;
+        float ok_ang = 2.0f;
         
         if(ang >= 360.0f - ok_ang || ang < ok_ang) {
             _x = (uint8_t)((_x) / 0.09f) * 0.09f + 0.09f - (float)pm.wall_corner_read_offset_l;
@@ -302,7 +318,7 @@ namespace module {
     void PositionEstimator::_cornerRCorrection() {
         ParameterManager& pm = ParameterManager::getInstance();
         float ang = _yaw * RAD2DEG;
-        float ok_ang = 3.0f;
+        float ok_ang = 2.0f;
 
         if(ang >= 360.0f - ok_ang || ang < ok_ang) {
             _x = (uint8_t)((_x) / 0.09f) * 0.09f + 0.09f - (float)pm.wall_corner_read_offset_r;

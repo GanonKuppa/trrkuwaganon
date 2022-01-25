@@ -227,15 +227,15 @@ namespace module{
                     //_nav_cmd_queue.push_back(ENavCommand::SAVE_MAZE);   
                     if(_maze.existsAWall(_x_cur, _y_cur, _azimuth)){
                         StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2 - 0.02f, _v, _v, _v, _a, _a);                        
-                        AheadWallCorrectionFactory::push(0.3f, 0.05f);
+                        AheadWallCorrectionFactory::push(0.2f, 0.05f);
                         if(_maze.existsRWall(_x_cur, _y_cur, _azimuth)){
                             SpinTurnFactory::push(-90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
-                            AheadWallCorrectionFactory::push(0.3f, 0.1f, true);
+                            AheadWallCorrectionFactory::push(0.2f, 0.1f, true);
                             SpinTurnFactory::push(-90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
                         }
                         else if(_maze.existsLWall(_x_cur, _y_cur, _azimuth)){
                             SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
-                            AheadWallCorrectionFactory::push(0.3f, 0.1f, true);
+                            AheadWallCorrectionFactory::push(0.2f, 0.1f, true);
                             SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
                         }
                         else{
@@ -261,6 +261,7 @@ namespace module{
             else if(cmd == ENavCommand::GO_CENTER){
                 float target_dist = 0.045f - _read_wall_offset2;
                 StraightFactory::push(ETurnType::STRAIGHT_CENTER, target_dist, _v, _v, 0.0f, _a, _a);
+                AheadWallCorrectionFactory::push(0.2f, 0.05f);
                 StopFactory::push(1.0f);
             }
             else if(cmd == ENavCommand::UPDATE_POTENTIAL_MAP){

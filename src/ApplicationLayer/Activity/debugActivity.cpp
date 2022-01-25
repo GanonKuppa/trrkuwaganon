@@ -14,6 +14,7 @@
 
 // Module
 #include "trajectoryCommander.h"
+#include "trajectoryInitializer.h"
 #include "parameterManager.h"
 #include "navigator.h"
 #include "positionEstimator.h"
@@ -107,6 +108,8 @@ namespace activity{
         else if(mode == 4){
         	
             ETurnType turn_type = ETurnType::STRAIGHT_CENTER;
+            module::TrajectoryCommander::getInstance().reset(0.045f, 0.045f - pm.wall2mouse_center_dist, 90.0f * DEG2RAD);
+            module::PositionEstimator::getInstance().reset(0.045f, 0.045f - pm.wall2mouse_center_dist, 90.0f * DEG2RAD);
         	float target_dist = 0.09 * 8.0f + pm.wall2mouse_center_dist;
             float v_0 = 0.0f;
             float v_max = pm.v_search_run;
@@ -117,56 +120,43 @@ namespace activity{
             StopFactory::push(2.0f);
         }
         else if(mode == 5){
-        	float target_dist = 0.045;
+            module::TrajectoryCommander::getInstance().reset(0.045f, 0.045f - pm.wall2mouse_center_dist, 90.0f * DEG2RAD);
+            module::PositionEstimator::getInstance().reset(0.045f, 0.045f - pm.wall2mouse_center_dist, 90.0f * DEG2RAD);
+        	float target_dist = 0.045f + 0.09f;
             float v_0 = 0.0f;
-            float v_max = pm.v_search_run;
+            float v_max = module::TrajectoryInitializer::getInstance().getV(ETurnParamSet::SAFE, ETurnType::TURN_90);
             float v_end = 0.0f;
-            float a_acc = pm.a_search_run;
-            float a_dec = pm.a_search_run;
+            float a_acc = 4.0f;
+            float a_dec = 4.0f;
             float yawrate_max = pm.spin_yawrate_max * DEG2RAD;
             float yawacc = pm.spin_yawacc * DEG2RAD;
 
             ETurnType turn_type = ETurnType::STRAIGHT;
-            StraightFactory::push(turn_type, target_dist, v_0, v_max, v_max, a_acc, a_dec);
-            CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_90, ETurnDir::CW);
-            CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_90, ETurnDir::CW);
-            CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_90, ETurnDir::CW);
-            CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_90, ETurnDir::CW);
-
+            StraightFactory::push(turn_type, target_dist + pm.wall2mouse_center_dist, v_0, v_max, v_max, a_acc, a_dec);
+            CurveFactory::pushWithStraight(ETurnParamSet::SAFE, ETurnType::TURN_90, ETurnDir::CW);
             StraightFactory::push(turn_type, target_dist, v_max, v_max, v_end, a_acc, a_dec);
-            SpinTurnFactory::push(180.0f * DEG2RAD, yawrate_max, yawacc);
-            StraightFactory::push(turn_type, target_dist, v_0, v_max, v_max, a_acc, a_dec);
-
-            CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_90, ETurnDir::CCW);
-            CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_90, ETurnDir::CCW);
-            CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_90, ETurnDir::CCW);
-            CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_90, ETurnDir::CCW);
-
-            StraightFactory::push(turn_type, target_dist, v_max, v_max, v_end, a_acc, a_dec);
-            StopFactory::push(2.0f);            
+            StopFactory::push(2.0f);
         }
         else if(mode == 6){        	
+            module::TrajectoryCommander::getInstance().reset(0.045f + 0.09f * 2.0f, 0.045f - pm.wall2mouse_center_dist, 90.0f * DEG2RAD);
+            module::PositionEstimator::getInstance().reset(0.045f + 0.09f * 2.0f, 0.045f - pm.wall2mouse_center_dist, 90.0f * DEG2RAD);
+        	float target_dist = 0.045 + 0.09f;
             float v_0 = 0.0f;
-            float v_max = pm.v_search_run;
+            float v_max = module::TrajectoryInitializer::getInstance().getV(ETurnParamSet::SAFE, ETurnType::TURN_90);
             float v_end = 0.0f;
-            float a_acc = pm.a_search_run;
-            float a_dec = pm.a_search_run;
-            constexpr float SQRT2 = 1.4142356f;
+            float a_acc = 4.0f;
+            float a_dec = 4.0f;
+            float yawrate_max = pm.spin_yawrate_max * DEG2RAD;
+            float yawacc = pm.spin_yawacc * DEG2RAD;
 
-            StraightFactory::push(ETurnType::STRAIGHT, 0.09f, v_0, v_max, v_max, a_acc, a_dec);
-            CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_L_90, ETurnDir::CW);
-            CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_180, ETurnDir::CCW);
-            CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_S2D_135, ETurnDir::CCW);
-            CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_D2S_45, ETurnDir::CW);
-            CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_L_90, ETurnDir::CCW);
-            CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_S2D_135, ETurnDir::CCW);
-            CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_D_90, ETurnDir::CW);
-            CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_D2S_135, ETurnDir::CCW);
-            CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_D2S_45, ETurnDir::CCW);
-            StraightFactory::push(ETurnType::DIAGONAL, 0.045 * SQRT2, v_max, v_max, v_max, a_acc, a_dec);
-            CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_D2S_45, ETurnDir::CCW);
-            StraightFactory::push(ETurnType::STRAIGHT, 0.09f, v_max, v_max, v_end, a_acc, a_dec);
+            ETurnType turn_type = ETurnType::STRAIGHT;
+            StraightFactory::push(turn_type, target_dist + pm.wall2mouse_center_dist, v_0, v_max, v_max, a_acc, a_dec);
+            CurveFactory::pushWithStraight(ETurnParamSet::SAFE, ETurnType::TURN_90, ETurnDir::CCW);
+            StraightFactory::push(turn_type, target_dist, v_max, v_max, v_end, a_acc, a_dec);
             StopFactory::push(2.0f);
+
+
+
         }
         else if(mode == 7){
             float yawrate_max = pm.spin_yawrate_max * DEG2RAD;
