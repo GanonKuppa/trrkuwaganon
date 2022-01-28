@@ -360,7 +360,7 @@ void HF_playPath(ETurnParamSet tp, std::vector<Path>& path_vec) {
                 v_fol = turn_p.getV(path_vec[i+1].turn_type);
             }
             
-            StraightFactory::push(ETurnType::DIAGONAL, x, v_pre, v_max, v_fol, a, a);            
+            StraightFactory::push(ETurnType::DIAGONAL_CENTER, x, v_pre, v_max, v_fol, a, a);            
 
         } 
         else {

@@ -199,8 +199,8 @@ namespace module {
         }
         _in_read_wall_area_pre = in_read_wall_area;
         
-
-        if(pm.corner_correction_enable && ws_msg.is_corner_l && ctrl_msg.traj_type == ETrajType::STRAIGHT){
+        // 探索時の右壁切れ
+        if(pm.corner_correction_enable && ws_msg.is_corner_l && ctrl_msg.traj_type == ETrajType::STRAIGHT && nav_msg.mode == ENavMode::SEARCH){
             if(_corner_l_cool_down_dist > 0.035f && _v_xy_body_for_odom < 1.0f) _cornerLCorrection();
             _corner_l_cool_down_dist = 0.0f;
         }
@@ -208,8 +208,9 @@ namespace module {
             _corner_l_cool_down_dist += _v_xy_body_for_odom * _delta_t;
         }
 
-        if(pm.corner_correction_enable && ws_msg.is_corner_r && ctrl_msg.traj_type == ETrajType::STRAIGHT){
-            if(_corner_r_cool_down_dist > 0.035f && _v_xy_body_for_odom < 1.2f) _cornerRCorrection();
+        // 探索時の左壁切れ
+        if(pm.corner_correction_enable && ws_msg.is_corner_r && ctrl_msg.traj_type == ETrajType::STRAIGHT && nav_msg.mode == ENavMode::SEARCH){
+            if(_corner_r_cool_down_dist > 0.035f && _v_xy_body_for_odom < 1.0f) _cornerRCorrection();
             _corner_r_cool_down_dist = 0.0f;
         }
         else{

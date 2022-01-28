@@ -11,6 +11,7 @@ namespace module {
         void update1();
         void turnFcled(bool r, bool g, bool b);
         void flashFcled(bool r, bool g, bool b, float on_time, float off_time);
+        void oneshotFcled(bool r, bool g, bool b, float on_time, float off_time);
         uint8_t getFcledState();
         void setDeltaT(float delta_t);
         void debug();
@@ -18,6 +19,8 @@ namespace module {
         std::unique_ptr<Led> _led_r;
         std::unique_ptr<Led> _led_g;
         std::unique_ptr<Led> _led_b;
+        bool _oneshot_engaged;
+        float _oneshot_time;
 
         friend class BaseModule<LedController>;
         LedController();

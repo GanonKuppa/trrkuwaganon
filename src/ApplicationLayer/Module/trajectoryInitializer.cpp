@@ -272,7 +272,6 @@ namespace module {
             return 0;
         }
 
-
         if (ntlibc_strcmp(argv[1], "debug") == 0 && ntlibc_strcmp(argv[2], "mollifier") == 0) {            
             TrajectoryInitializer::getInstance().debugMollifier();
             return 0;
@@ -288,8 +287,7 @@ namespace module {
             return 0;
         }
 
-
         PRINTF_ASYNC("  Unknown sub command found\r\n");
-        return -1;        
+        return -1;
     }
 }

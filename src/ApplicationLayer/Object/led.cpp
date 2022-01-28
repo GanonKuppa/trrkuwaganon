@@ -16,10 +16,14 @@ Led::Led(float delta_t, bool on_state, void (*setGpioFunc)(bool)):
 void Led::update() {
     if (_flash_flag) {
         if (_led_time < _on_time) {
-            _setGpioFunc(true);
+            // 点灯
+            if(_on_state) _setGpioFunc(true);
+            else _setGpioFunc(false);
             _state = true;
         } else {
-            _setGpioFunc(false);
+            // 消灯
+            if(_on_state) _setGpioFunc(false);
+            else _setGpioFunc(true);            
             _state = false;
         }
 

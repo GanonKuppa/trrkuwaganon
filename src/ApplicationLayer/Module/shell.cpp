@@ -64,6 +64,7 @@ static const cmd_table_t cmdlist[] = {
     { "imuDriver", "ImuDriver Module.", module::usrcmd_imuDriver },
     { "imu", "alias of imuDriver command.", module::usrcmd_imuDriver },
     { "ledController", "LedController Module.", module::usrcmd_ledController },
+    { "led", "ailias of ledController command.", module::usrcmd_ledController },
     { "logger", "Logger Module.", module::usrcmd_logger },
     { "navigator", "Navigator Module.", module::usrcmd_navigator },
     { "paramManager", "ParamManager Module.", module::usrcmd_parameterManager },

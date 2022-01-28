@@ -395,7 +395,7 @@ namespace module{
         }
         
         // 柱を見ている際は柱に近づき過ぎている場合のみ壁制御をかける
-        if(_watchedPillar(_x, _y, _azimuth)){
+        if(_watchedPillar(_x, _y, _azimuth) && _mode == ENavMode::SEARCH){
             if(_ws_msg.dist_r > 0.035f) _r_wall_enable = false;
             if(_ws_msg.dist_l > 0.035f) _l_wall_enable = false;
         }
