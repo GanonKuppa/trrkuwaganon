@@ -43,7 +43,7 @@ class BaseTrajectory {
     float _cumulative_yaw;
     float _cumulative_t;
 
-    bool _in_edge_read_area;
+    bool _in_detect_edge_area;
 
     ETrajType _traj_type;
     ETurnType _turn_type;
@@ -72,6 +72,8 @@ class StraightTrajectory : public BaseTrajectory {
     float _a_dec;
     float _v_0;
     float _target_dist;
+
+    bool _detected_edge;    
 
     float _calcResidualDist(float x_esti, float y_esti);
 };

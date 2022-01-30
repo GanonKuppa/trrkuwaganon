@@ -34,6 +34,7 @@ BaseTrajectory::BaseTrajectory() :
     _cumulative_dist(0.0f),
     _cumulative_yaw(0.0f),
     _cumulative_t(0.0f),
+    _in_detect_edge_area(false),
     _traj_type(ETrajType::NONE),
     _turn_type(ETurnType::NONE),
     _turn_dir(ETurnDir::NO_TURN)
@@ -101,7 +102,7 @@ void BaseTrajectory::publish(){
     msg.traj_type = _traj_type;
     msg.turn_type = _turn_type;
     msg.turn_dir = _turn_dir;
-    msg.in_edge_read_area = _in_edge_read_area;
+    msg.in_detect_edge_area = _in_detect_edge_area;
     publishMsg(msg_id::CTRL_SETPOINT, &msg);
 };
 
@@ -137,6 +138,7 @@ StraightTrajectory::StraightTrajectory(ETurnType turn_type, float target_dist, f
     _v_0 = v_0;
     _v_xy_body = v_0;
     _a_xy_body = a_acc;
+    _detected_edge = false;
 
     _traj_type = ETrajType::STRAIGHT;
     if(isTurnStraight(turn_type)){
@@ -218,6 +220,13 @@ void StraightTrajectory::update() {
         _y = getEndY();
         _yaw = getEndYaw();
     }
+
+    if(_cumulative_dist >= dist && 
+     (_turn_type == ETurnType::STRAIGHT_CENTER_EDGE || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE)
+    )
+    {
+        _in_detect_edge_area = true;
+    }
 }
     
 bool StraightTrajectory::isEnd() {
@@ -226,12 +235,14 @@ bool StraightTrajectory::isEnd() {
     copyMsg(msg_id::VEHICLE_POSITION, &pos_msg);
     copyMsg(msg_id::WALL_SENSOR, &ws_msg);
     float res_dist = _calcResidualDist(pos_msg.x, pos_msg.y);
-    if ( 
+    
+
+    if (
 #ifndef SILS
-    res_dist <= 0.0f && _cumulative_dist >= _target_dist
+    (res_dist <= 0.0f && _cumulative_dist >= _target_dist) || ws_msg.dist_a < 0.045f
 #else
-    _cumulative_dist >= _target_dist || ws_msg.dist_a < 0.045f
-#endif    
+    _cumulative_dist >= _target_dist
+#endif
     ) {
         _x = getEndX();
         _y = getEndY();
@@ -489,7 +500,6 @@ AheadWallCorrectionTrajectory::AheadWallCorrectionTrajectory(float stop_time, fl
     else{
         _turn_type = ETurnType::AHEAD_WALL_CORRECTION;
     }
-    //_turn_type = ETurnType::AHEAD_WALL_CORRECTION;
     _turn_dir = ETurnDir::NO_TURN;
     _stop_time = stop_time;
     _calm_time = calm_time;
