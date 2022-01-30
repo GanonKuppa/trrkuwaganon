@@ -26,7 +26,7 @@
 #include "navStateMsg.h"
 
 #if FULL_PARAM
-static float _log_data[1500][41];
+static float _log_data[1500][42];
 #else
 static float _log_data[3000][22];
 #endif
@@ -85,6 +85,7 @@ namespace module {
             "wall_p,"
             "wall_i,"
             "wall_d,"
+            "diag_p,"            
             "voltage,"
             "turn_type,"
     #endif
@@ -103,7 +104,7 @@ namespace module {
                         "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f,"
                         "%f, %f, %f, %f, %f, %f, %f, %f, %f,"
                         "%f, %f, %f, %f, %f, %f, %f,"
-                        "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n",
+                        "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n",
                         _log_data[i][0],
                         _log_data[i][1], _log_data[i][2],_log_data[i][3],_log_data[i][4],_log_data[i][5],
                         _log_data[i][6], _log_data[i][7],_log_data[i][8],_log_data[i][9],_log_data[i][10],
@@ -111,7 +112,7 @@ namespace module {
                         _log_data[i][16], _log_data[i][17],_log_data[i][18],_log_data[i][19],_log_data[i][20],
                         _log_data[i][21], _log_data[i][22],_log_data[i][23],_log_data[i][24],_log_data[i][25],
                         _log_data[i][26], _log_data[i][27],_log_data[i][28],_log_data[i][29],_log_data[i][30],
-                        _log_data[i][31], _log_data[i][32],_log_data[i][33],_log_data[i][34],_log_data[i][35],_log_data[i][36],_log_data[i][37],_log_data[i][38],_log_data[i][39],_log_data[i][40]
+                        _log_data[i][31], _log_data[i][32],_log_data[i][33],_log_data[i][34],_log_data[i][35],_log_data[i][36],_log_data[i][37],_log_data[i][38],_log_data[i][39],_log_data[i][40],_log_data[i][41]
             );
             hal::waitmsec(1);
 
@@ -239,8 +240,9 @@ namespace module {
             _log_data[_data_num][36] = pid_msg.wall_p;
             _log_data[_data_num][37] = pid_msg.wall_i;
             _log_data[_data_num][38] = pid_msg.wall_d;
-            _log_data[_data_num][39] = bat_msg.voltage;
-            _log_data[_data_num][40] = nav_msg.r_wall_enable + nav_msg.l_wall_enable * 2;//(uint8_t)ctrl_msg.turn_type;
+            _log_data[_data_num][39] = pid_msg.diag_p;
+            _log_data[_data_num][40] = bat_msg.voltage;
+            _log_data[_data_num][41] = (uint8_t)ctrl_msg.turn_type;
     #endif
             _data_num++;
         }

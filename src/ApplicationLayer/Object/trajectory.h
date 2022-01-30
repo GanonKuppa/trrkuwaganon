@@ -34,7 +34,7 @@ class BaseTrajectory {
     float _yawrate;
     float _yawacc;
     float _beta;
-    float _beta_dot;
+    float _beta_dot;    
     float _delta_t;
     float _x_0;
     float _y_0;
@@ -42,6 +42,8 @@ class BaseTrajectory {
     float _cumulative_dist;
     float _cumulative_yaw;
     float _cumulative_t;
+
+    bool _in_edge_read_area;
 
     ETrajType _traj_type;
     ETurnType _turn_type;

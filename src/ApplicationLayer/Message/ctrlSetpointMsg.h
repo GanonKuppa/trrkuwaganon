@@ -23,6 +23,7 @@ class CtrlSetpointMsg : public BaseMsg{
     float beta = 0.0f;      // [rad]
     float beta_dot = 0.0f;  // [rad/s]
 
+    bool in_edge_read_area = false;
     ETrajType traj_type = ETrajType::STOP; // [enum]
     ETurnType turn_type = ETurnType::STOP; // [enum]
     ETurnDir turn_dir = ETurnDir::NO_TURN; // [enum]

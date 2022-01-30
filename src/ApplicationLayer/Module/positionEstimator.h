@@ -25,6 +25,12 @@ namespace module {
         void _publish_vehicle_position();
         void _publish_vehicle_attitude();
         void _aheadWallCorrectionOnWallRead(float dist_a);
+
+
+        void _edgeLCorrection();
+        void _edgeRCorrection();
+        void _diagEdgeLCorrection();
+        void _diagEdgeRCorrection();
         
         float _x;
         float _y;

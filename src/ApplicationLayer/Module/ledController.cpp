@@ -60,11 +60,10 @@ namespace module {
         _led_b->turn(b);
     }
 
-    void LedController::oneshotFcled(bool r, bool g, bool b, float on_time, float off_time){
-        if(_oneshot_engaged) return;
+    void LedController::oneshotFcled(bool r, bool g, bool b, float on_time, float off_time){        
         LedController::flashFcled(r, g, b, on_time, off_time);
         _oneshot_engaged = true;
-        _oneshot_time = on_time + off_time;        
+        _oneshot_time = on_time + off_time;
     }
 
 

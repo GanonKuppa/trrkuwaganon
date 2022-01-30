@@ -101,6 +101,7 @@ void BaseTrajectory::publish(){
     msg.traj_type = _traj_type;
     msg.turn_type = _turn_type;
     msg.turn_dir = _turn_dir;
+    msg.in_edge_read_area = _in_edge_read_area;
     publishMsg(msg_id::CTRL_SETPOINT, &msg);
 };
 
@@ -229,7 +230,7 @@ bool StraightTrajectory::isEnd() {
 #ifndef SILS
     res_dist <= 0.0f && _cumulative_dist >= _target_dist
 #else
-    _cumulative_dist >= _target_dist || ws_msg.dist_a < 0.045f;
+    _cumulative_dist >= _target_dist || ws_msg.dist_a < 0.045f
 #endif    
     ) {
         _x = getEndX();

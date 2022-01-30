@@ -63,11 +63,33 @@ namespace module {
 
     void TrajectoryCommander::debug(){
         constexpr float RAD2DEG = 180.0f / 3.14159265f;
+        CtrlSetpointMsg msg;
+        copyMsg(msg_id::CTRL_SETPOINT, &msg);        
+        
         PRINTF_ASYNC("  -- trajectoryCommander Val --\n");
         PRINTF_ASYNC("  x              : %f\n", _x);
         PRINTF_ASYNC("  y              : %f\n", _y);
         PRINTF_ASYNC("  yaw            : %f\n", _yaw * RAD2DEG);        
         PRINTF_ASYNC("  traj_queue num : %d\n", _traj_queue.size());
+        PRINTF_ASYNC("  -- ctrlSetpointMsg --\n");
+        PRINTF_ASYNC("  x              : %f\n", msg.x);
+        PRINTF_ASYNC("  v_x            : %f\n", msg.v_x);
+        PRINTF_ASYNC("  a_x            : %f\n", msg.a_x);
+        PRINTF_ASYNC("  y              : %f\n", msg.y);
+        PRINTF_ASYNC("  v_y            : %f\n", msg.v_y);
+        PRINTF_ASYNC("  a_y            : %f\n", msg.a_y);
+        PRINTF_ASYNC("  v_xy_body      : %f\n", msg.v_xy_body);
+        PRINTF_ASYNC("  a_xy_body      : %f\n", msg.a_xy_body);
+        PRINTF_ASYNC("  yaw            : %f\n", msg.yaw);
+        PRINTF_ASYNC("  yawrate        : %f\n", msg.yawrate);
+        PRINTF_ASYNC("  yawacc         : %f\n", msg.yawacc);
+        PRINTF_ASYNC("  beta           : %f\n", msg.beta);
+        PRINTF_ASYNC("  beta_dot       : %f\n", msg.beta_dot);
+        PRINTF_ASYNC("  traj_type      : %s\n", trajType2Str(msg.traj_type).c_str());
+        PRINTF_ASYNC("  turn_type      : %s\n", turnType2Str(msg.turn_type).c_str());
+        PRINTF_ASYNC("  turn_dir       : %s\n", turnDir2Str(msg.turn_dir).c_str());
+
+
     }
 
     void TrajectoryCommander::_publish(){        

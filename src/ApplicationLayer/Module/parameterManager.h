@@ -96,6 +96,9 @@ namespace module {
         uint8_t wall_diag_saturation_enable; //65
         uint8_t wall_diag_i_saturation_enable; //66
         
+        float diag_ctrl_dist_thr_r; //67
+        float diag_ctrl_dist_thr_l;
+      
         
         float v_ff_coef; //80
         float v_ff_offset; //81

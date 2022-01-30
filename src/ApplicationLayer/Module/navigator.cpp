@@ -125,18 +125,7 @@ namespace module{
         if(!is_failsafe_pre && _is_failsafe){
             PRINTF_PICKLE("!!!!FAILSAFE!!!!      | cor_setp:(%6.3f, %6.3f)| x_setp:%6.3f, x:%6.3f |y_setp %6.3f, y:%6.3f |aout_err:%d\n",_x_setp/0.09f,_y_setp/0.09f, _x_setp, _x, _y_setp, _y, _is_actuator_error);
         }
-        // LEDの制御
-        if(_navigating){
-            if(_inReadWallArea(0.078f, 0.08f)){
-                module::LedController::getInstance().turnFcled(1, 1, 0);
-            }
-            else if(_inReadWallArea(_read_wall_offset1, _read_wall_offset2)){
-                module::LedController::getInstance().turnFcled(1, 1, 1);
-            }
-            else{
-                module::LedController::getInstance().turnFcled(0, 0, 0);
-            }        
-        }
+
         // 現在区画の更新
         _x_cur = (uint8_t)(_x / 0.09f);
         _y_cur = (uint8_t)(_y / 0.09f);
@@ -148,6 +137,7 @@ namespace module{
             _is_pre_read_r_wall = _ws_msg.is_right;
             _pre_read_l_wall_dist = _ws_msg.dist_l;
             _pre_read_r_wall_dist = _ws_msg.dist_r;
+            module::LedController::getInstance().oneshotFcled(0, 1, 0, 0.005, 0.005);
         }
 
         // 壁の更新エリアに入ったときの動作
@@ -158,6 +148,8 @@ namespace module{
            _navigating &&
            _mode == ENavMode::SEARCH
         ){                            
+            // LEDの点灯
+            module::LedController::getInstance().oneshotFcled(1, 1, 0, 0.005, 0.005);
 
             // 迷路の壁情報更新
             if(!_maze.isReached(_x_cur, _y_cur)){                               
@@ -168,7 +160,7 @@ namespace module{
                 ws_msg_temp.is_left = _is_pre_read_l_wall;
                 ws_msg_temp.is_right = _is_pre_read_r_wall;                
                 //PRINTF_PICKLE("  dist: %.3f, %.3f, %.3f, %.3f\n", _ws_msg.dist_al, _ws_msg.dist_l, _ws_msg.dist_r, _ws_msg.dist_ar);
-                //PRINTF_PICKLE("        %.3f, %.3f, %.3f, %.3f\n", ws_msg_temp.dist_al, ws_msg_temp.dist_l, ws_msg_temp.dist_r, ws_msg_temp.dist_ar);
+                //PRINTF_PICKLE("  dist: %.3f, %.3f, %.3f, %.3f\n", ws_msg_temp.dist_al, ws_msg_temp.dist_l, ws_msg_temp.dist_r, ws_msg_temp.dist_ar);
                 _maze.updateWall(_x_cur, _y_cur, _azimuth, ws_msg_temp);
             }
 
@@ -190,8 +182,8 @@ namespace module{
                 // 目標区画の更新
                 _updateDestination();
 
-                _x_last = _y_cur;
-                _y_last = _x_cur;
+                _x_last = _x_cur;
+                _y_last = _y_cur;
                 _lock_guard = true;
                 _nav_cmd_queue.push_back(ENavCommand::UPDATE_POTENTIAL_MAP);                
                 _nav_cmd_queue.push_back(ENavCommand::GO_NEXT_SECTION);
@@ -643,7 +635,8 @@ namespace module{
         msg.azimuth = _azimuth;
         msg.r_wall_enable = _r_wall_enable;
         msg.l_wall_enable = _l_wall_enable;
-        msg.is_failsafe = _is_failsafe;
+        msg.in_read_wall_area = _in_read_wall_area;
+        msg.is_failsafe = _is_failsafe;        
         publishMsg(msg_id::NAV_STATE, &msg);
     }
 

@@ -19,6 +19,7 @@
 
 // Module
 #include "parameterManager.h"
+#include "ledController.h"
 
 // Obj
 #include "navigationEnum.h"
@@ -241,8 +242,9 @@ namespace module {
                 _x = (uint8_t)(_x / 0.09f) * 0.09f + 0.09f/2.0f;                
             }            
             //PRINTF_PICKLE("ON_WALL_CENTER | x:%6.3f, x_pre:%6.3f, y:%6.3f, y_pre:%6.3f yaw:%6.3f, yaw_pre:%6.3f\n", _x, x_pre, _y, y_pre, _yaw*RAD2DEG, yaw_pre*RAD2DEG);
+            //module::LedController::getInstance().oneshotFcled(0, 0, 1, 0.05, 0.05);
         }
-        else if(_on_wall_center_dist > 0.06f){
+        else if(_on_wall_center_dist > 0.05f){
             if(ang >= 315.0 || ang < 45.0) {
                 _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;
                 _yaw = 0.0 * DEG2RAD;
@@ -260,6 +262,7 @@ namespace module {
                 _yaw = 270.0f * DEG2RAD;
             }
             _on_wall_center_dist = 0.02f;
+            //module::LedController::getInstance().oneshotFcled(1, 0, 1, 0.05, 0.05);
             //PRINTF_PICKLE("ON_WALL_CENTER YAW| x:%6.3f, x_pre:%6.3f, y:%6.3f, y_pre:%6.3f yaw:%6.3f, yaw_pre:%6.3f\n", _x, x_pre, _y, y_pre, _yaw*RAD2DEG, yaw_pre*RAD2DEG);            
         }
     }
@@ -297,42 +300,146 @@ namespace module {
         } else if(ang >= 225.0f && ang < 315.0f) {
             _y = (uint8_t)(_y / 0.09f) * 0.09f + dist_a;            
         }
+        //module::LedController::getInstance().oneshotFcled(0, 0, 1, 0.05, 0.05);
     }
 
 
     void PositionEstimator::_cornerLCorrection() {
         ParameterManager& pm = ParameterManager::getInstance();
         float ang = _yaw * RAD2DEG;
-        float ok_ang = 2.0f;
-        
+        float ok_ang = 3.0f;
+        bool corrected = false;
+
         if(ang >= 360.0f - ok_ang || ang < ok_ang) {
-            _x = (uint8_t)((_x) / 0.09f) * 0.09f + 0.09f - (float)pm.wall_corner_read_offset_l;
+            _x = (uint8_t)((_x) / 0.09f) * 0.09f + 0.09f - (float)pm.wall_corner_read_offset_l;            
+            corrected = true;
         } else if(ang >= 90.0f - ok_ang && ang < 90.0f + ok_ang) {
             _y = (uint8_t)((_y) / 0.09f) * 0.09f + 0.09f - (float)pm.wall_corner_read_offset_l;
+            corrected = true;
         } else if(ang >= 180.0f - ok_ang && ang < 180.0f + ok_ang) {
             _x = (uint8_t)((_x) / 0.09f) * 0.09f + (float)pm.wall_corner_read_offset_l;
+            corrected = true;
         } else if(ang >= 270.0f - ok_ang && ang < 270.0f + ok_ang) {
             _y = (uint8_t)((_y) / 0.09f) * 0.09f + (float)pm.wall_corner_read_offset_l;
+            corrected = true;
+        }
+
+        if(corrected){
+            //module::LedController::getInstance().oneshotFcled(1, 0, 0, 0.005, 0.005);
         }
     }
 
     void PositionEstimator::_cornerRCorrection() {
         ParameterManager& pm = ParameterManager::getInstance();
         float ang = _yaw * RAD2DEG;
-        float ok_ang = 2.0f;
+        float ok_ang = 3.0f;
+        bool corrected = false;
 
         if(ang >= 360.0f - ok_ang || ang < ok_ang) {
             _x = (uint8_t)((_x) / 0.09f) * 0.09f + 0.09f - (float)pm.wall_corner_read_offset_r;
+            corrected = true;
         } else if(ang >= 90.0f - ok_ang && ang < 90.0f + ok_ang) {
             _y = (uint8_t)((_y) / 0.09f) * 0.09f + 0.09f - (float)pm.wall_corner_read_offset_r;
+            corrected = true;
         } else if(ang >= 180.0f - ok_ang && ang < 180.0f + ok_ang) {
             _x = (uint8_t)((_x) / 0.09) * 0.09f + (float)pm.wall_corner_read_offset_r;
+            corrected = true;
         } else if(ang >= 270.0f - ok_ang && ang < 270.0f + ok_ang) {
             _y = (uint8_t)((_y) / 0.09f) * 0.09f + (float)pm.wall_corner_read_offset_r;
+            corrected = true;
         }        
+
+        if(corrected){
+            //module::LedController::getInstance().oneshotFcled(1, 0, 0, 0.005, 0.005);
+        }
+    }
+
+    void PositionEstimator::_edgeLCorrection() {
+        ParameterManager& pm = ParameterManager::getInstance();
+        float ang = _yaw * RAD2DEG;
+        float ok_ang = 10.0f;
+        bool corrected = false;
+
+        if(ang >= 360.0f - ok_ang || ang < ok_ang) {
+            _x = (uint8_t)((_x) / 0.09f) * 0.09f + 0.09f - (float)pm.wall_corner_read_offset_l;            
+            corrected = true;
+        } else if(ang >= 90.0f - ok_ang && ang < 90.0f + ok_ang) {
+            _y = (uint8_t)((_y) / 0.09f) * 0.09f + 0.09f - (float)pm.wall_corner_read_offset_l;
+            corrected = true;
+        } else if(ang >= 180.0f - ok_ang && ang < 180.0f + ok_ang) {
+            _x = (uint8_t)((_x) / 0.09f) * 0.09f + (float)pm.wall_corner_read_offset_l;
+            corrected = true;
+        } else if(ang >= 270.0f - ok_ang && ang < 270.0f + ok_ang) {
+            _y = (uint8_t)((_y) / 0.09f) * 0.09f + (float)pm.wall_corner_read_offset_l;
+            corrected = true;
+        }
+
+        if(corrected){
+            //module::LedController::getInstance().oneshotFcled(1, 0, 0, 0.005, 0.005);
+        }
+    }
+
+    void PositionEstimator::_edgeRCorrection() {
+        ParameterManager& pm = ParameterManager::getInstance();
+        float ang = _yaw * RAD2DEG;
+        float ok_ang = 10.0f;
+        bool corrected = false;
+
+        if(ang >= 360.0f - ok_ang || ang < ok_ang) {
+            _x = (uint8_t)((_x) / 0.09f) * 0.09f + 0.09f - (float)pm.wall_corner_read_offset_r;
+            corrected = true;
+        } else if(ang >= 90.0f - ok_ang && ang < 90.0f + ok_ang) {
+            _y = (uint8_t)((_y) / 0.09f) * 0.09f + 0.09f - (float)pm.wall_corner_read_offset_r;
+            corrected = true;
+        } else if(ang >= 180.0f - ok_ang && ang < 180.0f + ok_ang) {
+            _x = (uint8_t)((_x) / 0.09) * 0.09f + (float)pm.wall_corner_read_offset_r;
+            corrected = true;
+        } else if(ang >= 270.0f - ok_ang && ang < 270.0f + ok_ang) {
+            _y = (uint8_t)((_y) / 0.09f) * 0.09f + (float)pm.wall_corner_read_offset_r;
+            corrected = true;
+        }        
+
+        if(corrected){
+            //module::LedController::getInstance().oneshotFcled(1, 0, 0, 0.005, 0.005);
+        }
     }
 
 
+    void PositionEstimator::_diagEdgeRCorrection() {
+        ParameterManager& pm = ParameterManager::getInstance();
+        if(pm.diag_r_corner_read_offset < 0.0f) return;
+        
+        float ok_ang = 10.0f;
+        float ang = _yaw * RAD2DEG;
+        
+        if( ang >= 45.0f - ok_ang  && ang < 45.0f + ok_ang ) {
+            _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f - (float)pm.diag_r_corner_read_offset;
+        } else if(ang >= 135.0f - ok_ang && ang < 135.0f + ok_ang) {
+            _x = (uint8_t)(_x / 0.09f) * 0.09f +  (float)pm.diag_r_corner_read_offset;
+        } else if(ang >= 225.0f - ok_ang && ang < 225.0f + ok_ang) {
+            _y = (uint8_t)(_y / 0.09f) * 0.09f + (float)pm.diag_r_corner_read_offset;
+        } else if(ang >= 315.0f - ok_ang && ang < 315.0f + ok_ang) {
+            _x = (uint8_t)(_x / 0.09f) * 0.09f + 0.09f - (float)pm.diag_r_corner_read_offset;
+        }
+    }
+
+    void PositionEstimator::_diagEdgeLCorrection() {
+        ParameterManager& pm = ParameterManager::getInstance();
+        if(pm.diag_l_corner_read_offset < 0.0f) return;
+
+        float ok_ang = 10.0f;
+        float ang = _yaw * RAD2DEG;
+        
+        if( ang >= 45.0f - ok_ang && ang < 45.0f + ok_ang ) {
+            _x = (uint8_t)(_x / 0.09f) * 0.09f + 0.09f - (float)pm.diag_l_corner_read_offset;
+        } else if(ang >= 135.0f - ok_ang && ang < 135.0f + ok_ang) {
+            _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f - (float)pm.diag_l_corner_read_offset;
+        } else if(ang >= 225.0f - ok_ang && ang < 225.0f + ok_ang) {
+            _x = (uint8_t)(_x / 0.09f) * 0.09f + (float)pm.diag_l_corner_read_offset;
+        } else if(ang >= 315.0f - ok_ang  && ang < 315.0f + ok_ang) {
+            _y = (uint8_t)(_y / 0.09f) * 0.09f + (float)pm.diag_l_corner_read_offset;
+        }            
+    }
 
     void PositionEstimator::debug(){
         PRINTF_ASYNC(  "  ---\n");
@@ -402,7 +509,6 @@ namespace module {
         publishMsg(msg_id::VEHICLE_POSITION, &msg);
     }
 
-
     void PositionEstimator::_publish_vehicle_attitude(){
         VehicleAttitudeMsg msg;
 
@@ -427,7 +533,6 @@ namespace module {
 
         publishMsg(msg_id::VEHICLE_ATTITUDE, &msg);
     }
-
 
     int usrcmd_positionEstimator(int argc, char **argv){
         if (ntlibc_strcmp(argv[1], "help") == 0) {

@@ -14,6 +14,7 @@
 
 // Module
 #include "parameterManager.h"
+#include "ledController.h"
 
 namespace module{
 
@@ -178,6 +179,10 @@ namespace module{
     }
 
     void ControlMixer::_updateController(){
+        _setp_v_xy_body = _setp_msg.v_xy_body;
+        _setp_yaw = _setp_msg.yaw;
+        _setp_yawrate = _setp_msg.yawrate;
+
         if(_nav_msg.mode == ENavMode::DEBUG || _setp_msg.traj_type == ETrajType::NONE){
             _resetController();
             return;
@@ -185,10 +190,6 @@ namespace module{
         
         ParameterManager& pm = ParameterManager::getInstance();
         
-        _setp_v_xy_body = _setp_msg.v_xy_body;
-        _setp_yaw = _setp_msg.yaw;
-        _setp_yawrate = _setp_msg.yawrate;
-
         // 超信知 or 停止制御後は制御量をリセットする
         if( _traj_type != _traj_type_pre &&
             (_traj_type_pre == ETrajType::STOP || _traj_type_pre == ETrajType::SPINTURN)
@@ -215,23 +216,25 @@ namespace module{
         if(_turn_type == ETurnType::DIAGONAL_CENTER) {
             float v_now = _pos_msg.v_xy_body_for_ctrl;
             if(v_now < 0.1f) v_now = 0.1f;              
-
-            if (_ws_msg.ahead_l < pm.diag_corner_threshold_off_l &&
-                _ws_msg.ahead_r >= pm.diag_corner_threshold_on_r
+            if (_ws_msg.dist_al < pm.diag_ctrl_dist_thr_l &&
+                _ws_msg.dist_ar >= pm.diag_ctrl_dist_thr_r
             ) {
-                //setp_yawrate -= v_now * pm.wall_diag_p;
-                _wall_diag_pidf.update(_ws_msg.ahead_r, pm.diag_corner_threshold_off_r);
+                //_setp_yawrate -= v_now * pm.wall_diag_p;
+                _wall_diag_pidf.update(_ws_msg.dist_ar, pm.diag_ctrl_dist_thr_r);
                 _setp_yawrate += - v_now * _wall_diag_pidf.getControlVal();
+                LedController::getInstance().turnFcled(1, 0, 0);
             } 
-            else if (_ws_msg.ahead_l >= pm.diag_corner_threshold_on_l &&
-            		 _ws_msg.ahead_r < pm.diag_corner_threshold_off_r
+            else if (_ws_msg.dist_al >= pm.diag_ctrl_dist_thr_l &&
+            		 _ws_msg.dist_ar < pm.diag_ctrl_dist_thr_r
             ) {
-                //setp_yawrate += v_now * pm.wall_diag_p;
-                _wall_diag_pidf.update(_ws_msg.ahead_l, pm.diag_corner_threshold_off_l);
+                //_setp_yawrate += v_now * pm.wall_diag_p;
+                _wall_diag_pidf.update(_ws_msg.dist_al, pm.diag_ctrl_dist_thr_l);
                 _setp_yawrate += v_now * _wall_diag_pidf.getControlVal();
+                LedController::getInstance().turnFcled(1, 0, 1);
             }
             else{
                 _wall_diag_pidf.reset();
+                LedController::getInstance().turnFcled(0, 0, 0);
             }            
         }
         else{
