@@ -57,6 +57,8 @@ namespace module {
         float _on_wall_ahead_l_time;
         float _on_wall_ahead_r_time;
         float _on_wall_center_time;
+        float _not_corner_l_elapsed_time;
+        float _not_corner_r_elapsed_time;
 
         const uint8_t BUFF_SIZE = 50;
         const uint8_t LED_ON_SEC = 100;        

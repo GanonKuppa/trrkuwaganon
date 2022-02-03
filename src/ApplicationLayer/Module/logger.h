@@ -5,8 +5,6 @@
 // Object
 #include "maze.h"
 
-#define FULL_PARAM 1
-
 namespace module {
     class Logger : public BaseModule<Logger> {
       public:
@@ -27,12 +25,7 @@ namespace module {
         uint32_t _data_num;
         uint32_t _start_time_ms;
         uint8_t  _skip_mod;
-        #if FULL_PARAM        
         const uint32_t _max_data_num = 1500;
-        #else
-        const uint32_t _max_data_num = 3000;
-        #endif
-
         bool _logging;
     };
 

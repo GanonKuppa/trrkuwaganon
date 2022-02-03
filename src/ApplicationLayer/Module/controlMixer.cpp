@@ -213,23 +213,33 @@ namespace module{
         }
 
         // 斜め直進時の壁制御
-        if(_turn_type == ETurnType::DIAGONAL_CENTER) {
+        if(_turn_type == ETurnType::DIAGONAL_CENTER || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE) {
             float v_now = _pos_msg.v_xy_body_for_ctrl;
             if(v_now < 0.1f) v_now = 0.1f;              
-            if (_ws_msg.dist_al < pm.diag_ctrl_dist_thr_l &&
-                _ws_msg.dist_ar >= pm.diag_ctrl_dist_thr_r
-            ) {
-                //_setp_yawrate -= v_now * pm.wall_diag_p;
-                _wall_diag_pidf.update(_ws_msg.dist_ar, pm.diag_ctrl_dist_thr_r);
-                _setp_yawrate += - v_now * _wall_diag_pidf.getControlVal();
-                LedController::getInstance().turnFcled(1, 0, 0);
-            } 
-            else if (_ws_msg.dist_al >= pm.diag_ctrl_dist_thr_l &&
-            		 _ws_msg.dist_ar < pm.diag_ctrl_dist_thr_r
-            ) {
-                //_setp_yawrate += v_now * pm.wall_diag_p;
+            
+            bool ctrl_ccw = false;
+            bool ctrl_cw = false;
+
+            //両方の前壁センサが反応している場合
+            if(_ws_msg.dist_al < pm.diag_ctrl_dist_thr_l && _ws_msg.dist_ar < pm.diag_ctrl_dist_thr_r){
+                ctrl_ccw = false;
+                ctrl_cw = false;
+            }
+            else if(_ws_msg.dist_al < pm.diag_ctrl_dist_thr_l){
+                ctrl_cw = true;
+            }
+            else if(_ws_msg.dist_ar < pm.diag_ctrl_dist_thr_r){
+                ctrl_ccw = true;
+            }
+            
+            if (ctrl_ccw) {
                 _wall_diag_pidf.update(_ws_msg.dist_al, pm.diag_ctrl_dist_thr_l);
                 _setp_yawrate += v_now * _wall_diag_pidf.getControlVal();
+                LedController::getInstance().turnFcled(1, 0, 0);
+            } 
+            else if (ctrl_cw) {
+                _wall_diag_pidf.update(_ws_msg.dist_ar, pm.diag_ctrl_dist_thr_r);
+                _setp_yawrate += - v_now * _wall_diag_pidf.getControlVal();
                 LedController::getInstance().turnFcled(1, 0, 1);
             }
             else{

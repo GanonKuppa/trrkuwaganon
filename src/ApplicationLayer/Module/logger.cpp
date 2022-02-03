@@ -25,12 +25,7 @@
 #include "wheelOdometryMsg.h"
 #include "navStateMsg.h"
 
-#if FULL_PARAM
-static float _log_data[1500][42];
-#else
-static float _log_data[3000][22];
-#endif
-
+static float _log_data[1500][50];
 
 namespace module {
 
@@ -50,28 +45,32 @@ namespace module {
             "v_ave,"
             "v_comp,"
             "v_acc,"
-            "yaw,"
-            "yawrate,"
-            "acc_x,"
-            "acc_y,"
-            "ws_l_raw,"
-            "ws_r_raw,"
-            "X_cor,"
-            "y_cor,"
-            "beta,"
             "v_setp,"
-            "x_setp,"
-            "y_setp,"
-            "a_setp,"
+            "yawrate,"
             "yawrate_traj,"
             "yawrate_setp,"
+            "yaw,"
             "yaw_traj,"
-            "yaw_setp,"
-    #if FULL_PARAM
+            "yaw_setp,"            
+            "beta,"
+            "beta_setp,"
+            "beta_dot,"
+            "beta_dot_setp,"
+            "x_cor,"
+            "y_cor,"
+            "x_cor_setp,"
+            "y_cor_setp,"
+            "a_x,"
+            "a_y,"
+            "a_setp,"
             "d_la,"
             "d_l,"
             "d_r,"
             "d_ra,"
+            "wall_la,"
+            "wall_l,"
+            "wall_r,"
+            "wall_ra,"
             "v_p,"
             "v_i,"
             "v_d,"
@@ -88,8 +87,10 @@ namespace module {
             "diag_p,"            
             "voltage,"
             "turn_type,"
-    #endif
-                "\n"
+            "on_wall_center_time,"
+            "not_corner_l_elapsed_time,"
+            "not_corner_r_elapsed_time"
+            "\n"
         );
     }
 
@@ -98,38 +99,25 @@ namespace module {
         if(_logging) return;
 
         printHeadder();
-        for(uint32_t i=0; i<_data_num; i++){
-    #if FULL_PARAM
-            PRINTF_ASYNC( "%f,"
-                        "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f,"
-                        "%f, %f, %f, %f, %f, %f, %f, %f, %f,"
-                        "%f, %f, %f, %f, %f, %f, %f,"
-                        "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n",
-                        _log_data[i][0],
-                        _log_data[i][1], _log_data[i][2],_log_data[i][3],_log_data[i][4],_log_data[i][5],
-                        _log_data[i][6], _log_data[i][7],_log_data[i][8],_log_data[i][9],_log_data[i][10],
-                        _log_data[i][11], _log_data[i][12],_log_data[i][13],_log_data[i][14],_log_data[i][15],
-                        _log_data[i][16], _log_data[i][17],_log_data[i][18],_log_data[i][19],_log_data[i][20],
-                        _log_data[i][21], _log_data[i][22],_log_data[i][23],_log_data[i][24],_log_data[i][25],
-                        _log_data[i][26], _log_data[i][27],_log_data[i][28],_log_data[i][29],_log_data[i][30],
-                        _log_data[i][31], _log_data[i][32],_log_data[i][33],_log_data[i][34],_log_data[i][35],_log_data[i][36],_log_data[i][37],_log_data[i][38],_log_data[i][39],_log_data[i][40],_log_data[i][41]
+        for(uint32_t i=0; i<_data_num; i++){    
+            PRINTF_ASYNC("%f, %f, %f, %f, %f, %f, %f, %f, %f, %f,"
+                         "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f,"
+                         "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f,"
+                         "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f,"
+                         "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n"
+                        ,
+                        _log_data[i][0],  _log_data[i][1],  _log_data[i][2],  _log_data[i][3],  _log_data[i][4],
+                        _log_data[i][5],  _log_data[i][6],  _log_data[i][7],  _log_data[i][8],  _log_data[i][9],
+                        _log_data[i][10], _log_data[i][11], _log_data[i][12], _log_data[i][13], _log_data[i][14],
+                        _log_data[i][15], _log_data[i][16], _log_data[i][17], _log_data[i][18], _log_data[i][19],
+                        _log_data[i][20], _log_data[i][21], _log_data[i][22], _log_data[i][23], _log_data[i][24],
+                        _log_data[i][25], _log_data[i][26], _log_data[i][27], _log_data[i][28], _log_data[i][29],
+                        _log_data[i][30], _log_data[i][31], _log_data[i][32], _log_data[i][33], _log_data[i][34],
+                        _log_data[i][35], _log_data[i][36], _log_data[i][37], _log_data[i][38], _log_data[i][39],
+                        _log_data[i][40], _log_data[i][41], _log_data[i][42], _log_data[i][43], _log_data[i][44],
+                        _log_data[i][45], _log_data[i][46], _log_data[i][47], _log_data[i][48], _log_data[i][49]
             );
-            hal::waitmsec(1);
-
-    #else
-            PRINTF_ASYNC( "%f," 
-                        "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f,"
-                        "%f, %f, %f, %f, %f, %f, %f, %f, %f"
-                        "\n",
-                        _log_data[i][0],
-                        _log_data[i][1], _log_data[i][2],_log_data[i][3],_log_data[i][4],_log_data[i][5],
-                        _log_data[i][6], _log_data[i][7],_log_data[i][8],_log_data[i][9],_log_data[i][10],
-                        _log_data[i][11], _log_data[i][12],_log_data[i][13],_log_data[i][14],_log_data[i][15],
-                        _log_data[i][16], _log_data[i][17],_log_data[i][18],_log_data[i][19],_log_data[i][20],
-                        _log_data[i][21], _log_data[i][22]
-            );
-            hal::waitmsec(1);
-    #endif
+            hal::waitusec(1300);
         }
     }
 
@@ -203,47 +191,68 @@ namespace module {
             _log_data[_data_num][2] = pos_msg.v_xy_body_ave;
             _log_data[_data_num][3] = pos_msg.v_xy_body_cmp;
             _log_data[_data_num][4] = pos_msg.v_xy_body_acc;
+            _log_data[_data_num][5] = pid_msg.setp_v_xy_body;
 
-            _log_data[_data_num][5] = att_msg.yaw * RAD2DEG;
             _log_data[_data_num][6] = att_msg.yawrate * RAD2DEG;
-            _log_data[_data_num][7] = imu_msg.acc_x;
-            _log_data[_data_num][8] = imu_msg.acc_y;
-            _log_data[_data_num][9] = (float)ws_msg.left;
-            _log_data[_data_num][10] = (float)ws_msg.right;
-            _log_data[_data_num][11] = pos_msg.x / 0.09f;
-            _log_data[_data_num][12] = pos_msg.y / 0.09f;
-            _log_data[_data_num][13] = att_msg.beta * RAD2DEG;
+            _log_data[_data_num][7] = ctrl_msg.yawrate * RAD2DEG;
+            _log_data[_data_num][8] = pid_msg.setp_yawrate * RAD2DEG;
 
-            _log_data[_data_num][14] = pid_msg.setp_v_xy_body;
-            _log_data[_data_num][15] = ctrl_msg.x / 0.09f;
-            _log_data[_data_num][16] = ctrl_msg.y / 0.09f;
-            _log_data[_data_num][17] = ctrl_msg.a_xy_body;
-            _log_data[_data_num][18] = ctrl_msg.yawrate * RAD2DEG;
-            _log_data[_data_num][19] = pid_msg.setp_yawrate * RAD2DEG;
-            _log_data[_data_num][20] = ctrl_msg.yaw * RAD2DEG;
-            _log_data[_data_num][21] = pid_msg.setp_yaw * RAD2DEG;
-    #if FULL_PARAM
-            _log_data[_data_num][22] = ws_msg.dist_al;
-            _log_data[_data_num][23] = ws_msg.dist_l;
-            _log_data[_data_num][24] = ws_msg.dist_r;
-            _log_data[_data_num][25] = ws_msg.dist_ar;
-            _log_data[_data_num][26] = pid_msg.v_p;
-            _log_data[_data_num][27] = pid_msg.v_i;
-            _log_data[_data_num][28] = pid_msg.v_d;
-            _log_data[_data_num][29] = aout_msg.duty_r_v;            
-            _log_data[_data_num][30] = pid_msg.yawrate_p;
-            _log_data[_data_num][31] = pid_msg.yawrate_i;
-            _log_data[_data_num][32] = pid_msg.yawrate_d;            
-            _log_data[_data_num][33] = aout_msg.duty_r_yaw;
-            _log_data[_data_num][34] = pid_msg.yaw_p;
-            _log_data[_data_num][35] = pid_msg.yaw_i;         
-            _log_data[_data_num][36] = pid_msg.wall_p;
-            _log_data[_data_num][37] = pid_msg.wall_i;
-            _log_data[_data_num][38] = pid_msg.wall_d;
-            _log_data[_data_num][39] = pid_msg.diag_p;
-            _log_data[_data_num][40] = bat_msg.voltage;
-            _log_data[_data_num][41] = (uint8_t)ctrl_msg.turn_type;
-    #endif
+            _log_data[_data_num][9] = att_msg.yaw * RAD2DEG;
+            _log_data[_data_num][10] = ctrl_msg.yaw * RAD2DEG;
+            _log_data[_data_num][11] = pid_msg.setp_yaw * RAD2DEG;
+
+            _log_data[_data_num][12] = att_msg.beta * RAD2DEG;
+            _log_data[_data_num][13] = ctrl_msg.beta * RAD2DEG;
+
+            _log_data[_data_num][14] = att_msg.beta_dot * RAD2DEG;
+            _log_data[_data_num][15] = ctrl_msg.beta_dot * RAD2DEG;
+
+            _log_data[_data_num][16] = pos_msg.x / 0.09f;
+            _log_data[_data_num][17] = pos_msg.y / 0.09f;
+            _log_data[_data_num][18] = ctrl_msg.x / 0.09f;
+            _log_data[_data_num][19] = ctrl_msg.y / 0.09f;
+
+            _log_data[_data_num][20] = imu_msg.acc_x;
+            _log_data[_data_num][21] = imu_msg.acc_y;
+            _log_data[_data_num][22] = ctrl_msg.a_xy_body;
+    
+            _log_data[_data_num][23] = ws_msg.dist_al;
+            _log_data[_data_num][24] = ws_msg.dist_l;
+            _log_data[_data_num][25] = ws_msg.dist_r;
+            _log_data[_data_num][26] = ws_msg.dist_ar;
+            _log_data[_data_num][27] = (float)ws_msg.ahead_l;
+            _log_data[_data_num][28] = (float)ws_msg.left;
+            _log_data[_data_num][29] = (float)ws_msg.right;
+            _log_data[_data_num][30] = (float)ws_msg.ahead_r;
+
+            _log_data[_data_num][31] = pid_msg.v_p;
+            _log_data[_data_num][32] = pid_msg.v_i;
+            _log_data[_data_num][33] = pid_msg.v_d;
+            _log_data[_data_num][34] = aout_msg.duty_r_v;
+           
+            _log_data[_data_num][35] = pid_msg.yawrate_p;
+            _log_data[_data_num][36] = pid_msg.yawrate_i;
+            _log_data[_data_num][37] = pid_msg.yawrate_d;
+            _log_data[_data_num][38] = aout_msg.duty_r_yaw;
+            
+            float v_now = pos_msg.v_xy_body_for_ctrl;
+            if(v_now < 0.05f) v_now = 0.05f;
+
+            _log_data[_data_num][39] = v_now * pid_msg.yaw_p * RAD2DEG;
+            _log_data[_data_num][40] = v_now * pid_msg.yaw_i * RAD2DEG;
+            _log_data[_data_num][41] = v_now * pid_msg.wall_p * RAD2DEG;
+            _log_data[_data_num][42] = v_now * pid_msg.wall_i * RAD2DEG;
+            _log_data[_data_num][43] = v_now * pid_msg.wall_d * RAD2DEG;
+            _log_data[_data_num][44] = v_now * pid_msg.diag_p * RAD2DEG;
+            
+            _log_data[_data_num][45] = bat_msg.voltage;
+            
+            _log_data[_data_num][46] = (uint8_t)ctrl_msg.turn_type;    
+
+            _log_data[_data_num][47] = ws_msg.on_wall_center_time;
+            _log_data[_data_num][48] = ws_msg.not_corner_l_elapsed_time;
+            _log_data[_data_num][49] = ws_msg.not_corner_r_elapsed_time;
+
             _data_num++;
         }
 

@@ -55,7 +55,9 @@ namespace module {
         _on_wall_ahead_l_time(0.0f),
         _on_wall_ahead_r_time(0.0f),
         _on_wall_center_time(0.0f),
-        _emit_led_cycle_time_us()   
+        _not_corner_l_elapsed_time(0.0f),
+        _not_corner_r_elapsed_time(0.0f),
+        _emit_led_cycle_time_us()
     {
         setModuleName("WallSensor");
         for (uint8_t i = 0; i < BUFF_SIZE; i++) {
@@ -131,6 +133,20 @@ namespace module {
         }
         else{
             _on_wall_center_time = 0.0f;
+        }
+
+        if(!_is_corner_l){
+            _not_corner_l_elapsed_time += _delta_t;
+        }
+        else{
+            _not_corner_l_elapsed_time = 0.0f;
+        }
+
+        if(!_is_corner_r){
+            _not_corner_r_elapsed_time += _delta_t;
+        }
+        else{
+            _not_corner_r_elapsed_time = 0.0f;
         }
 
         _publish();
@@ -331,7 +347,8 @@ namespace module {
         msg.on_wall_ahead_l_time = _on_wall_ahead_r_time;
         msg.on_wall_ahead_r_time = _on_wall_ahead_l_time;
         msg.on_wall_center_time = _on_wall_center_time;
-        
+        msg.not_corner_l_elapsed_time = _not_corner_l_elapsed_time;
+        msg.not_corner_r_elapsed_time = _not_corner_r_elapsed_time;
 
         publishMsg(msg_id::WALL_SENSOR, &msg);
     }
@@ -424,22 +441,24 @@ namespace module {
         PRINTF_ASYNC("  dist   : al, l, r, ar: %f, %f, %f, %f\n", _dist_al, _dist_l, _dist_r, _dist_ar);
         PRINTF_ASYNC("  dist_a : %f\n", _dist_a);
         PRINTF_ASYNC("  =============================\n");
-        PRINTF_ASYNC("  is_ahead_l          : %d\n", _is_ahead_l);
-        PRINTF_ASYNC("  is_ahead_r          : %d\n", _is_ahead_r);
-        PRINTF_ASYNC("  is_ahead            : %d\n", _is_ahead);
-        PRINTF_ASYNC("  is_left             : %d\n", _is_left);
-        PRINTF_ASYNC("  is_right            : %d\n", _is_right);
-        PRINTF_ASYNC("  is_left_ctrl        : %d\n", _is_left_ctrl);
-        PRINTF_ASYNC("  is_right_ctrl       : %d\n", _is_right_ctrl);
+        PRINTF_ASYNC("  is_ahead_l                : %d\n", _is_ahead_l);
+        PRINTF_ASYNC("  is_ahead_r                : %d\n", _is_ahead_r);
+        PRINTF_ASYNC("  is_ahead                  : %d\n", _is_ahead);
+        PRINTF_ASYNC("  is_left                   : %d\n", _is_left);
+        PRINTF_ASYNC("  is_right                  : %d\n", _is_right);
+        PRINTF_ASYNC("  is_left_ctrl              : %d\n", _is_left_ctrl);
+        PRINTF_ASYNC("  is_right_ctrl             : %d\n", _is_right_ctrl);
         PRINTF_ASYNC("  =============================\n");
-        PRINTF_ASYNC("  is_contact_wall     : %d\n", _is_contact_wall);
-        PRINTF_ASYNC("  is_on_wall_center   : %d\n", _is_on_wall_center);
-        PRINTF_ASYNC("  is_corner_l         : %d\n", _is_corner_l);
-        PRINTF_ASYNC("  is_corner_r         : %d\n", _is_corner_r);
+        PRINTF_ASYNC("  is_contact_wall           : %d\n", _is_contact_wall);
+        PRINTF_ASYNC("  is_on_wall_center         : %d\n", _is_on_wall_center);
+        PRINTF_ASYNC("  is_corner_l               : %d\n", _is_corner_l);
+        PRINTF_ASYNC("  is_corner_r               : %d\n", _is_corner_r);
         PRINTF_ASYNC("  =============================\n");
-        PRINTF_ASYNC("  contact_wall_time   : %f\n", _contact_wall_time);
-        PRINTF_ASYNC("  on_wall_ahead_time  : %f\n", _on_wall_ahead_time);
-        PRINTF_ASYNC("  on_wall_center_time : %f\n", _on_wall_center_time);
+        PRINTF_ASYNC("  contact_wall_time         : %f\n", _contact_wall_time);
+        PRINTF_ASYNC("  on_wall_ahead_time        : %f\n", _on_wall_ahead_time);
+        PRINTF_ASYNC("  on_wall_center_time       : %f\n", _on_wall_center_time);
+        PRINTF_ASYNC("  not_corner_l_elapsed_time : %f\n", _not_corner_l_elapsed_time);
+        PRINTF_ASYNC("  not_corner_r_elapsed_time : %f\n", _not_corner_r_elapsed_time);
     }
 
     void WallSensor::eval() {

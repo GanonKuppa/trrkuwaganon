@@ -195,8 +195,8 @@ namespace module {
 
         // 迷路の壁読み時に前壁からの距離で位置を補正
         bool in_read_wall_area = nav_msg.in_read_wall_area;
-        if(!_in_read_wall_area_pre && in_read_wall_area && ws_msg.is_ahead && nav_msg.mode == ENavMode::SEARCH){
-            _aheadWallCorrectionOnWallRead(ws_msg.dist_a);
+        if(_in_read_wall_area_pre && !in_read_wall_area && ws_msg.is_ahead && nav_msg.mode == ENavMode::SEARCH){
+            //_aheadWallCorrectionOnWallRead(ws_msg.dist_a);
         }
         _in_read_wall_area_pre = in_read_wall_area;
         
@@ -440,6 +440,7 @@ namespace module {
             _y = (uint8_t)(_y / 0.09f) * 0.09f + (float)pm.diag_l_corner_read_offset;
         }            
     }
+
 
     void PositionEstimator::debug(){
         PRINTF_ASYNC(  "  ---\n");

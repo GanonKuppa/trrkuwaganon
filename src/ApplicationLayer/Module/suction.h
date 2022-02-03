@@ -9,14 +9,10 @@ namespace module{
         void updateEvery();
         float getDuty();
         void setDuty(float duty);
-        void useBuzzer(float time);
         void debug();
-      private:
-        float _duty;        
+      private:        
+        float _duty;
         float _voltage;
-        float _buzzer_on_time;
-        float _buzzer_save_duty;
-        bool _used_buzzer;
 
         friend class BaseModule<Suction>;
         Suction();

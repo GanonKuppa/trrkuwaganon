@@ -34,4 +34,6 @@ class WallSensorMsg : public BaseMsg{
     float on_wall_ahead_l_time = 0.0f; // [s]
     float on_wall_ahead_r_time = 0.0f; // [s]
     float on_wall_center_time = 0.0f;  // [s]
+    float not_corner_l_elapsed_time = 0.0f; // [s]
+    float not_corner_r_elapsed_time = 0.0f; // [s]
 };
