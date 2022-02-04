@@ -37,8 +37,8 @@ namespace module {
         registration<float>(19, suction_duty_shortest, "suction_duty_shortest", 1.0f); //19
         registration<uint8_t>(20, corner_correction_enable, "corner_correction_enable", 0); //20
         registration<uint8_t>(21, turn_pre_corner_correction_enable, "turn_pre_corner_correction_enable", 0); //21
-        ;//22
-        ;//23
+        registration<uint8_t>(22, on_wall_center_correction_enable, "on_wall_center_correction_enable", 0); //22
+        registration<uint8_t>(23, on_wall_read_correction_enable, "on_wall_read_correction_enable", 0); //23
         ;//24
         ;//25
         ;//26

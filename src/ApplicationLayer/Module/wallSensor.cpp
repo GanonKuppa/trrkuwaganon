@@ -354,15 +354,15 @@ namespace module {
     }
 
     float  WallSensor::_aheadDistL(float ad){
-        constexpr float a = 0.6527638f;
-        constexpr float b = -0.3636394f;
+        constexpr float a = 0.97343693f;
+        constexpr float b = -0.40873802f;
         float x = std::max(ad, 1.0f);
         return a * std::pow(ad, b);
     }
 
     float  WallSensor::_aheadDistR(float ad){
-        constexpr float a = 0.5697565f;
-        constexpr float b = -0.3321443;
+        constexpr float a = 0.74718993f;
+        constexpr float b = -0.36178926f;
         float x = std::max(ad, 1.0f);
         return a * std::pow(ad, b);
     }

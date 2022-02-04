@@ -177,7 +177,8 @@ namespace module {
             ws_msg.is_on_wall_center &&
             !ws_msg.is_ahead && 
             _v_xy_body_for_odom > 0.1f && 
-            std::fabs(_yawrate) < 50.0f * DEG2RAD
+            std::fabs(_yawrate) < 50.0f * DEG2RAD &&
+            pm.on_wall_center_correction_enable
         ){
             _on_wall_center_dist += _v_xy_body_for_odom * _delta_t;
         }
@@ -195,8 +196,11 @@ namespace module {
 
         // 迷路の壁読み時に前壁からの距離で位置を補正
         bool in_read_wall_area = nav_msg.in_read_wall_area;
-        if(_in_read_wall_area_pre && !in_read_wall_area && ws_msg.is_ahead && nav_msg.mode == ENavMode::SEARCH){
-            //_aheadWallCorrectionOnWallRead(ws_msg.dist_a);
+        if(_in_read_wall_area_pre && !in_read_wall_area && 
+           ws_msg.is_ahead && nav_msg.mode == ENavMode::SEARCH &&
+           pm.on_wall_read_correction_enable
+           ){
+            _aheadWallCorrectionOnWallRead(ws_msg.dist_a);
         }
         _in_read_wall_area_pre = in_read_wall_area;
         
