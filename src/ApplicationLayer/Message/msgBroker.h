@@ -12,6 +12,7 @@ enum class msg_id : uint8_t{
     IMU,
     NAV_STATE,
     PID_CONTROL_VAL, 
+    TRAJ_TRIPLET,
     VEHICLE_ATTITUDE,
     VEHICLE_POSITION,
     WALL_SENSOR,

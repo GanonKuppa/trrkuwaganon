@@ -42,33 +42,18 @@ namespace activity{
         return mode_name;
     }
 
-    void ShortestRunActivity::onStart(){
-        uint8_t run_mode = 5;
+    void ShortestRunActivity::onStart(){        
         uint8_t param_mode = 0;
-#if 0
-        {       
-            Intent intent = Intent();
-            intent.uint8_t_param["SUB_MODE_NUM"] = 6;
-            auto activity = ActivityFactory::createSubModeSelect();
-            activity->start(intent);
-            
-            intent = activity->getIntent();
-            PRINTF_ASYNC("SUB MODE SELECT RESULT = %d \n", intent.uint8_t_param["SUB_MODE"]);        
-            run_mode = intent.uint8_t_param["SUB_MODE"];
-            if(run_mode == 0) return;
-        }
-#endif
-        {       
-            Intent intent = Intent();
-            intent.uint8_t_param["SUB_MODE_NUM"] = 8;
-            auto activity = ActivityFactory::createSubModeSelect();
-            activity->start(intent);
-            
-            intent = activity->getIntent();
-            PRINTF_ASYNC("SUB MODE SELECT RESULT = %d \n", intent.uint8_t_param["SUB_MODE"]);        
-            param_mode = intent.uint8_t_param["SUB_MODE"];
-            if(param_mode == 0) return;
-        }
+
+        Intent intent = Intent();
+        intent.uint8_t_param["SUB_MODE_NUM"] = 8;
+        auto activity = ActivityFactory::createSubModeSelect();
+        activity->start(intent);
+        
+        intent = activity->getIntent();
+        PRINTF_ASYNC("SUB MODE SELECT RESULT = %d \n", intent.uint8_t_param["SUB_MODE"]);        
+        param_mode = intent.uint8_t_param["SUB_MODE"];
+        if(param_mode == 0) return;
 
 
         hal::waitmsec(100);
@@ -92,30 +77,10 @@ namespace activity{
         Maze& maze = module::Navigator::getInstance().getMazeRef();
 
 
-        if(run_mode == 1 ) {
-            makeMinStepPath(pm.goal_x, pm.goal_y, maze, path_vec);
-            translatePathSpin(path_vec);
-            //HF_playPathSpin(turn_p, path_vec, m.trajCommander);
-            HF_playPath(tp, path_vec);
-        } else if(run_mode == 2) {
-            makeMinStepPath(pm.goal_x, pm.goal_y, maze, path_vec);
-            translatePathDiagonal(path_vec);
-            //HF_playPathSpinDiagonal(turn_p, path_vec, m.trajCommander);
-            HF_playPath(tp, path_vec);
-        } else if(run_mode == 3) {
-            makeMinStepPath(pm.goal_x, pm.goal_y, maze, path_vec);
-            translatePath90Deg(path_vec);
-            //HF_playPath(turn_p, path_vec, m.trajCommander);
-            HF_playPath(tp, path_vec);
-        } else if(run_mode == 4) {
-            makeMinStepPath(pm.goal_x, pm.goal_y, maze, path_vec);
-            translatePathLong(path_vec);
-            HF_playPath(tp, path_vec);
-        } else if(run_mode == 5) {
-            makeFastestDiagonalPath(500, tp, pm.goal_x, pm.goal_y, maze, path_vec);
-            module::Logger::getInstance().start();
-            HF_playPath(tp, path_vec);
-        }
+        makeFastestDiagonalPath(500, tp, pm.goal_x, pm.goal_y, maze, path_vec);
+        module::Logger::getInstance().start();
+        HF_playPath(tp, path_vec);
+
         PRINTF_ASYNC("--- makeMinStepPath ----\n");
         printPath(path_vec);
         

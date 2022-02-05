@@ -16,6 +16,9 @@ class BaseTrajectory {
     virtual float getNecessaryTime();
     virtual void update();
     virtual bool isEnd()=0;
+    ETrajType getTrajType(){return _traj_type;};
+    ETurnType getTurnType(){return _turn_type;};
+    ETurnDir getTurnDir(){return _turn_dir;};
 
     void publish();
 

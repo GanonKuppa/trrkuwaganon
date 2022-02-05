@@ -222,6 +222,14 @@ namespace module {
             _corner_r_cool_down_dist += _v_xy_body_for_odom * _delta_t;
         }
 
+        // 最短時の右壁切れ
+
+        // 最短時の左壁切れ
+
+        // 最短時の右斜め壁切れ
+
+        // 最短時の左斜め壁切れ
+
         _publish_vehicle_position();
         _publish_vehicle_attitude();
     }

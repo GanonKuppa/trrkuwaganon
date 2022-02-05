@@ -7,6 +7,7 @@
 // Msg
 #include "msgBroker.h"
 #include "ctrlSetpointMsg.h"
+#include "trajTripletMsg.h"
 
 namespace module {
 
@@ -14,7 +15,10 @@ namespace module {
     _x(0.045f),
     _y(0.045f),
     _yaw(90.0f * 3.14159265f / 180.0f),
-    _lock_guard(false)    
+    _traj_type_pre(ETrajType::NONE),
+    _turn_type_pre(ETurnType::NONE),
+    _turn_dir_pre(ETurnDir::NO_TURN),
+    _lock_guard(false)
     {
         setModuleName("TrajectoryCommander");
     }
@@ -30,7 +34,12 @@ namespace module {
 
     void TrajectoryCommander::clear() {
         _lock_guard = true;
+        
         while(!_traj_queue.empty()) _traj_queue.pop_front();
+        _traj_type_pre = ETrajType::NONE;
+        _turn_type_pre = ETurnType::NONE;
+        _turn_dir_pre = ETurnDir::NO_TURN;
+
         _lock_guard = false;
     }
 
@@ -52,6 +61,11 @@ namespace module {
                 _x = _traj_queue.front()->getEndX();
                 _y = _traj_queue.front()->getEndY();
                 _yaw = _traj_queue.front()->getEndYaw();
+
+                _traj_type_pre = _traj_queue.front()->getTrajType();
+                _turn_type_pre = _traj_queue.front()->getTurnType();
+                _turn_dir_pre = _traj_queue.front()->getTurnDir();
+
                 _traj_queue.pop_front();
                 if(!_traj_queue.empty()){
                     _traj_queue.front()->setInitPos(_x, _y, _yaw);
@@ -69,7 +83,7 @@ namespace module {
         PRINTF_ASYNC("  -- trajectoryCommander Val --\n");
         PRINTF_ASYNC("  x              : %f\n", _x);
         PRINTF_ASYNC("  y              : %f\n", _y);
-        PRINTF_ASYNC("  yaw            : %f\n", _yaw * RAD2DEG);        
+        PRINTF_ASYNC("  yaw            : %f\n", _yaw * RAD2DEG);      
         PRINTF_ASYNC("  traj_queue num : %d\n", _traj_queue.size());
         PRINTF_ASYNC("  -- ctrlSetpointMsg --\n");
         PRINTF_ASYNC("  x              : %f\n", msg.x);
@@ -94,28 +108,55 @@ namespace module {
 
     void TrajectoryCommander::_publish(){        
         if(_traj_queue.empty()){
-            CtrlSetpointMsg msg;
-            msg.x = _x;
-            msg.v_x = 0.0f;
-            msg.a_x = 0.0f;
-            msg.y = _y;
-            msg.v_y = 0.0f;
-            msg.a_y = 0.0f;
-            msg.v_xy_body = 0.0f;
-            msg.a_xy_body = 0.0f;
-            msg.yaw = _yaw;
-            msg.yawrate = 0.0f;
-            msg.yawacc = 0.0f;
-            msg.beta = 0.0f;
-            msg.beta_dot = 0.0f;
-            msg.traj_type = ETrajType::NONE;
-            msg.turn_type = ETurnType::NONE;
-            msg.turn_dir = ETurnDir::NO_TURN;
-            publishMsg(msg_id::CTRL_SETPOINT, &msg);
+            CtrlSetpointMsg setp_msg;
+            setp_msg.x = _x;
+            setp_msg.v_x = 0.0f;
+            setp_msg.a_x = 0.0f;
+            setp_msg.y = _y;
+            setp_msg.v_y = 0.0f;
+            setp_msg.a_y = 0.0f;
+            setp_msg.v_xy_body = 0.0f;
+            setp_msg.a_xy_body = 0.0f;
+            setp_msg.yaw = _yaw;
+            setp_msg.yawrate = 0.0f;
+            setp_msg.yawacc = 0.0f;
+            setp_msg.beta = 0.0f;
+            setp_msg.beta_dot = 0.0f;
+            setp_msg.traj_type = ETrajType::NONE;
+            setp_msg.turn_type = ETurnType::NONE;
+            setp_msg.turn_dir = ETurnDir::NO_TURN;
+            publishMsg(msg_id::CTRL_SETPOINT, &setp_msg);
         }
         else{
             _traj_queue.front()->publish();
         }
+
+        TrajTripletMsg traj_msg;
+        traj_msg.traj_type_pre = _traj_type_pre;
+        traj_msg.turn_type_pre = _turn_type_pre;
+        traj_msg.turn_dir_pre = _turn_dir_pre;
+        if(_traj_queue.size() > 0){
+            traj_msg.traj_type_now = _traj_queue.front()->getTrajType();
+            traj_msg.turn_type_now = _traj_queue.front()->getTurnType();
+            traj_msg.turn_dir_now = _traj_queue.front()->getTurnDir();
+        }
+        else{
+            traj_msg.traj_type_now = ETrajType::NONE;
+            traj_msg.turn_type_now = ETurnType::NONE;
+            traj_msg.turn_dir_now = ETurnDir::NO_TURN;
+        }
+
+        if(_traj_queue.size() > 1){
+            traj_msg.traj_type_next = _traj_queue[1]->getTrajType();
+            traj_msg.turn_type_next = _traj_queue[1]->getTurnType(); 
+            traj_msg.turn_dir_next = _traj_queue[1]->getTurnDir();
+        }
+        else{
+            traj_msg.traj_type_next = ETrajType::NONE;
+            traj_msg.turn_type_next = ETurnType::NONE;
+            traj_msg.turn_dir_next = ETurnDir::NO_TURN;
+        }
+        publishMsg(msg_id::TRAJ_TRIPLET, &traj_msg);
     }
 
     int usrcmd_trajectoryCommander(int argc, char **argv){
