@@ -250,7 +250,8 @@ void translatePathDiagonal(std::vector<Path>& path_vec) {
 
 void HF_playPath(ETurnParamSet tp, std::vector<Path>& path_vec) {
     TurnParameter turn_p = module::TrajectoryInitializer::getInstance().getTurnParameter(tp);
-    float wall2mouse_center_dist = module::ParameterManager::getInstance().wall2mouse_center_dist;
+    module::ParameterManager &pm = module::ParameterManager::getInstance();
+    float wall2mouse_center_dist = pm.wall2mouse_center_dist;
     float v_pre = 0.0f;
     float v_fol = 0.0f;    
     float x = 0.0f;
@@ -316,10 +317,20 @@ void HF_playPath(ETurnParamSet tp, std::vector<Path>& path_vec) {
             }
             
             if(i == 0 && path_vec[i].block_num == 1){
-                StraightFactory::push(ETurnType::STRAIGHT_CENTER, x, v_pre, v_fol, v_fol, a, a);            
+                if(pm.s_turn_pre_edge_correction_enable){
+                    StraightFactory::push(ETurnType::STRAIGHT_CENTER_EDGE, x, v_pre, v_fol, v_fol, a, a);
+                }
+                else{
+                    StraightFactory::push(ETurnType::STRAIGHT_CENTER, x, v_pre, v_fol, v_fol, a, a);
+                }
             }
             else{
-                StraightFactory::push(ETurnType::STRAIGHT_CENTER, x, v_pre, v_max, v_fol, a, a);            
+                if(pm.s_turn_pre_edge_correction_enable){
+                    StraightFactory::push(ETurnType::STRAIGHT_CENTER_EDGE, x, v_pre, v_max, v_fol, a, a);
+                }
+                else{
+                    StraightFactory::push(ETurnType::STRAIGHT_CENTER, x, v_pre, v_max, v_fol, a, a);
+                }
             }
 
         } 
@@ -360,8 +371,12 @@ void HF_playPath(ETurnParamSet tp, std::vector<Path>& path_vec) {
                 v_fol = turn_p.getV(path_vec[i+1].turn_type);
             }
             
-            StraightFactory::push(ETurnType::DIAGONAL_CENTER, x, v_pre, v_max, v_fol, a, a);            
-
+            if(pm.d_turn_pre_edge_correction_enable){
+                StraightFactory::push(ETurnType::DIAGONAL_CENTER_EDGE, x, v_pre, v_max, v_fol, a, a);
+            }
+            else{
+                StraightFactory::push(ETurnType::DIAGONAL_CENTER, x, v_pre, v_max, v_fol, a, a);
+            }
         } 
         else {
             if(i + 1 == (uint16_t)path_vec.size()){ 
@@ -411,9 +426,19 @@ void HF_playPath(ETurnParamSet tp, std::vector<Path>& path_vec) {
                 x = pre_fol_dist + now_pre_dist;
                 float a_pre = std::max(a, std::fabs(v_pre * v_pre -  v_max * v_max) / (2.0f * x));                
                 if(v_pre > v_max){
-                    StraightFactory::push(ETurnType::STRAIGHT_CENTER, x, v_pre, v_pre, v_max, a_pre, a_pre); 
+                    if(pm.s_turn_pre_edge_correction_enable){
+                        StraightFactory::push(ETurnType::STRAIGHT_CENTER_EDGE, x, v_pre, v_pre, v_max, a_pre, a_pre);
+                    }
+                    else{
+                        StraightFactory::push(ETurnType::STRAIGHT_CENTER, x, v_pre, v_pre, v_max, a_pre, a_pre);
+                    }
                 }else{
-                    StraightFactory::push(ETurnType::STRAIGHT_CENTER, x, v_pre, v_max, v_max, a_pre, a_pre); 
+                    if(pm.s_turn_pre_edge_correction_enable){
+                        StraightFactory::push(ETurnType::STRAIGHT_CENTER_EDGE, x, v_pre, v_max, v_max, a_pre, a_pre); 
+                    }
+                    else{
+                        StraightFactory::push(ETurnType::STRAIGHT_CENTER, x, v_pre, v_max, v_max, a_pre, a_pre); 
+                    }
                 }
             } 
             else if(path_vec[i].isDiagonalStart() && path_vec[i-1].isTurnCurve()) {
@@ -430,9 +455,20 @@ void HF_playPath(ETurnParamSet tp, std::vector<Path>& path_vec) {
                 float a_pre = std::max(a, std::fabs(v_pre * v_pre -  v_max * v_max) / (2.0f * x));
 
                 if(v_pre > v_max){
-                    StraightFactory::push(ETurnType::DIAGONAL, x, v_pre, v_pre, v_max, a_pre, a_pre); 
+                    if(pm.d_turn_pre_edge_correction_enable){
+                        StraightFactory::push(ETurnType::DIAGONAL_EDGE, x, v_pre, v_pre, v_max, a_pre, a_pre);
+                    }
+                    else{
+                        StraightFactory::push(ETurnType::DIAGONAL, x, v_pre, v_pre, v_max, a_pre, a_pre);
+                    }
+                     
                 }else{
-                    StraightFactory::push(ETurnType::DIAGONAL, x, v_pre, v_max, v_max, a_pre, a_pre); 
+                    if(pm.d_turn_pre_edge_correction_enable){
+                        StraightFactory::push(ETurnType::DIAGONAL_EDGE, x, v_pre, v_max, v_max, a_pre, a_pre);
+                    }
+                    else{
+                        StraightFactory::push(ETurnType::DIAGONAL, x, v_pre, v_max, v_max, a_pre, a_pre);
+                    }
                 }
             }
             

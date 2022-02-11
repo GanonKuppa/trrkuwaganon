@@ -36,9 +36,10 @@ namespace module {
         registration<float>(18, suction_duty_search, "suction_duty_search", 0.5f); //18
         registration<float>(19, suction_duty_shortest, "suction_duty_shortest", 1.0f); //19
         registration<uint8_t>(20, corner_correction_enable, "corner_correction_enable", 0); //20
-        registration<uint8_t>(21, turn_pre_corner_correction_enable, "turn_pre_corner_correction_enable", 0); //21
-        registration<uint8_t>(22, on_wall_center_correction_enable, "on_wall_center_correction_enable", 0); //22
-        registration<uint8_t>(23, on_wall_read_correction_enable, "on_wall_read_correction_enable", 0); //23
+        registration<uint8_t>(21, s_turn_pre_edge_correction_enable, "s_turn_pre_edge_correction_enable", 0); //21
+        registration<uint8_t>(22, d_turn_pre_edge_correction_enable, "d_turn_pre_edge_correction_enable", 0); //22
+        registration<uint8_t>(23, on_wall_center_correction_enable, "on_wall_center_correction_enable", 0); //23
+        registration<uint8_t>(24, on_wall_read_correction_enable, "on_wall_read_correction_enable", 0); //24
         ;//24
         ;//25
         ;//26

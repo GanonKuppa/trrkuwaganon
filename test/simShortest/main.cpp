@@ -66,6 +66,9 @@ int main() {
     printPath(path_vec);
 
     HF_playPath(tp, path_vec);
+    trajCommander.update0();
+    copyMsg(msg_id::CTRL_SETPOINT, &setp_msg);
+    trajCommander.debug();
 
     PRINTF_ASYNC("=========== shortest run ============\n");
     while(setp_msg.traj_type != ETrajType::NONE){                

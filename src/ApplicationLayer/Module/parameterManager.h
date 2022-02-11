@@ -62,9 +62,10 @@ namespace module {
         float suction_duty_search; //18
         float suction_duty_shortest; //19
         uint8_t corner_correction_enable; //20
-        uint8_t turn_pre_corner_correction_enable; //21
-        uint8_t on_wall_center_correction_enable; //22
-        uint8_t on_wall_read_correction_enable; //23
+        uint8_t s_turn_pre_edge_correction_enable; //21
+        uint8_t d_turn_pre_edge_correction_enable; //22
+        uint8_t on_wall_center_correction_enable; //23
+        uint8_t on_wall_read_correction_enable; //24
 
 
         float duty_coef_left_p; //30

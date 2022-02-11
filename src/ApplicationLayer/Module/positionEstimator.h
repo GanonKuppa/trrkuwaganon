@@ -1,11 +1,14 @@
 #pragma once
 
+
+
 #include "baseModule.h"
 
 #include <deque>
 #include <stdint.h>
 #include <Eigen/Geometry>
 #include "turnEnum.h"
+#include "trajTripletMsg.h"
 
 namespace module {
     class PositionEstimator : public BaseModule<PositionEstimator> {
@@ -27,10 +30,10 @@ namespace module {
         void _aheadWallCorrectionOnWallRead(float dist_a);
 
 
-        void _edgeLCorrection();
-        void _edgeRCorrection();
-        void _diagEdgeLCorrection();
-        void _diagEdgeRCorrection();
+        void _edgeLCorrection(TrajTripletMsg &traj_msg);
+        void _edgeRCorrection(TrajTripletMsg &traj_msg);
+        void _diagEdgeLCorrection(TrajTripletMsg &traj_msg);
+        void _diagEdgeRCorrection(TrajTripletMsg &traj_msg);
         
         float _x;
         float _y;
@@ -83,8 +86,8 @@ namespace module {
         float _corner_r_cool_down_dist;
         float _corner_l_cool_down_dist;
 
-
         bool _in_read_wall_area_pre;
+        bool _detected_edge;
 
     };
 

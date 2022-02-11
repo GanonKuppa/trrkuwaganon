@@ -102,7 +102,11 @@ namespace module {
         PRINTF_ASYNC("  traj_type      : %s\n", trajType2Str(msg.traj_type).c_str());
         PRINTF_ASYNC("  turn_type      : %s\n", turnType2Str(msg.turn_type).c_str());
         PRINTF_ASYNC("  turn_dir       : %s\n", turnDir2Str(msg.turn_dir).c_str());
+        PRINTF_ASYNC("  -- traj_queue --\n");
 
+        for(const auto& traj : _traj_queue){
+            PRINTF_ASYNC("  %s\n", turnType2Str(traj->getTurnType()).c_str());            
+        }
 
     }
 
@@ -125,6 +129,9 @@ namespace module {
             setp_msg.traj_type = ETrajType::NONE;
             setp_msg.turn_type = ETurnType::NONE;
             setp_msg.turn_dir = ETurnDir::NO_TURN;
+            setp_msg.in_detect_edge_area = false;
+            setp_msg.detected_edge = false;
+
             publishMsg(msg_id::CTRL_SETPOINT, &setp_msg);
         }
         else{
@@ -139,6 +146,9 @@ namespace module {
             traj_msg.traj_type_now = _traj_queue.front()->getTrajType();
             traj_msg.turn_type_now = _traj_queue.front()->getTurnType();
             traj_msg.turn_dir_now = _traj_queue.front()->getTurnDir();
+            traj_msg.end_x_now = _traj_queue.front()->getEndX();
+            traj_msg.end_y_now = _traj_queue.front()->getEndY();
+            traj_msg.end_yaw_now = _traj_queue.front()->getEndYaw();
         }
         else{
             traj_msg.traj_type_now = ETrajType::NONE;

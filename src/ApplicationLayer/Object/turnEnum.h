@@ -19,6 +19,7 @@ enum class ETurnType : uint8_t{
     STRAIGHT_CENTER,
     STRAIGHT_CENTER_EDGE,
     DIAGONAL,
+    DIAGONAL_EDGE,
     DIAGONAL_CENTER,
     DIAGONAL_CENTER_EDGE,
     TURN_90,
@@ -113,6 +114,8 @@ inline std::string turnType2Str(ETurnType tt){
             return std::string("TURN_D_90");
         case ETurnType::DIAGONAL:
             return std::string("DIAGONAL");
+        case ETurnType::DIAGONAL_EDGE:
+            return std::string("DIAGONAL_EDGE");
         case ETurnType::DIAGONAL_CENTER:
             return std::string("DIAGONAL_CENTER");
         case ETurnType::DIAGONAL_CENTER_EDGE:
@@ -154,6 +157,7 @@ inline bool isTurnStraight(ETurnType turn_type){
        turn_type == ETurnType::STRAIGHT_CENTER ||
        turn_type == ETurnType::STRAIGHT_CENTER_EDGE ||
        turn_type == ETurnType::DIAGONAL ||
+       turn_type == ETurnType::DIAGONAL_EDGE ||
        turn_type == ETurnType::DIAGONAL_CENTER ||
        turn_type == ETurnType::DIAGONAL_CENTER_EDGE
     ){

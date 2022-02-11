@@ -78,7 +78,7 @@ constexpr float END_Y_D2S_45  = 0.090f;
 constexpr float END_Y_D2S_135 = 0.090f;
 
 int main() {
-    float cp = 100.0f;
+    float cp = 150.0f;
     printf("-------- TurnPreCalculation test --------\n");
     
     printf("-- turn_90 --\n");

@@ -87,6 +87,8 @@ class TurnParameter {
                 return _v_turn_d_90;
             case ETurnType::DIAGONAL:
                 return _v_d_straight;
+            case ETurnType::DIAGONAL_EDGE:
+                return _v_d_straight;
             case ETurnType::DIAGONAL_CENTER:
                 return _v_d_straight;
             case ETurnType::DIAGONAL_CENTER_EDGE:

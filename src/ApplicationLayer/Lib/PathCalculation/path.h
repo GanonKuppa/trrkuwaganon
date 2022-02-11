@@ -62,6 +62,7 @@ class Path {
 
     bool isDiagonalEnd() {
         if(turn_type == ETurnType::DIAGONAL             ||
+           turn_type == ETurnType::DIAGONAL_EDGE        ||
            turn_type == ETurnType::DIAGONAL_CENTER      ||
            turn_type == ETurnType::DIAGONAL_CENTER_EDGE ||
            turn_type == ETurnType::TURN_S2D_45          ||
@@ -76,6 +77,7 @@ class Path {
 
     bool isDiagonalStart() {
         if(turn_type == ETurnType::DIAGONAL             ||
+           turn_type == ETurnType::DIAGONAL_EDGE        ||
            turn_type == ETurnType::DIAGONAL_CENTER      ||
            turn_type == ETurnType::DIAGONAL_CENTER_EDGE ||           
            turn_type == ETurnType::TURN_D2S_45          ||

@@ -50,6 +50,8 @@ namespace module {
         _is_on_wall_center(false),
         _is_corner_l(false),
         _is_corner_r(false),
+        _is_diag_corner_l(false),
+        _is_diag_corner_r(false),
         _contact_wall_time(0.0f),
         _on_wall_ahead_time(0.0f),
         _on_wall_ahead_l_time(0.0f),
@@ -341,6 +343,8 @@ namespace module {
         msg.is_on_wall_center = _is_on_wall_center;
         msg.is_corner_l = _is_corner_l;
         msg.is_corner_r = _is_corner_r;
+        msg.is_diag_corner_l = _is_diag_corner_l;
+        msg.is_diag_corner_r = _is_diag_corner_r;
 
         msg.contact_wall_time = _contact_wall_time;
         msg.on_wall_ahead_time = _on_wall_ahead_time;
@@ -394,7 +398,37 @@ namespace module {
     bool WallSensor::_isCornerR() {
         ParameterManager& pm = ParameterManager::getInstance();
         int16_t th_on = pm.wall_corner_threshold_on_r;
-        int16_t th_off = pm.wall_corner_threshold_off_r;
+        int16_t th_off = pm.wall_corner_threshold_off_r;        
+
+        if(_right_q.at(0) < th_off) {
+            for(int i=1; i<BUFF_SIZE; i++) {
+                if(_right_q.at(i)> th_on) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    bool WallSensor::_isDiagCornerL() {
+        ParameterManager& pm = ParameterManager::getInstance();
+        int16_t th_on = pm.diag_corner_threshold_on_l;
+        int16_t th_off = pm.diag_corner_threshold_off_l;
+
+        if(_left_q.at(0) < th_off) {
+            for(int i=1; i<BUFF_SIZE; i++) {
+                if(_left_q.at(i)> th_on) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    bool WallSensor::_isDiagCornerR() {
+        ParameterManager& pm = ParameterManager::getInstance();
+        int16_t th_on = pm.diag_corner_threshold_on_r;
+        int16_t th_off = pm.diag_corner_threshold_off_r;        
 
         if(_right_q.at(0) < th_off) {
             for(int i=1; i<BUFF_SIZE; i++) {

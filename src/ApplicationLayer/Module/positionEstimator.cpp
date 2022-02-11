@@ -14,8 +14,8 @@
 #include "wheelOdometryMsg.h"
 #include "vehicleAttitudeMsg.h"
 #include "vehiclePositionMsg.h"
-#include "wallSensorMsg.h"
 #include "navStateMsg.h"
+#include "wallSensorMsg.h"
 
 // Module
 #include "parameterManager.h"
@@ -59,7 +59,8 @@ namespace module {
     _on_wall_center_dist(0.0f),
     _corner_r_cool_down_dist(0.0f),
     _corner_l_cool_down_dist(0.0f),
-    _in_read_wall_area_pre(false)
+    _in_read_wall_area_pre(false),
+    _detected_edge(false)
     {        
         setModuleName("PositionEstimator");
         
@@ -90,11 +91,13 @@ namespace module {
         CtrlSetpointMsg ctrl_msg;
         WallSensorMsg ws_msg;
         NavStateMsg nav_msg;
+        TrajTripletMsg traj_msg;
         copyMsg(msg_id::IMU, &imu_msg);
         copyMsg(msg_id::WHEEL_ODOMETRY, &wodo_msg);
         copyMsg(msg_id::CTRL_SETPOINT, &ctrl_msg);
         copyMsg(msg_id::WALL_SENSOR, &ws_msg);
         copyMsg(msg_id::NAV_STATE, &nav_msg);
+        copyMsg(msg_id::TRAJ_TRIPLET, &traj_msg);
 
         float yawrate_pre = _yawrate; // yawrateは今期に取得したものは今期のデータ
         float yaw_pre = _yaw;
@@ -222,13 +225,48 @@ namespace module {
             _corner_r_cool_down_dist += _v_xy_body_for_odom * _delta_t;
         }
 
-        // 最短時の右壁切れ
+        if(pm.s_turn_pre_edge_correction_enable && ctrl_msg.in_detect_edge_area){
+            // 最短時の右壁切れ
+            if(traj_msg.turn_dir_now == ETurnDir::CW &&
+                traj_msg.turn_type_now == ETurnType::STRAIGHT_CENTER_EDGE &&
+                ws_msg.is_corner_r
+            ){
+                _edgeRCorrection(traj_msg);
+                _detected_edge = true;
+            }
+            // 最短時の左壁切れ
+            else if(traj_msg.turn_dir_now == ETurnDir::CCW &&
+                traj_msg.turn_type_now == ETurnType::STRAIGHT_CENTER_EDGE &&
+                ws_msg.is_corner_l
+            ){
+                _edgeLCorrection(traj_msg);
+                _detected_edge = true;
+            }
+        }
 
-        // 最短時の左壁切れ
+        if(pm.d_turn_pre_edge_correction_enable && ctrl_msg.in_detect_edge_area){
+            // 最短時の右斜め壁切れ
+            if(traj_msg.turn_dir_now == ETurnDir::CW &&
+                (traj_msg.turn_type_now == ETurnType::DIAGONAL_CENTER_EDGE || traj_msg.turn_type_now == ETurnType::DIAGONAL_EDGE) &&
+                ws_msg.is_diag_corner_r
+            ){
+                _diagEdgeRCorrection(traj_msg);
+                _detected_edge = true;
+            }
 
-        // 最短時の右斜め壁切れ
+            // 最短時の左斜め壁切れ
+            else if(traj_msg.turn_dir_now == ETurnDir::CCW &&
+                (traj_msg.turn_type_now == ETurnType::DIAGONAL_CENTER_EDGE || traj_msg.turn_type_now == ETurnType::DIAGONAL_EDGE) &&
+                ws_msg.is_diag_corner_l
+            ){
+                _diagEdgeLCorrection(traj_msg);
+                _detected_edge = true;
+            }
+        }
 
-        // 最短時の左斜め壁切れ
+        if(_detected_edge && !ctrl_msg.in_detect_edge_area) {
+            _detected_edge = false;
+        }
 
         _publish_vehicle_position();
         _publish_vehicle_attitude();
@@ -366,23 +404,30 @@ namespace module {
         }
     }
 
-    void PositionEstimator::_edgeLCorrection() {
+    void PositionEstimator::_edgeLCorrection(TrajTripletMsg &traj_msg) {
         ParameterManager& pm = ParameterManager::getInstance();
-        float ang = _yaw * RAD2DEG;
-        float ok_ang = 10.0f;
+        if(pm.wall_corner_read_offset_l < 0.0f) return;
+
+        float x = traj_msg.end_x_now;
+        float y = traj_msg.end_y_now;
+        float r = pm.wall_corner_read_offset_l;
+        float end_yaw = traj_msg.end_yaw_now;
+
+        float ang = end_yaw * RAD2DEG;
+        float ok_ang = 10.0f;        
         bool corrected = false;
 
         if(ang >= 360.0f - ok_ang || ang < ok_ang) {
-            _x = (uint8_t)((_x) / 0.09f) * 0.09f + 0.09f - (float)pm.wall_corner_read_offset_l;            
+            _x = (uint8_t)(x / 0.09f) * 0.09f + 0.09f - r;
             corrected = true;
         } else if(ang >= 90.0f - ok_ang && ang < 90.0f + ok_ang) {
-            _y = (uint8_t)((_y) / 0.09f) * 0.09f + 0.09f - (float)pm.wall_corner_read_offset_l;
+            _y = (uint8_t)(y / 0.09f) * 0.09f + 0.09f - r;
             corrected = true;
         } else if(ang >= 180.0f - ok_ang && ang < 180.0f + ok_ang) {
-            _x = (uint8_t)((_x) / 0.09f) * 0.09f + (float)pm.wall_corner_read_offset_l;
+            _x = (uint8_t)(x / 0.09f) * 0.09f + r;
             corrected = true;
         } else if(ang >= 270.0f - ok_ang && ang < 270.0f + ok_ang) {
-            _y = (uint8_t)((_y) / 0.09f) * 0.09f + (float)pm.wall_corner_read_offset_l;
+            _y = (uint8_t)(y / 0.09f) * 0.09f + r;
             corrected = true;
         }
 
@@ -391,25 +436,32 @@ namespace module {
         }
     }
 
-    void PositionEstimator::_edgeRCorrection() {
+    void PositionEstimator::_edgeRCorrection(TrajTripletMsg &traj_msg) {
         ParameterManager& pm = ParameterManager::getInstance();
-        float ang = _yaw * RAD2DEG;
-        float ok_ang = 10.0f;
+        if(pm.wall_corner_read_offset_r < 0.0f) return;
+
+        float x = traj_msg.end_x_now;
+        float y = traj_msg.end_y_now;
+        float r = pm.wall_corner_read_offset_r;
+        float end_yaw = traj_msg.end_yaw_now;
+
+        float ang = end_yaw * RAD2DEG;
+        float ok_ang = 10.0f;        
         bool corrected = false;
 
         if(ang >= 360.0f - ok_ang || ang < ok_ang) {
-            _x = (uint8_t)((_x) / 0.09f) * 0.09f + 0.09f - (float)pm.wall_corner_read_offset_r;
+            _x = (uint8_t)(x / 0.09f) * 0.09f + 0.09f - r;
             corrected = true;
         } else if(ang >= 90.0f - ok_ang && ang < 90.0f + ok_ang) {
-            _y = (uint8_t)((_y) / 0.09f) * 0.09f + 0.09f - (float)pm.wall_corner_read_offset_r;
+            _y = (uint8_t)(y / 0.09f) * 0.09f + 0.09f - r;
             corrected = true;
         } else if(ang >= 180.0f - ok_ang && ang < 180.0f + ok_ang) {
-            _x = (uint8_t)((_x) / 0.09) * 0.09f + (float)pm.wall_corner_read_offset_r;
+            _x = (uint8_t)(x / 0.09f) * 0.09f + r;
             corrected = true;
         } else if(ang >= 270.0f - ok_ang && ang < 270.0f + ok_ang) {
-            _y = (uint8_t)((_y) / 0.09f) * 0.09f + (float)pm.wall_corner_read_offset_r;
+            _y = (uint8_t)(y / 0.09f) * 0.09f + r;
             corrected = true;
-        }        
+        }
 
         if(corrected){
             //module::LedController::getInstance().oneshotFcled(1, 0, 0, 0.005, 0.005);
@@ -417,40 +469,36 @@ namespace module {
     }
 
 
-    void PositionEstimator::_diagEdgeRCorrection() {
+    void PositionEstimator::_diagEdgeRCorrection(TrajTripletMsg &traj_msg) {
         ParameterManager& pm = ParameterManager::getInstance();
         if(pm.diag_r_corner_read_offset < 0.0f) return;
         
-        float ok_ang = 10.0f;
-        float ang = _yaw * RAD2DEG;
-        
-        if( ang >= 45.0f - ok_ang  && ang < 45.0f + ok_ang ) {
-            _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f - (float)pm.diag_r_corner_read_offset;
-        } else if(ang >= 135.0f - ok_ang && ang < 135.0f + ok_ang) {
-            _x = (uint8_t)(_x / 0.09f) * 0.09f +  (float)pm.diag_r_corner_read_offset;
-        } else if(ang >= 225.0f - ok_ang && ang < 225.0f + ok_ang) {
-            _y = (uint8_t)(_y / 0.09f) * 0.09f + (float)pm.diag_r_corner_read_offset;
-        } else if(ang >= 315.0f - ok_ang && ang < 315.0f + ok_ang) {
-            _x = (uint8_t)(_x / 0.09f) * 0.09f + 0.09f - (float)pm.diag_r_corner_read_offset;
-        }
+        float end_x = traj_msg.end_x_now;
+        float end_y = traj_msg.end_y_now;
+        float end_yaw = traj_msg.end_yaw_now;
+        float turn_dir_next = (float)(traj_msg.turn_dir_next);
+        float x_pillar = x_pillar = 0.09f*(float)((uint8_t)( (end_x + 0.045f )/ 0.09f));
+        float y_pillar = y_pillar = 0.09f*(float)((uint8_t)( (end_y + 0.045f )/ 0.09f));
+        float r = pm.diag_r_corner_read_offset;        
+
+        _x = x_pillar + cosf(end_yaw - turn_dir_next * 3.0f/4.0f * PI) * 0.045f + r * cosf(end_yaw + PI);
+        _y = y_pillar + sinf(end_yaw - turn_dir_next * 3.0f/4.0f * PI) * 0.045f + r * sinf(end_yaw + PI);
     }
 
-    void PositionEstimator::_diagEdgeLCorrection() {
+    void PositionEstimator::_diagEdgeLCorrection(TrajTripletMsg &traj_msg) {
         ParameterManager& pm = ParameterManager::getInstance();
         if(pm.diag_l_corner_read_offset < 0.0f) return;
-
-        float ok_ang = 10.0f;
-        float ang = _yaw * RAD2DEG;
         
-        if( ang >= 45.0f - ok_ang && ang < 45.0f + ok_ang ) {
-            _x = (uint8_t)(_x / 0.09f) * 0.09f + 0.09f - (float)pm.diag_l_corner_read_offset;
-        } else if(ang >= 135.0f - ok_ang && ang < 135.0f + ok_ang) {
-            _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f - (float)pm.diag_l_corner_read_offset;
-        } else if(ang >= 225.0f - ok_ang && ang < 225.0f + ok_ang) {
-            _x = (uint8_t)(_x / 0.09f) * 0.09f + (float)pm.diag_l_corner_read_offset;
-        } else if(ang >= 315.0f - ok_ang  && ang < 315.0f + ok_ang) {
-            _y = (uint8_t)(_y / 0.09f) * 0.09f + (float)pm.diag_l_corner_read_offset;
-        }            
+        float end_x = traj_msg.end_x_now;
+        float end_y = traj_msg.end_y_now;
+        float end_yaw = traj_msg.end_yaw_now;
+        float turn_dir_next = (float)(traj_msg.turn_dir_next);
+        float x_pillar = x_pillar = 0.09f*(float)((uint8_t)( (end_x + 0.045f )/ 0.09f));
+        float y_pillar = y_pillar = 0.09f*(float)((uint8_t)( (end_y + 0.045f )/ 0.09f));
+        float r = pm.diag_l_corner_read_offset;        
+
+        _x = x_pillar + cosf(end_yaw - turn_dir_next * 3.0f/4.0f * PI) * 0.045f + r * cosf(end_yaw + PI);
+        _y = y_pillar + sinf(end_yaw - turn_dir_next * 3.0f/4.0f * PI) * 0.045f + r * sinf(end_yaw + PI);
     }
 
 

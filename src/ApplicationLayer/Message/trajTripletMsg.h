@@ -14,4 +14,8 @@ class TrajTripletMsg : public BaseMsg{
     ETrajType traj_type_next = ETrajType::NONE; // [enum]
     ETurnType turn_type_next = ETurnType::NONE; // [enum]
     ETurnDir turn_dir_next = ETurnDir::NO_TURN; // [enum]
+
+    float end_x_now = 0.0f;                     // [m]
+    float end_y_now = 0.0f;                     // [m]
+    float end_yaw_now = 0.0f;                   // [rad]
 };

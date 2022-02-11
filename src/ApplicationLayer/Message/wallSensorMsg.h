@@ -28,6 +28,8 @@ class WallSensorMsg : public BaseMsg{
 
     bool is_corner_l = false;          // [bool]
     bool is_corner_r = false;          // [bool]
+    bool is_diag_corner_l = false;     // [bool]
+    bool is_diag_corner_r = false;     // [bool]
 
     float contact_wall_time = 0.0f;    // [s]
     float on_wall_ahead_time = 0.0f;   // [s]

@@ -8,6 +8,7 @@
 #include "vehicleAttitudeMsg.h"
 #include "ctrlSetpointMsg.h"
 #include "wallSensorMsg.h"
+#include "trajTripletMsg.h"
 
 // Mod
 #include "trajectoryInitializer.h"
@@ -35,6 +36,7 @@ BaseTrajectory::BaseTrajectory() :
     _cumulative_yaw(0.0f),
     _cumulative_t(0.0f),
     _in_detect_edge_area(false),
+    _detected_edge(false),
     _traj_type(ETrajType::NONE),
     _turn_type(ETurnType::NONE),
     _turn_dir(ETurnDir::NO_TURN)
@@ -103,6 +105,7 @@ void BaseTrajectory::publish(){
     msg.turn_type = _turn_type;
     msg.turn_dir = _turn_dir;
     msg.in_detect_edge_area = _in_detect_edge_area;
+    msg.detected_edge = _detected_edge;
     publishMsg(msg_id::CTRL_SETPOINT, &msg);
 };
 
@@ -137,8 +140,7 @@ StraightTrajectory::StraightTrajectory(ETurnType turn_type, float target_dist, f
     _v_max = v_max;
     _v_0 = v_0;
     _v_xy_body = v_0;
-    _a_xy_body = a_acc;
-    _detected_edge = false;
+    _a_xy_body = a_acc;    
 
     _traj_type = ETrajType::STRAIGHT;
     if(isTurnStraight(turn_type)){
@@ -174,6 +176,39 @@ float StraightTrajectory::getNecessaryTime(){
 
 void StraightTrajectory::update() {
     BaseTrajectory::update();
+
+    if(_turn_type == ETurnType::STRAIGHT_CENTER_EDGE && (_target_dist - _cumulative_dist) < 0.065f){
+        _in_detect_edge_area = true;
+    }
+    else if( (_turn_type == ETurnType::DIAGONAL_CENTER_EDGE || (_turn_type == ETurnType::DIAGONAL_EDGE)) && 
+            _target_dist - _cumulative_dist < 0.045f)
+    {
+        _in_detect_edge_area = true;
+    }
+    else{
+        _in_detect_edge_area = false;
+    }
+
+    if(_in_detect_edge_area){
+        if(!_detected_edge){
+            TrajTripletMsg traj_msg;
+            WallSensorMsg ws_msg;
+            copyMsg(msg_id::TRAJ_TRIPLET, &traj_msg);
+            copyMsg(msg_id::WALL_SENSOR, &ws_msg);
+            if(traj_msg.turn_dir_next == ETurnDir::CCW){
+                if(_turn_type == ETurnType::STRAIGHT_CENTER_EDGE) _detected_edge = ws_msg.is_corner_l;
+                else _detected_edge = ws_msg.is_diag_corner_l;                
+            }
+            else if(traj_msg.turn_dir_next == ETurnDir::CW){
+                if(_turn_type == ETurnType::STRAIGHT_CENTER_EDGE) _detected_edge = ws_msg.is_corner_r;
+                else _detected_edge = ws_msg.is_diag_corner_r;
+            }
+            else{
+                _detected_edge = false;
+            }
+        }
+    }
+
 
     if( (_a_acc == 0.0f && _a_dec == 0.0f)||
         (_v_max == _v_0 && _v_max == _v_end)
@@ -221,12 +256,6 @@ void StraightTrajectory::update() {
         _yaw = getEndYaw();
     }
 
-    if(_cumulative_dist >= dist && 
-     (_turn_type == ETurnType::STRAIGHT_CENTER_EDGE || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE)
-    )
-    {
-        _in_detect_edge_area = true;
-    }
 }
     
 bool StraightTrajectory::isEnd() {
@@ -236,14 +265,21 @@ bool StraightTrajectory::isEnd() {
     copyMsg(msg_id::WALL_SENSOR, &ws_msg);
     float res_dist = _calcResidualDist(pos_msg.x, pos_msg.y);
     
+    
+    bool is_end = false;
 
-    if (
-#ifndef SILS
-    (res_dist <= 0.0f && _cumulative_dist >= _target_dist) || ws_msg.dist_a < 0.045f
-#else
-    _cumulative_dist >= _target_dist
-#endif
-    ) {
+    #ifndef SILS
+    if(_turn_type == ETurnType::STRAIGHT_CENTER_EDGE || _turn_type == ETurnType::DIAGONAL_EDGE || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE){
+        is_end = _in_detect_edge_area && _detected_edge && res_dist <= 0.0f;
+    }
+    else{
+        is_end = (res_dist <= 0.0f && _cumulative_dist >= _target_dist) || ws_msg.dist_a < 0.045f;
+    }
+    #else
+    is_end = (_cumulative_dist >= _target_dist);
+    #endif
+
+    if (is_end) {
         _x = getEndX();
         _y = getEndY();
         _yaw = getEndYaw();

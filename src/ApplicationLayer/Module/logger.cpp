@@ -25,7 +25,7 @@
 #include "wheelOdometryMsg.h"
 #include "navStateMsg.h"
 
-static float _log_data[1500][50];
+static float _log_data[1500][52];
 
 namespace module {
 
@@ -89,7 +89,9 @@ namespace module {
             "turn_type,"
             "on_wall_center_time,"
             "not_corner_l_elapsed_time,"
-            "not_corner_r_elapsed_time"
+            "not_corner_r_elapsed_time,"
+            "in_detect_edge_area,"
+            "detected_edge"
             "\n"
         );
     }
@@ -104,7 +106,8 @@ namespace module {
                          "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f,"
                          "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f,"
                          "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f,"
-                         "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n"
+                         "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f,"
+                         "%f, %f\n"
                         ,
                         _log_data[i][0],  _log_data[i][1],  _log_data[i][2],  _log_data[i][3],  _log_data[i][4],
                         _log_data[i][5],  _log_data[i][6],  _log_data[i][7],  _log_data[i][8],  _log_data[i][9],
@@ -115,7 +118,8 @@ namespace module {
                         _log_data[i][30], _log_data[i][31], _log_data[i][32], _log_data[i][33], _log_data[i][34],
                         _log_data[i][35], _log_data[i][36], _log_data[i][37], _log_data[i][38], _log_data[i][39],
                         _log_data[i][40], _log_data[i][41], _log_data[i][42], _log_data[i][43], _log_data[i][44],
-                        _log_data[i][45], _log_data[i][46], _log_data[i][47], _log_data[i][48], _log_data[i][49]
+                        _log_data[i][45], _log_data[i][46], _log_data[i][47], _log_data[i][48], _log_data[i][49],
+                        _log_data[i][50], _log_data[i][51]
             );
             hal::waitusec(1300);
         }
@@ -252,6 +256,8 @@ namespace module {
             _log_data[_data_num][47] = ws_msg.on_wall_center_time;
             _log_data[_data_num][48] = ws_msg.not_corner_l_elapsed_time;
             _log_data[_data_num][49] = ws_msg.not_corner_r_elapsed_time;
+            _log_data[_data_num][50] = ctrl_msg.in_detect_edge_area;
+            _log_data[_data_num][51] = ctrl_msg.detected_edge;
 
             _data_num++;
         }
