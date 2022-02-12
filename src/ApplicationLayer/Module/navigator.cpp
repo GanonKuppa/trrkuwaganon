@@ -208,7 +208,7 @@ namespace module{
                 PRINTF_PICKLE("DO_FIRST_MOVE        | x_setp:%6.3f, y_setp:%6.3f | x:%6.3f, y:%6.3f\n",_x_setp/0.09f, _y_setp/0.09f, _x/0.09f, _y/0.09f);
             }
             else if(cmd == ENavCommand::GO_NEXT_SECTION){
-                EAzimuth dest_dir = _maze.getSearchDirection2(_x_cur, _y_cur, _azimuth);
+                EAzimuth dest_dir = _maze.getSearchDirection(_x_cur, _y_cur, _azimuth);
                 EAzimuth min_dir = _maze.getMinDirection(_x_cur, _y_cur, _azimuth);
                 EAzimuth unknown_dir = _maze.getUnknownDirection(_x_cur, _y_cur, _azimuth);
                 int8_t rot_times = _maze.calcRotTimes(dest_dir, _azimuth);

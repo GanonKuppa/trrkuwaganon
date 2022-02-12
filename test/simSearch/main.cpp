@@ -46,7 +46,7 @@ int main() {
 
     Maze maze;
     Maze maze_gt;    
-    maze_archive::setMaze(maze_gt, maze_archive::EMazeName::AllJapan2018Final_HF);
+    maze_archive::setMaze(maze_gt, maze_archive::EMazeName::AllJapan2013Final_HF);
     sim::setWallsWithoutOuter32(maze_gt.walls_vertical, maze_gt.walls_horizontal, maze.walls_vertical, maze.walls_horizontal);
 
     maze.init();
@@ -80,6 +80,7 @@ int main() {
         if(tick_count % 30 == 0) {
             sim::setRobotPos(setp_msg.x, setp_msg.y, setp_msg.yaw*RAD2DEG, setp_msg.v_xy_body);
             sim::addPointRobotContrail(setp_msg.x, setp_msg.y, setp_msg.yaw*RAD2DEG, setp_msg.v_xy_body);
+            sim::updateDataView(real_time, 4.2f, 4.2f, 4.2f, setp_msg.x, setp_msg.y, setp_msg.yaw*RAD2DEG, setp_msg.v_xy_body);
         }
         
         if(setp_msg.traj_type == ETrajType::NONE) {
@@ -93,12 +94,12 @@ int main() {
 
             int8_t rot_times = 0;
             if(!maze.isReached(maze_gt.goal_x, maze_gt.goal_y)) {
-                maze.makeSearchMap(maze_gt.goal_x, maze_gt.goal_y);
-                rot_times = maze.calcRotTimes(maze.getSearchDirection2(watch_x, watch_y, watch_dir), watch_dir);
+                maze.makeAllAreaSearchMap(maze_gt.goal_x, maze_gt.goal_y);
+                rot_times = maze.calcRotTimes(maze.getSearchDirection(watch_x, watch_y, watch_dir), watch_dir);
             }
             else{
-                maze.makeSearchMap(0, 0);
-                rot_times = maze.calcRotTimes(maze.getSearchDirection2(watch_x, watch_y, watch_dir), watch_dir);
+                maze.makeAllAreaSearchMap(0, 0);
+                rot_times = maze.calcRotTimes(maze.getSearchDirection(watch_x, watch_y, watch_dir), watch_dir);
             }
 
             if(rot_times == 0) {
@@ -130,6 +131,7 @@ int main() {
         if(tick_count % 30 == 0) {
             sim::setRobotPos(setp_msg.x, setp_msg.y, setp_msg.yaw*RAD2DEG, setp_msg.v_xy_body);
             sim::addPointRobotContrail(setp_msg.x, setp_msg.y, setp_msg.yaw*RAD2DEG, setp_msg.v_xy_body);
+            sim::updateDataView(real_time, 4.2f, 4.2f, 4.2f, setp_msg.x, setp_msg.y, setp_msg.yaw*RAD2DEG, setp_msg.v_xy_body);
         }
         hal::waitmsec(1);
         tick_count++;

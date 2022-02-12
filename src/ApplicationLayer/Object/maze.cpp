@@ -490,18 +490,7 @@ EAzimuth Maze::getUnknownDirection(uint8_t x, uint8_t y, EAzimuth dir) {
     return EAzimuth::POLE;
 }
 
-
 EAzimuth Maze::getSearchDirection(uint8_t x, uint8_t y, EAzimuth dir) {
-    EAzimuth min_dir = getMinDirection(x, y, dir);
-    EAzimuth unknown_dir = getUnknownDirection(x, y, dir);
-    
-    if( (x > 3 && x < 28) && (y > 3 && y < 28) ) return min_dir;
-    else if(unknown_dir == EAzimuth::POLE) return min_dir;
-    else if(unknown_dir != min_dir) return unknown_dir;
-    else return (EAzimuth)min_dir;
-}
-
-EAzimuth Maze::getSearchDirection2(uint8_t x, uint8_t y, EAzimuth dir) {
     EAzimuth min_dir = getMinDirection(x, y, dir);
     EAzimuth unknown_dir = getUnknownDirection(x, y, dir);
 
@@ -557,6 +546,59 @@ void Maze::makeSearchMap(uint8_t x, uint8_t y) {
         }
     }
 
+}
+void Maze::makeAllAreaSearchMap(uint8_t x, uint8_t y){
+    std::queue<std::pair<uint8_t, uint8_t>> que;            
+
+    //歩数マップの初期化
+    for(uint8_t i=0; i<32; i++) {
+        for(uint8_t j=0; j<32; j++) {
+            if(isReached(i, j)){
+                p_map[i][j] = 0xffff;
+            }
+            else{
+                p_map[i][j] = 0;
+                que.push(std::make_pair(i, j));
+            }
+        }
+    }
+    p_map[x][y] = 0; //目的地のポテンシャルは0
+
+    que.push(std::make_pair(x, y));
+    while(!que.empty()) {
+        x = que.front().first;
+        y = que.front().second;
+        que.pop();
+
+        // wall_E
+        if((x != 31) && p_map[x+1][y] == 0xffff) {
+            if( ((walls_vertical[x] >>y )& 1) == 0){
+                p_map[x+1][y] = p_map[x][y] + 1;
+                que.push(std::make_pair(x+1,y));
+            }
+        }
+        // wall_N
+        if((y != 31) && p_map[x][y+1] == 0xffff) {
+            if( ((walls_horizontal[y]  >>x )& 1) == 0){
+                p_map[x][y+1] = p_map[x][y] + 1;
+                que.push(std::make_pair(x,y+1));
+            }
+        }
+        // wall_W
+        if((x !=  0) && p_map[x-1][y] == 0xffff) {
+            if( ((walls_vertical[x-1]  >>y )& 1) == 0){
+                p_map[x-1][y] = p_map[x][y] + 1;
+                que.push(std::make_pair(x-1,y));
+            }
+        }
+        // wall_S
+        if((y !=  0) && p_map[x][y-1] == 0xffff) {
+            if( ((walls_horizontal[y-1]>>x )& 1) == 0){
+                p_map[x][y-1] = p_map[x][y] + 1;
+                que.push(std::make_pair(x,y-1));
+            }
+        }
+    }
 }
 
 void Maze::makeRandomFastestMap(uint8_t x, uint8_t y) {

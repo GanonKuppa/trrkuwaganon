@@ -1,5 +1,6 @@
 HardwareDebug
 .settings
+.vscode
 .cproject
 .project
 trr_kuwaganon Debug.launch

@@ -253,6 +253,23 @@ namespace sim {
         sendUdpString(val.serialize());
     }
 
+    void updateDataView(float time, float bat_vol, float l_motor_vol, float r_motor_vol, float x, float y, float yaw, float v){
+        picojson::object obj;
+        // データの追加
+        obj.emplace(std::make_pair("cmd", "UPDATE_DATA_VIEW"));
+        obj.emplace(std::make_pair("time", time));
+        obj.emplace(std::make_pair("bat", bat_vol));
+        obj.emplace(std::make_pair("V_l", l_motor_vol));
+        obj.emplace(std::make_pair("V_r", r_motor_vol));
+        obj.emplace(std::make_pair("x", x));
+        obj.emplace(std::make_pair("y", y));
+        obj.emplace(std::make_pair("ang", yaw));
+        obj.emplace(std::make_pair("v", v));
 
+        // 文字列にするためにvalueを使用
+        picojson::value val(obj);
+        val.serialize();
+        sendUdpString(val.serialize());
+    }
 
 }

@@ -76,9 +76,9 @@ class Maze {
     EAzimuth getUnknownDirection(uint8_t x, uint8_t y, EAzimuth dir);
 
     EAzimuth getSearchDirection(uint8_t x, uint8_t y, EAzimuth dir);    
-    EAzimuth getSearchDirection2(uint8_t x, uint8_t y, EAzimuth dir);
     
     void makeSearchMap(uint8_t x, uint8_t y);
+    void makeAllAreaSearchMap(uint8_t x, uint8_t y);
     void makeRandomFastestMap(uint8_t x, uint8_t y);
     void makeFastestMap(uint8_t x, uint8_t y);
     void makeRandomNoEntryMaskMap(uint8_t x, uint8_t y);
