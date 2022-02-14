@@ -439,6 +439,7 @@ namespace module {
             PRINTF_ASYNC("  list pid_enable            :\r\n");
             PRINTF_ASYNC("  list pid_gain              :\r\n");
             PRINTF_ASYNC("  list pid_saturation        :\r\n");
+            PRINTF_ASYNC("  list corner                :\r\n");
             PRINTF_ASYNC("  ttl                        : output teraterm macro\r\n");
             PRINTF_ASYNC("  write <param_name> <value> :\r\n");
             PRINTF_ASYNC("  read <param_name>          :\r\n");
@@ -449,6 +450,7 @@ namespace module {
             bool is_pid_enable_only = (argc == 3 && ntlibc_strcmp(argv[2], "pid_enable") == 0);
             bool is_pid_gain_only = (argc == 3  && ntlibc_strcmp(argv[2], "pid_gain") == 0);
             bool is_pid_saturation_only = (argc == 3  && ntlibc_strcmp(argv[2], "pid_saturation") == 0);
+            bool is_corner_only = (argc == 3  && ntlibc_strcmp(argv[2], "corner") == 0);
             
             PRINTF_ASYNC("  # no  , type   , name_str        , val\n");                           
             auto &pm = ParameterManager::getInstance();
@@ -456,6 +458,7 @@ namespace module {
                 if(is_pid_enable_only &&  !(i >= 50 && i <= 66)) continue;
                 if(is_pid_gain_only && !(i >= 88 && i <= 125) ) continue;
                 if(is_pid_saturation_only && !(i >= 126 && i <= 137) ) continue;
+                if(is_corner_only && !(i >= 138 && i <= 149) ) continue;
 
                 uint16_t val_num = i;
                 std::string key_str = pm.valStrkeyMap[val_num];

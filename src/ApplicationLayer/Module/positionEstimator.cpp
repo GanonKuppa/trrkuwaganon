@@ -227,7 +227,7 @@ namespace module {
 
         if(pm.s_turn_pre_edge_correction_enable && ctrl_msg.in_detect_edge_area){
             // 最短時の右壁切れ
-            if(traj_msg.turn_dir_now == ETurnDir::CW &&
+            if(traj_msg.turn_dir_next == ETurnDir::CW &&
                 traj_msg.turn_type_now == ETurnType::STRAIGHT_CENTER_EDGE &&
                 ws_msg.is_corner_r
             ){
@@ -235,7 +235,7 @@ namespace module {
                 _detected_edge = true;
             }
             // 最短時の左壁切れ
-            else if(traj_msg.turn_dir_now == ETurnDir::CCW &&
+            else if(traj_msg.turn_dir_next == ETurnDir::CCW &&
                 traj_msg.turn_type_now == ETurnType::STRAIGHT_CENTER_EDGE &&
                 ws_msg.is_corner_l
             ){
@@ -246,7 +246,7 @@ namespace module {
 
         if(pm.d_turn_pre_edge_correction_enable && ctrl_msg.in_detect_edge_area){
             // 最短時の右斜め壁切れ
-            if(traj_msg.turn_dir_now == ETurnDir::CW &&
+            if(traj_msg.turn_dir_next == ETurnDir::CW &&
                 (traj_msg.turn_type_now == ETurnType::DIAGONAL_CENTER_EDGE || traj_msg.turn_type_now == ETurnType::DIAGONAL_EDGE) &&
                 ws_msg.is_diag_corner_r
             ){
@@ -255,7 +255,7 @@ namespace module {
             }
 
             // 最短時の左斜め壁切れ
-            else if(traj_msg.turn_dir_now == ETurnDir::CCW &&
+            else if(traj_msg.turn_dir_next == ETurnDir::CCW &&
                 (traj_msg.turn_type_now == ETurnType::DIAGONAL_CENTER_EDGE || traj_msg.turn_type_now == ETurnType::DIAGONAL_EDGE) &&
                 ws_msg.is_diag_corner_l
             ){

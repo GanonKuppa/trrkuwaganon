@@ -24,6 +24,7 @@
 #include "parameterManager.h"
 #include "wheelOdometryMsg.h"
 #include "navStateMsg.h"
+#include "trajTripletMsg.h"
 
 static float _log_data[1500][52];
 
@@ -176,6 +177,7 @@ namespace module {
             VehiclePositionMsg pos_msg;
             WheelOdometryMsg wodo_msg;
             NavStateMsg nav_msg;
+            TrajTripletMsg traj_msg;
 
             copyMsg(msg_id::ACTUATOR_OUTPUT, &aout_msg);
             copyMsg(msg_id::BATTERY_INFO, &bat_msg);
@@ -187,6 +189,7 @@ namespace module {
             copyMsg(msg_id::VEHICLE_POSITION, &pos_msg);
             copyMsg(msg_id::WHEEL_ODOMETRY, &wodo_msg);
             copyMsg(msg_id::NAV_STATE, &nav_msg);
+            copyMsg(msg_id::TRAJ_TRIPLET, &traj_msg);
 
 
             constexpr float RAD2DEG = 180.0f / 3.14159265f;
@@ -256,7 +259,7 @@ namespace module {
             _log_data[_data_num][47] = ws_msg.on_wall_center_time;
             _log_data[_data_num][48] = ws_msg.not_corner_l_elapsed_time;
             _log_data[_data_num][49] = ws_msg.not_corner_r_elapsed_time;
-            _log_data[_data_num][50] = ctrl_msg.in_detect_edge_area;
+            _log_data[_data_num][50] = ctrl_msg.in_detect_edge_area * (int8_t)traj_msg.turn_dir_next;
             _log_data[_data_num][51] = ctrl_msg.detected_edge;
 
             _data_num++;

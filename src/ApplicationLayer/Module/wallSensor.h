@@ -63,7 +63,7 @@ namespace module {
         float _not_corner_l_elapsed_time;
         float _not_corner_r_elapsed_time;
 
-        const uint8_t BUFF_SIZE = 50;
+        const uint8_t BUFF_SIZE = 60;
         const uint8_t LED_ON_SEC = 100;        
         float _emit_led_cycle_time_us[8];
 

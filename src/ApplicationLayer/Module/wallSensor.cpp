@@ -101,6 +101,9 @@ namespace module {
         _is_on_wall_center = (std::fabs(_dist_r - 0.045f) < 0.005) || (std::fabs(_dist_l - 0.045f) < 0.005);
         _is_corner_l = _isCornerL();
         _is_corner_r = _isCornerR();
+        _is_diag_corner_l = _isDiagCornerL();
+        _is_diag_corner_r = _isDiagCornerR();
+
 
         if(_is_contact_wall){
             _contact_wall_time += _delta_t;
