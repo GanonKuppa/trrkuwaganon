@@ -65,7 +65,7 @@ namespace activity{
         module::TrajectoryCommander::getInstance().reset(0.045f, 0.045f - wall2mouse_center_dist, 90.0f * DEG2RAD);
         module::PositionEstimator::getInstance().reset(0.045f, 0.045f - wall2mouse_center_dist, 90.0f * DEG2RAD);
         module::Navigator::getInstance().setNavMode(ENavMode::FASTEST);
-        StopFactory::push(0.1f);
+        StopFactory::push(2.1f);
 
         float suction_duty = module::ParameterManager::getInstance().suction_duty_shortest;
         module::Suction::getInstance().setDuty(suction_duty);

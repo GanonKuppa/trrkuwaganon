@@ -177,7 +177,7 @@ float StraightTrajectory::getNecessaryTime(){
 void StraightTrajectory::update() {
     BaseTrajectory::update();
 
-    if(_turn_type == ETurnType::STRAIGHT_CENTER_EDGE && (_target_dist - _cumulative_dist) < 0.045f){
+    if(_turn_type == ETurnType::STRAIGHT_CENTER_EDGE && (_target_dist - _cumulative_dist) < 0.06f){
         _in_detect_edge_area = true;
     }
     else if( (_turn_type == ETurnType::DIAGONAL_CENTER_EDGE || (_turn_type == ETurnType::DIAGONAL_EDGE)) && 

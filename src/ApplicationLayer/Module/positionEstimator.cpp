@@ -225,7 +225,7 @@ namespace module {
             _corner_r_cool_down_dist += _v_xy_body_for_odom * _delta_t;
         }
 
-        if(pm.s_turn_pre_edge_correction_enable && ctrl_msg.in_detect_edge_area){
+        if(pm.s_turn_pre_edge_correction_enable && ctrl_msg.in_detect_edge_area && !_detected_edge){
             // 最短時の右壁切れ
             if(traj_msg.turn_dir_next == ETurnDir::CW &&
                 traj_msg.turn_type_now == ETurnType::STRAIGHT_CENTER_EDGE &&
@@ -244,7 +244,7 @@ namespace module {
             }
         }
 
-        if(pm.d_turn_pre_edge_correction_enable && ctrl_msg.in_detect_edge_area){
+        if(pm.d_turn_pre_edge_correction_enable && ctrl_msg.in_detect_edge_area && !_detected_edge){
             // 最短時の右斜め壁切れ
             if(traj_msg.turn_dir_next == ETurnDir::CW &&
                 (traj_msg.turn_type_now == ETurnType::DIAGONAL_CENTER_EDGE || traj_msg.turn_type_now == ETurnType::DIAGONAL_EDGE) &&
@@ -415,30 +415,22 @@ namespace module {
 
         float ang = end_yaw * RAD2DEG;
         float ok_ang = 10.0f;        
-        bool corrected = false;
 
         if(ang >= 360.0f - ok_ang || ang < ok_ang) {
             _x = (uint8_t)(x / 0.09f) * 0.09f + 0.09f - r;
-            corrected = true;
         } else if(ang >= 90.0f - ok_ang && ang < 90.0f + ok_ang) {
             _y = (uint8_t)(y / 0.09f) * 0.09f + 0.09f - r;
-            corrected = true;
         } else if(ang >= 180.0f - ok_ang && ang < 180.0f + ok_ang) {
             _x = (uint8_t)(x / 0.09f) * 0.09f + r;
-            corrected = true;
         } else if(ang >= 270.0f - ok_ang && ang < 270.0f + ok_ang) {
             _y = (uint8_t)(y / 0.09f) * 0.09f + r;
-            corrected = true;
         }
 
-        if(corrected){
-            //module::LedController::getInstance().oneshotFcled(1, 0, 0, 0.005, 0.005);
-        }
+        module::LedController::getInstance().oneshotFcled(1, 0, 0, 0.005, 0.005);
     }
 
     void PositionEstimator::_edgeRCorrection(TrajTripletMsg &traj_msg) {
-        ParameterManager& pm = ParameterManager::getInstance();
-        if(pm.wall_corner_read_offset_r < 0.0f) return;
+        ParameterManager& pm = ParameterManager::getInstance();        
 
         float x = traj_msg.end_x_now;
         float y = traj_msg.end_y_now;
@@ -447,31 +439,23 @@ namespace module {
 
         float ang = end_yaw * RAD2DEG;
         float ok_ang = 10.0f;        
-        bool corrected = false;
 
         if(ang >= 360.0f - ok_ang || ang < ok_ang) {
             _x = (uint8_t)(x / 0.09f) * 0.09f + 0.09f - r;
-            corrected = true;
         } else if(ang >= 90.0f - ok_ang && ang < 90.0f + ok_ang) {
             _y = (uint8_t)(y / 0.09f) * 0.09f + 0.09f - r;
-            corrected = true;
         } else if(ang >= 180.0f - ok_ang && ang < 180.0f + ok_ang) {
             _x = (uint8_t)(x / 0.09f) * 0.09f + r;
-            corrected = true;
         } else if(ang >= 270.0f - ok_ang && ang < 270.0f + ok_ang) {
             _y = (uint8_t)(y / 0.09f) * 0.09f + r;
-            corrected = true;
         }
 
-        if(corrected){
-            //module::LedController::getInstance().oneshotFcled(1, 0, 0, 0.005, 0.005);
-        }
+        module::LedController::getInstance().oneshotFcled(1, 0, 0, 0.005, 0.005);
     }
 
 
     void PositionEstimator::_diagEdgeRCorrection(TrajTripletMsg &traj_msg) {
-        ParameterManager& pm = ParameterManager::getInstance();
-        if(pm.diag_r_corner_read_offset < 0.0f) return;
+        ParameterManager& pm = ParameterManager::getInstance();        
         
         float end_x = traj_msg.end_x_now;
         float end_y = traj_msg.end_y_now;
@@ -483,11 +467,12 @@ namespace module {
 
         _x = x_pillar + cosf(end_yaw - turn_dir_next * 3.0f/4.0f * PI) * 0.045f + r * cosf(end_yaw + PI);
         _y = y_pillar + sinf(end_yaw - turn_dir_next * 3.0f/4.0f * PI) * 0.045f + r * sinf(end_yaw + PI);
+
+        module::LedController::getInstance().oneshotFcled(1, 0, 0, 0.005, 0.005);
     }
 
     void PositionEstimator::_diagEdgeLCorrection(TrajTripletMsg &traj_msg) {
-        ParameterManager& pm = ParameterManager::getInstance();
-        if(pm.diag_l_corner_read_offset < 0.0f) return;
+        ParameterManager& pm = ParameterManager::getInstance();        
         
         float end_x = traj_msg.end_x_now;
         float end_y = traj_msg.end_y_now;
@@ -499,6 +484,8 @@ namespace module {
 
         _x = x_pillar + cosf(end_yaw - turn_dir_next * 3.0f/4.0f * PI) * 0.045f + r * cosf(end_yaw + PI);
         _y = y_pillar + sinf(end_yaw - turn_dir_next * 3.0f/4.0f * PI) * 0.045f + r * sinf(end_yaw + PI);
+
+        module::LedController::getInstance().oneshotFcled(1, 0, 0, 0.005, 0.005);
     }
 
 

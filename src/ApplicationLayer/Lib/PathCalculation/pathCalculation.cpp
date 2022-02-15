@@ -325,7 +325,7 @@ void HF_playPath(ETurnParamSet tp, std::vector<Path>& path_vec) {
                 }
             }
             else{
-                if(pm.s_turn_pre_edge_correction_enable){
+                if(pm.s_turn_pre_edge_correction_enable && v_fol > 0.0f){
                     StraightFactory::push(ETurnType::STRAIGHT_CENTER_EDGE, x, v_pre, v_max, v_fol, a, a);
                 }
                 else{
@@ -371,7 +371,7 @@ void HF_playPath(ETurnParamSet tp, std::vector<Path>& path_vec) {
                 v_fol = turn_p.getV(path_vec[i+1].turn_type);
             }
             
-            if(pm.d_turn_pre_edge_correction_enable){
+            if(pm.d_turn_pre_edge_correction_enable  && v_fol > 0.0f){
                 StraightFactory::push(ETurnType::DIAGONAL_CENTER_EDGE, x, v_pre, v_max, v_fol, a, a);
             }
             else{

@@ -20,6 +20,9 @@
 #include "ctrlSetpointMsg.h"
 #include "navStateMsg.h"
 
+// Obj
+#include "trajectoryFactory.h"
+
 
 namespace activity{    
     constexpr float DEG2RAD = 3.14159265f / 180.0f;
@@ -42,7 +45,7 @@ namespace activity{
         uint8_t mode = intent.uint8_t_param["SUB_MODE"];
         if(mode == 0) return;
         
-        hal::waitmsec(1000);
+        hal::waitmsec(100);
 
         float wall2mouse_center_dist = module::ParameterManager::getInstance().wall2mouse_center_dist;
         constexpr float DEG2RAD = 3.14159265f / 180.0f;
@@ -52,11 +55,13 @@ namespace activity{
         module::Navigator::getInstance().setNavMode(ENavMode::SEARCH);
         if(mode == 1) module::Navigator::getInstance().setNavSubMode(ENavSubMode::START2GOAL);
         else if(mode == 2) module::Navigator::getInstance().setNavSubMode(ENavSubMode::START2GOAL2START);
+        StopFactory::push(1.0f);
+        float suction_duty = module::ParameterManager::getInstance().suction_duty_search;
+        module::Suction::getInstance().setDuty(suction_duty);
+        hal::waitmsec(1100);
         module::Navigator::getInstance().startNavigation();
 
         module::Logger::getInstance().start();
-        float suction_duty = module::ParameterManager::getInstance().suction_duty_search;
-        module::Suction::getInstance().setDuty(suction_duty);
         hal::waitmsec(100);
     }
     
@@ -74,7 +79,7 @@ namespace activity{
         ELoopStatus loop_status = ELoopStatus::CONTINUE;
         
         if(nav_msg.is_failsafe){
-            module::TrajectoryCommander::getInstance().clear();
+            //module::TrajectoryCommander::getInstance().clear();
             loop_status = ELoopStatus::FINISH;
         }
 

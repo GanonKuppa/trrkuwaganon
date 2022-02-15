@@ -345,9 +345,10 @@ namespace module{
         _duty_l = _duty_l_v + _duty_l_yaw;
 
         // 制御誤差の監視
-        if( std::fabs(_yawrate_pidf.getError()) > YAWRATE_ERROR_TH || 
+        if( !(_turn_type == ETurnType::AHEAD_WALL_CORRECTION || _turn_type == ETurnType::AHEAD_WALL_YAW_CORRECTION) &&
+            (std::fabs(_yawrate_pidf.getError()) > YAWRATE_ERROR_TH || 
             std::fabs(_v_pidf.getError()) > V_ERROR_TH ||
-            std::fabs(_yaw_pidf.getError()) > YAW_ERROR_TH
+            std::fabs(_yaw_pidf.getError()) > YAW_ERROR_TH)
         ){
             _error_sec += _delta_t;
         }                

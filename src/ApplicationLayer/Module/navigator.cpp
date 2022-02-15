@@ -427,15 +427,17 @@ namespace module{
             x_thr = 0.1f;
             y_thr = 0.1f;
         }
+
+        float ang_diff = _yaw - _yaw_setp;
+        while(ang_diff >  180.0f * DEG2RAD) ang_diff -= 360.0f * DEG2RAD;
+        while(ang_diff < -180.0f * DEG2RAD) ang_diff += 360.0f * DEG2RAD;
+
         
-        return (_turn_type != ETurnType::AHEAD_WALL_CORRECTION &&
-                _turn_type != ETurnType::AHEAD_WALL_YAW_CORRECTION &&
-            _ctrl_mode == ECtrlMode::VEHICLE &&
+        return (_ctrl_mode == ECtrlMode::VEHICLE &&
            (std::fabs(_x - _x_setp) > x_thr || 
-            std::fabs(_y - _y_setp) > y_thr //||
-            //std::fabs(_yaw - _yaw_setp) > 20.0f * DEG2RAD
-            //||
-            //_is_actuator_error
+            std::fabs(_y - _y_setp) > y_thr ||
+            std::fabs(ang_diff) > 30.0f * DEG2RAD
+            //|| _is_actuator_error
            )
         );
     }

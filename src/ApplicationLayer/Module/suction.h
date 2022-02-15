@@ -12,6 +12,7 @@ namespace module{
         void debug();
       private:        
         float _duty;
+        float _target_duty;
         float _voltage;
 
         friend class BaseModule<Suction>;

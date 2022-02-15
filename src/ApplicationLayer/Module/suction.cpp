@@ -1,6 +1,7 @@
 #include "suction.h"
 
 #include <string>
+#include <cmath>
 
 // Lib
 #include "ntlibc.h"
@@ -18,7 +19,8 @@
 namespace module{
     
     Suction::Suction() :
-    _duty(0.0f),    
+    _duty(0.0f),  
+    _target_duty(0.0f),
     _voltage(4.2f)
     {
         setModuleName("Suction");
@@ -36,19 +38,23 @@ namespace module{
         // バッテリー残量が少なくなったことをファンを低速回転させることで通知
         bool is_low_voltage = bat_msg.is_low_voltage;        
         if(is_low_voltage && nav_msg.mode != ENavMode::FASTEST && nav_msg.mode != ENavMode::SEARCH){
-            float max_voltage_duty = _duty * _voltage / 4.2f;
-            hal::setDutyPWM0(0.1f);
+            _target_duty = 0.1f;
         }
         // バッテリー電圧に応じたdutyをセット
         else{
-            float max_voltage_duty = _duty * _voltage / 4.2f;
+            constexpr float RATE_OF_CHANGE = 0.5f; // duty/s
+            if( std::fabs(_duty - _target_duty) < _delta_t * RATE_OF_CHANGE * 2.0f) _duty = _target_duty; 
+            else if(_duty < _target_duty) _duty += _delta_t * RATE_OF_CHANGE;
+            else if(_duty > _target_duty) _duty -= _delta_t * RATE_OF_CHANGE;
+
+            float max_voltage_duty = _duty * _voltage / 4.2f;            
             hal::setDutyPWM0(max_voltage_duty);
         }        
 
     }
 
     void Suction::setDuty(float duty){
-        _duty = duty;
+        _target_duty = duty;
     }
 
     float Suction::getDuty(){
