@@ -69,7 +69,7 @@ namespace module {
         static constexpr float YAW_ERROR_TH = 0.174f; // 0.174 rad = 10deg
         static constexpr float YAWRATE_ERROR_TH = 1.74f; // 1.74 rad/s = 100 deg/s  
         static constexpr float V_ERROR_TH = 0.3f; // m/s
-        static constexpr float ERROR_TIME_TH = 0.4f;
+        static constexpr float ERROR_TIME_TH = 1.5f;
         ControlMixer();
 
         void _updateControllerParam();

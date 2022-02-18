@@ -62,7 +62,9 @@ namespace module{
         _is_pre_read_l_wall(false),
         _is_pre_read_r_wall(false),
         _pre_read_l_wall_dist(0.0f),
-        _pre_read_r_wall_dist(0.0f)
+        _pre_read_r_wall_dist(0.0f),
+        _crossroads_count(0),
+        _slalom_count(0)
     {
         setModuleName("Navigator");
         _maze.readMazeDataFromFlash();
@@ -147,7 +149,7 @@ namespace module{
            !(_x_last == _x_cur && _y_last == _y_cur ) &&
            _navigating &&
            _mode == ENavMode::SEARCH
-        ){                            
+        ){
             // LEDの点灯
             module::LedController::getInstance().oneshotFcled(1, 1, 0, 0.005, 0.005);
 
@@ -165,8 +167,9 @@ namespace module{
             }
 
             if(_x_cur == _x_dest && _y_cur == _y_dest && 
-               (_sub_mode == ENavSubMode::START2GOAL ||
-                (_sub_mode == ENavSubMode::START2GOAL2START && _done_outward)
+               (  _sub_mode == ENavSubMode::START2GOAL ||
+                  (_sub_mode == ENavSubMode::START2GOAL2START && _done_outward) ||
+                  (_sub_mode == ENavSubMode::ALL_AREA_SEARCH && _done_outward)
                )
             ){                
                 _nav_cmd_queue.push_back(ENavCommand::GO_CENTER);
@@ -212,6 +215,29 @@ namespace module{
                 EAzimuth min_dir = _maze.getMinDirection(_x_cur, _y_cur, _azimuth);
                 EAzimuth unknown_dir = _maze.getUnknownDirection(_x_cur, _y_cur, _azimuth);
                 int8_t rot_times = _maze.calcRotTimes(dest_dir, _azimuth);
+
+                // 櫛対策に4区画連続で十字路だったらとりあえず左に曲がる
+                if(_maze.isCrossroads(_x_cur, _y_cur)){
+                    _crossroads_count ++;
+                }                
+                else{
+                    _crossroads_count = 0;
+                }
+
+                if(_crossroads_count >= 4){
+                    _crossroads_count = 0;
+                    rot_times = 2;
+                }
+
+                // 連続スラローム対策
+                if(rot_times == 2 || rot_times == -2){
+                    _slalom_count ++;
+                }
+                else{
+                    _slalom_count = 0;
+                }
+
+
                 if(rot_times == 0) {
                     StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.09, _v);
                 } 
@@ -240,10 +266,56 @@ namespace module{
                     StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f + _read_wall_offset2, 0.0f, _v, _v, _a, _a);
                 }
                 else if(rot_times == 2) {
-                    CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_90, ETurnDir::CCW, -_read_wall_offset2 , _read_wall_offset2);
+                    if(_slalom_count <= 6){
+                        CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_90, ETurnDir::CCW, -_read_wall_offset2 , _read_wall_offset2);
+                    }
+                    else{
+                        if(_maze.existsAWall(_x_cur, _y_cur, _azimuth)){
+                            StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2 - 0.02f, _v, _v, _v, _a, _a);                        
+                            AheadWallCorrectionFactory::push(0.2f, 0.05f);
+                        }
+                        else{
+                            StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2, _v, _v, 0.0f, _a, _a);                       
+                        }
+
+                        if(_maze.existsRWall(_x_cur, _y_cur, _azimuth)){
+                            SpinTurnFactory::push(-90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
+                            AheadWallCorrectionFactory::push(0.2f, 0.1f, true);
+                            SpinTurnFactory::push(180.0f * DEG2RAD, _yawrate_max, _yawacc);                            
+                        }
+                        else{
+                            SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
+                        }
+                        
+                        StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f + _read_wall_offset2, 0.0f, _v, _v, _a, _a);
+                        _slalom_count = 0;
+                    }
                 }
                 else if(rot_times == -2){
-                    CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_90, ETurnDir::CW, -_read_wall_offset2 , _read_wall_offset2);
+                    if(_slalom_count <= 7){
+                        CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_90, ETurnDir::CW, -_read_wall_offset2 , _read_wall_offset2);
+                    }
+                    else{
+                        if(_maze.existsAWall(_x_cur, _y_cur, _azimuth)){
+                            StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2 - 0.02f, _v, _v, _v, _a, _a);                        
+                            AheadWallCorrectionFactory::push(0.2f, 0.05f);
+                        }
+                        else{
+                            StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2, _v, _v, 0.0f, _a, _a);                       
+                        }
+
+                        if(_maze.existsLWall(_x_cur, _y_cur, _azimuth)){
+                            SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
+                            AheadWallCorrectionFactory::push(0.2f, 0.1f, true);
+                            SpinTurnFactory::push(180.0f * DEG2RAD, _yawrate_max, _yawacc);                            
+                        }
+                        else{
+                            SpinTurnFactory::push(-90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
+                        }
+
+                        StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f + _read_wall_offset2, 0.0f, _v, _v, _a, _a);
+                        _slalom_count = 0;                        
+                    }
                 }
                 PRINTF_PICKLE("GO_NEXT_SECTION      | x_setp:%6.3f, y_setp:%6.3f | x:%6.3f, y:%6.3f\n",_x_setp/0.09f, _y_setp/0.09f, _x/0.09f, _y/0.09f);
                 PRINTF_PICKLE("  dest_dir:%c, azimuth:%c, rot_times:%d\n",azimuth2Char(dest_dir), azimuth2Char(_azimuth), rot_times);
@@ -257,7 +329,12 @@ namespace module{
                 StopFactory::push(1.0f);
             }
             else if(cmd == ENavCommand::UPDATE_POTENTIAL_MAP){
-                _maze.makeSearchMap(_x_dest, _y_dest);
+                if(_sub_mode == ENavSubMode::ALL_AREA_SEARCH){
+                    _maze.makeAllAreaSearchMap(_x_dest, _y_dest);
+                }
+                else{
+                    _maze.makeSearchMap(_x_dest, _y_dest);
+                }                
                 PRINTF_PICKLE("UPDATE_POTENTIAL_MAP | x_setp:%6.3f, y_setp:%6.3f | x:%6.3f, y:%6.3f\n",_x_setp/0.09f, _y_setp/0.09f, _x/0.09f, _y/0.09f);
             }
             else if(cmd == ENavCommand::SAVE_MAZE){
@@ -400,7 +477,7 @@ namespace module{
             _x_dest = _x_goal;
             _y_dest = _y_goal;
         }            
-        else if(_sub_mode == ENavSubMode::START2GOAL2START){
+        else if(_sub_mode == ENavSubMode::START2GOAL2START || _sub_mode == ENavSubMode::ALL_AREA_SEARCH){
             if(!_done_outward){
                 _x_dest = _x_goal;
                 _y_dest = _y_goal;
@@ -437,7 +514,7 @@ namespace module{
            (std::fabs(_x - _x_setp) > x_thr || 
             std::fabs(_y - _y_setp) > y_thr ||
             std::fabs(ang_diff) > 30.0f * DEG2RAD
-            //|| _is_actuator_error
+            || _is_actuator_error
            )
         );
     }

@@ -112,6 +112,16 @@ void Maze::writeReached(uint8_t x, uint8_t y, bool reached_) {
     }
 }
 
+bool Maze::isCrossroads(uint8_t x, uint8_t y){
+    if( 0<=x && x<=31 && 0<=y && y<=31) {
+        Wall wall = readWall(x, y);
+        return !wall.E && !wall.N && !wall.W && !wall.S && isReached(x, y);
+    }
+    else {
+        return false;
+    }
+}
+
 bool Maze::isNoEntry(uint8_t x, uint8_t y) {
     bool is_no_entry;
     if( 0<=x && x<=31 && 0<=y && y<=31) is_no_entry = (no_entry[x] >> y) & 0x00000001;

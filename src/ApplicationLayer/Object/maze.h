@@ -42,7 +42,8 @@ class Maze {
 
     bool isReached(uint8_t x, uint8_t y);
     void writeReached(uint8_t x, uint8_t y, bool reached_);
-    
+    bool isCrossroads(uint8_t x, uint8_t y);
+
     bool isNoEntry(uint8_t x, uint8_t y);
     void writeNoEntry(uint8_t x, uint8_t y, bool no_entry_);
     void writeNoEntryAllFalse();

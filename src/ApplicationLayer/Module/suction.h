@@ -14,6 +14,7 @@ namespace module{
         float _duty;
         float _target_duty;
         float _voltage;
+        static constexpr float MAX_VOLTAGE = 4.2f;
 
         friend class BaseModule<Suction>;
         Suction();

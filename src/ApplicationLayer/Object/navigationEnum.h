@@ -14,7 +14,8 @@ enum class ENavSubMode : uint8_t{
     STANDBY = 0,
     GOAL2START,
     START2GOAL,
-    START2GOAL2START
+    START2GOAL2START,
+    ALL_AREA_SEARCH
 };
 
 enum class EAzimuth : uint8_t{

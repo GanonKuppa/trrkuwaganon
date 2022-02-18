@@ -148,8 +148,8 @@ namespace module {
         }
 
         // グローバル座標系速度算出
-        _v_x = _v_xy_body_for_odom * cosf(yaw_pre); // 一旦betaを0に
-        _v_y = _v_xy_body_for_odom * sinf(yaw_pre); // 
+        _v_x = _v_xy_body_for_odom * cosf(yaw_pre + ctrl_msg.beta); // ctrl_msgのbetaを利用
+        _v_y = _v_xy_body_for_odom * sinf(yaw_pre + ctrl_msg.beta); 
 
         // グローバル座標系位置算出
         _x += _delta_t * v_x_pre;

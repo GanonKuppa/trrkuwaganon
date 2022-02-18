@@ -41,14 +41,20 @@ namespace module{
             _target_duty = 0.1f;
         }
         // バッテリー電圧に応じたdutyをセット
-        else{
+        else if(_target_duty > 0.0f){
             constexpr float RATE_OF_CHANGE = 0.5f; // duty/s
             if( std::fabs(_duty - _target_duty) < _delta_t * RATE_OF_CHANGE * 2.0f) _duty = _target_duty; 
             else if(_duty < _target_duty) _duty += _delta_t * RATE_OF_CHANGE;
             else if(_duty > _target_duty) _duty -= _delta_t * RATE_OF_CHANGE;
 
-            float max_voltage_duty = _duty * _voltage / 4.2f;            
+            float max_voltage_duty = _duty * MAX_VOLTAGE / _voltage;
             hal::setDutyPWM0(max_voltage_duty);
+        }
+        
+        else{
+            _duty = 0.0f;
+            _target_duty = 0.0f;
+            hal::setDutyPWM0(0.0f);
         }        
 
     }

@@ -82,6 +82,8 @@ namespace module {
         bool _is_pre_read_r_wall;
         float _pre_read_l_wall_dist;
         float _pre_read_r_wall_dist;
+        uint8_t _crossroads_count;
+        uint8_t _slalom_count;
 
         void _updateParam();
         void _updateWallEnable();

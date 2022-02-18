@@ -150,6 +150,7 @@ StraightTrajectory::StraightTrajectory(ETurnType turn_type, float target_dist, f
         _turn_type = ETurnType::STRAIGHT;
     }
     _turn_dir = ETurnDir::NO_TURN;
+    _res_dist = target_dist;
 }
 
 float StraightTrajectory::getEndX(){
@@ -177,11 +178,18 @@ float StraightTrajectory::getNecessaryTime(){
 void StraightTrajectory::update() {
     BaseTrajectory::update();
 
-    if(_turn_type == ETurnType::STRAIGHT_CENTER_EDGE && (_target_dist - _cumulative_dist) < 0.06f){
+    VehiclePositionMsg pos_msg;    
+    copyMsg(msg_id::VEHICLE_POSITION, &pos_msg);    
+    _res_dist = _calcResidualDist(pos_msg.x, pos_msg.y);
+
+    if(_turn_type == ETurnType::STRAIGHT_CENTER_EDGE && _target_dist < 0.36f  && (_res_dist) < 0.06f){
+        _in_detect_edge_area = true;
+    }
+    else if(_turn_type == ETurnType::STRAIGHT_CENTER_EDGE && _target_dist >= 0.36f && (_res_dist) < 0.045f){
         _in_detect_edge_area = true;
     }
     else if( (_turn_type == ETurnType::DIAGONAL_CENTER_EDGE || (_turn_type == ETurnType::DIAGONAL_EDGE)) && 
-            _target_dist - _cumulative_dist < 0.08f)
+             _res_dist < 0.08f)
     {
         _in_detect_edge_area = true;
     }
@@ -259,21 +267,17 @@ void StraightTrajectory::update() {
 }
     
 bool StraightTrajectory::isEnd() {
-    VehiclePositionMsg pos_msg;
     WallSensorMsg ws_msg;
-    copyMsg(msg_id::VEHICLE_POSITION, &pos_msg);
     copyMsg(msg_id::WALL_SENSOR, &ws_msg);
-    float res_dist = _calcResidualDist(pos_msg.x, pos_msg.y);
-    
-    
+        
     bool is_end = false;
 
     #ifndef SILS
     if(_turn_type == ETurnType::STRAIGHT_CENTER_EDGE || _turn_type == ETurnType::DIAGONAL_EDGE || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE){
-        is_end = _in_detect_edge_area && _detected_edge && res_dist <= 0.0f;
+        is_end = _in_detect_edge_area && _detected_edge && _res_dist <= 0.0f;
     }
     else{
-        is_end = (res_dist <= 0.0f && _cumulative_dist >= _target_dist) || ws_msg.dist_a < 0.045f;
+        is_end = (_res_dist <= 0.0f && _cumulative_dist >= _target_dist) || ws_msg.dist_a < 0.045f;
     }
     #else
     is_end = (_cumulative_dist >= _target_dist);
