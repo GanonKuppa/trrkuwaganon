@@ -9,6 +9,7 @@
 #include <Eigen/Geometry>
 #include "turnEnum.h"
 #include "trajTripletMsg.h"
+#include "navStateMsg.h"
 
 namespace module {
     class PositionEstimator : public BaseModule<PositionEstimator> {
@@ -21,7 +22,7 @@ namespace module {
         friend class BaseModule<PositionEstimator>;
                 
         PositionEstimator();
-        void _onWallCenterCorrection();
+        void _onWallCenterCorrection(NavStateMsg &nav_msg);
         void _aheadWallCorrection(bool is_correct_yaw);
         void _cornerLCorrection();
         void _cornerRCorrection();

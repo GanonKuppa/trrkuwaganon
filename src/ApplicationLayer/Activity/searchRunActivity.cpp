@@ -55,11 +55,10 @@ namespace activity{
         module::Navigator::getInstance().setNavMode(ENavMode::SEARCH);
         if(mode == 1) module::Navigator::getInstance().setNavSubMode(ENavSubMode::START2GOAL);
         else if(mode == 2) module::Navigator::getInstance().setNavSubMode(ENavSubMode::START2GOAL2START);
-        else if(mode == 3) module::Navigator::getInstance().setNavSubMode(ENavSubMode::ALL_AREA_SEARCH);
-        StopFactory::push(1.0f);
+        else if(mode == 3) module::Navigator::getInstance().setNavSubMode(ENavSubMode::ALL_AREA_SEARCH);        
         float suction_duty = module::ParameterManager::getInstance().suction_duty_search;
         module::Suction::getInstance().setDuty(suction_duty);
-        hal::waitmsec(1100);
+        hal::waitmsec(2000);
         module::Navigator::getInstance().startNavigation();
 
         module::Logger::getInstance().start();

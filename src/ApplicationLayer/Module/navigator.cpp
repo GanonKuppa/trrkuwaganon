@@ -50,9 +50,11 @@ namespace module{
         _yaw(90.0f * DEG2RAD),
         _x_setp(0.045f),
         _y_setp(0.045f),
+        _v_setp(0.0f),
         _yaw_setp(90.0f * DEG2RAD),
         _turn_type(ETurnType::NONE),
         _v(0.25f),
+        _v_max(1.0f),
         _a(4.0f),
         _yawrate_max(1000.0f * DEG2RAD),
         _yawacc(1000.0f * DEG2RAD),
@@ -91,7 +93,15 @@ namespace module{
         _maze.updateStartSectionWall();
         _maze.makeSearchMap(_x_dest, _y_dest);
         _is_failsafe = false;
-        _navigating = true;              
+        _navigating = true;  
+        _is_pre_read_l_wall = false;
+        _is_pre_read_r_wall = false;
+        _pre_read_l_wall_dist = 0.0f;
+        _pre_read_r_wall_dist = 0.0f;
+        _crossroads_count = 0;
+        _slalom_count = 0;
+        _x_last = 255;
+        _y_last = 255;
     }
 
     void Navigator::endNavigation(){
@@ -187,10 +197,12 @@ namespace module{
 
                 _x_last = _x_cur;
                 _y_last = _y_cur;
-                _lock_guard = true;
-                _nav_cmd_queue.push_back(ENavCommand::UPDATE_POTENTIAL_MAP);                
-                _nav_cmd_queue.push_back(ENavCommand::GO_NEXT_SECTION);
-                _lock_guard = false;
+                if(_v_setp <= _v){ // 既知区画加速中か判定
+                    _lock_guard = true;                
+                    _nav_cmd_queue.push_back(ENavCommand::UPDATE_POTENTIAL_MAP);                
+                    _nav_cmd_queue.push_back(ENavCommand::GO_NEXT_SECTION);
+                    _lock_guard = false;
+                }
 
             }
         }
@@ -237,9 +249,36 @@ namespace module{
                     _slalom_count = 0;
                 }
 
-
                 if(rot_times == 0) {
-                    StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.09, _v);
+                    uint8_t block_count = 1;
+                    uint8_t x_next = _x_cur;
+                    uint8_t y_next = _y_cur;
+                    while(1){
+                        if (_azimuth == EAzimuth::E) x_next++;
+                        else if (_azimuth == EAzimuth::N) y_next++;
+                        else if (_azimuth == EAzimuth::W) x_next--;
+                        else if (_azimuth == EAzimuth::S) y_next--;
+                        if(!_maze.isReached(x_next, y_next) || (x_next == 0 && y_next == 0)
+                        ){
+                            break;
+                        }
+                        EAzimuth dest_dir_next = _maze.getSearchDirection(x_next, y_next, _azimuth);
+                        int8_t rot_times = _maze.calcRotTimes(dest_dir_next, _azimuth);
+                        if(rot_times == 0 && _crossroads_count <= 3) {
+                             if(_maze.isCrossroads(x_next, y_next)){
+                                _crossroads_count ++;
+                            }                
+                            else{
+                                _crossroads_count = 0;
+                            }                            
+                            block_count ++;
+                        }else {
+                            break;
+                        }
+                    }
+
+                    if(block_count == 1) StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.09f, _v);
+                    else StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.09f * block_count, _v, _v_max, _v, _a, _a);                    
                 } 
                 else if (std::abs(rot_times) == 4) {
                     //_nav_cmd_queue.push_back(ENavCommand::SAVE_MAZE);   
@@ -440,6 +479,7 @@ namespace module{
         _x_setp = setp_msg.x;
         _y_setp = setp_msg.y;
         _yaw_setp = setp_msg.yaw;
+        _v_setp = setp_msg.v_xy_body;
         _turn_type = setp_msg.turn_type;
 
         _is_actuator_error = aout_msg.is_error;

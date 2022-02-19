@@ -484,7 +484,7 @@ void HF_playPath(ETurnParamSet tp, std::vector<Path>& path_vec) {
                 float now_fol_dist = module::TrajectoryInitializer::getInstance().getFolDist(ETurnParamSet::SAFE ,path_vec[i].turn_type);
                 x = now_fol_dist;
                 float a_fol = std::max(a, std::fabs(v_fol * v_fol -  v_max * v_max) / (2.0f * x));
-                StraightFactory::push(ETurnType::STRAIGHT_CENTER, x, v_max, v_max, v_fol, a_fol, a_fol);                
+                StraightFactory::push(ETurnType::STRAIGHT_CENTER, x, v_max, v_max, v_fol, a_fol, a_fol);
             } 
             else if(path_vec[i].isDiagonalEnd() && i + 1 == (uint16_t)path_vec.size()) {
                 float now_fol_dist = module::TrajectoryInitializer::getInstance().getFolDist(ETurnParamSet::SAFE ,path_vec[i].turn_type);

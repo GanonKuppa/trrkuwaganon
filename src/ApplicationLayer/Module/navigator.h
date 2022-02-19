@@ -67,10 +67,12 @@ namespace module {
         float _x_setp;
         float _y_setp;
         float _yaw_setp;
+        float _v_setp;
         ETurnType _turn_type;
 
 
         float _v;
+        float _v_max;
         float _a;
         float _yawrate_max;
         float _yawacc;        

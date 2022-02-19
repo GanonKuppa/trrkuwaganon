@@ -188,7 +188,7 @@ namespace module {
         else{
             _on_wall_center_dist = 0.0f;
         }
-        _onWallCenterCorrection();
+        _onWallCenterCorrection(nav_msg);
 
         // 前壁補正時に位置, 方位を強制書き換え
         if( (turn_type_pre == ETurnType::AHEAD_WALL_CORRECTION || turn_type_pre == ETurnType::AHEAD_WALL_YAW_CORRECTION) && 
@@ -272,13 +272,14 @@ namespace module {
         _publish_vehicle_attitude();
     }
 
-    void PositionEstimator::_onWallCenterCorrection() {
+    void PositionEstimator::_onWallCenterCorrection(NavStateMsg &nav_msg) {
         float x_pre = _x;
         float y_pre = _y;
         float yaw_pre = _yaw;
-
+        float position_dist_thr = 0.0f;
+        float yaw_dist_thr = 0.0f;
         float ang = _yaw * RAD2DEG;
-        if(_on_wall_center_dist > 0.03f && _on_wall_center_dist <= 0.06f) {
+        if(_on_wall_center_dist > 0.03f && _on_wall_center_dist <= 0.06f && nav_msg.mode == ENavMode::SEARCH) {
             if(ang >= 315.0 || ang < 45.0) {
                 _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;                
             } 
@@ -294,7 +295,9 @@ namespace module {
             //PRINTF_PICKLE("ON_WALL_CENTER | x:%6.3f, x_pre:%6.3f, y:%6.3f, y_pre:%6.3f yaw:%6.3f, yaw_pre:%6.3f\n", _x, x_pre, _y, y_pre, _yaw*RAD2DEG, yaw_pre*RAD2DEG);
             //module::LedController::getInstance().oneshotFcled(0, 0, 1, 0.05, 0.05);
         }
-        else if(_on_wall_center_dist > 0.05f){
+        else if( (_on_wall_center_dist > 0.05f && nav_msg.mode == ENavMode::SEARCH) ||
+                 (_on_wall_center_dist > 0.135f && nav_msg.mode == ENavMode::FASTEST)
+        ){
             if(ang >= 315.0 || ang < 45.0) {
                 _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;
                 _yaw = 0.0 * DEG2RAD;
@@ -314,7 +317,7 @@ namespace module {
             _on_wall_center_dist = 0.02f;
             //module::LedController::getInstance().oneshotFcled(1, 0, 1, 0.05, 0.05);
             //PRINTF_PICKLE("ON_WALL_CENTER YAW| x:%6.3f, x_pre:%6.3f, y:%6.3f, y_pre:%6.3f yaw:%6.3f, yaw_pre:%6.3f\n", _x, x_pre, _y, y_pre, _yaw*RAD2DEG, yaw_pre*RAD2DEG);            
-        }
+        }        
     }
 
     void PositionEstimator::_aheadWallCorrection(bool is_correct_yaw) {
