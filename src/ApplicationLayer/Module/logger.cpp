@@ -191,8 +191,8 @@ namespace module {
             copyMsg(msg_id::NAV_STATE, &nav_msg);
             copyMsg(msg_id::TRAJ_TRIPLET, &traj_msg);
 
-
-            constexpr float RAD2DEG = 180.0f / 3.14159265f;
+            constexpr float PI = 3.14159265f;
+            constexpr float RAD2DEG = 180.0f / PI;
             _log_data[_data_num][0] = (float)(hal::getElapsedMsec() - _start_time_ms)/1000.0f;
             _log_data[_data_num][1] = pos_msg.v_xy_body_enc;
             _log_data[_data_num][2] = pos_msg.v_xy_body_ave;
@@ -204,7 +204,12 @@ namespace module {
             _log_data[_data_num][7] = ctrl_msg.yawrate * RAD2DEG;
             _log_data[_data_num][8] = pid_msg.setp_yawrate * RAD2DEG;
 
-            _log_data[_data_num][9] = att_msg.yaw * RAD2DEG;
+
+            float ang_diff = ctrl_msg.yaw - att_msg.yaw;
+            while(ang_diff >  PI) ang_diff -= 2.0f * PI;
+            while(ang_diff < -PI) ang_diff += 2.0f * PI;                    
+            _log_data[_data_num][9] = ang_diff * RAD2DEG;
+            
             _log_data[_data_num][10] = ctrl_msg.yaw * RAD2DEG;
             _log_data[_data_num][11] = pid_msg.setp_yaw * RAD2DEG;
 

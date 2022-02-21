@@ -65,21 +65,25 @@ namespace activity{
         module::TrajectoryCommander::getInstance().reset(0.045f, 0.045f - wall2mouse_center_dist, 90.0f * DEG2RAD);
         module::PositionEstimator::getInstance().reset(0.045f, 0.045f - wall2mouse_center_dist, 90.0f * DEG2RAD);
         module::Navigator::getInstance().setNavMode(ENavMode::FASTEST);
-        StopFactory::push(2.1f);
-
-        float suction_duty = module::ParameterManager::getInstance().suction_duty_shortest;
-        module::Suction::getInstance().setDuty(suction_duty);
-        hal::waitmsec(100);
-        
+                
         ETurnParamSet tp = ETurnParamSet(param_mode);
         module::ParameterManager& pm = module::ParameterManager::getInstance();
         std::vector<Path> path_vec;
         Maze& maze = module::Navigator::getInstance().getMazeRef();
 
-
         makeFastestDiagonalPath(500, tp, pm.goal_x, pm.goal_y, maze, path_vec);
+
+        StopFactory::push(2.1f);
+        float suction_duty = module::ParameterManager::getInstance().suction_duty_shortest;
+        module::Suction::getInstance().setDuty(suction_duty);
+        CtrlSetpointMsg ctrl_msg;
+        copyMsg(msg_id::CTRL_SETPOINT, &ctrl_msg);
+        HF_playPath(tp, path_vec);        
+        while(ctrl_msg.traj_type == ETrajType::STOP || ctrl_msg.traj_type == ETrajType::NONE){
+        	copyMsg(msg_id::CTRL_SETPOINT, &ctrl_msg);
+        	hal::waitmsec(1);
+        }
         module::Logger::getInstance().start();
-        HF_playPath(tp, path_vec);
 
         PRINTF_ASYNC("--- makeMinStepPath ----\n");
         printPath(path_vec);
