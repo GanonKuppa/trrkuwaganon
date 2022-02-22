@@ -83,19 +83,22 @@ void timerInterrupt0() {
     }
     // スロット1
     if (int_tick_count % 4 == 1) {        
-        module::LedController::getInstance().cycle1();        
+        module::LedController::getInstance().cycle1();
+        module::ImuDriver::getInstance().cycle1();
         module::Shell::getInstance().cycle1();
         hal::setSlot1Time(hal::hrtGetElapsedUsec());
     }
     // スロット2
     if (int_tick_count % 4 == 2) {        
         module::PseudoDial::getInstance().cycle2();        
+        module::ImuDriver::getInstance().cycle2();
         module::Shell::getInstance().cycle2();        
         hal::setSlot2Time(hal::hrtGetElapsedUsec());
     }
     // スロット3
     if (int_tick_count % 4 == 3) {                
         module::Logger::getInstance().cycle3();
+        module::ImuDriver::getInstance().cycle3();
         module::Shell::getInstance().cycle3();        
         hal::setSlot3Time(hal::hrtGetElapsedUsec());
     }

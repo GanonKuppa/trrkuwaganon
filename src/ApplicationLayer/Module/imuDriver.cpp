@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <string>
+#include <algorithm>
 
 // Lib
 #include "ntlibc.h"
@@ -32,6 +33,7 @@ namespace module {
 
     ImuDriver::ImuDriver() :
     _ang_v_raw{0, 0, 0},
+    _ang_v_2_os{0, 0, 0, 0},
     _acc_raw{0, 0, 0},
     _ang_v_c{0.0f, 0.0f, 0.0f},
     _acc_c{0, 0, 0},
@@ -181,6 +183,22 @@ namespace module {
         }
     }
 
+    void ImuDriver::update1(){
+        uint8_t outz_l_g = _readReg(0x26);
+        uint8_t outz_h_g = _readReg(0x27);
+        _ang_v_2_os[1] = concatenate2Byte_int(outz_h_g, outz_l_g);
+
+    }
+    void ImuDriver::update2(){
+        uint8_t outz_l_g = _readReg(0x26);
+        uint8_t outz_h_g = _readReg(0x27);
+        _ang_v_2_os[2] = concatenate2Byte_int(outz_h_g, outz_l_g);
+    }
+    void ImuDriver::update3(){
+        uint8_t outz_l_g = _readReg(0x26);
+        uint8_t outz_h_g = _readReg(0x27);
+        _ang_v_2_os[3] = concatenate2Byte_int(outz_h_g, outz_l_g);
+    }
 
 
     void ImuDriver::update0(){
@@ -229,7 +247,14 @@ namespace module {
         
         _ang_v_raw[0] = - concatenate2Byte_int(outx_h_g, outx_l_g);
         _ang_v_raw[1] = - concatenate2Byte_int(outy_h_g, outy_l_g);
-        _ang_v_raw[2] = concatenate2Byte_int(outz_h_g, outz_l_g);
+
+        int16_t ang_v_2_max = std::max({_ang_v_2_os[0], _ang_v_2_os[1], _ang_v_2_os[2], _ang_v_2_os[3]});
+        int16_t ang_v_2_min = std::min({_ang_v_2_os[0], _ang_v_2_os[1], _ang_v_2_os[2], _ang_v_2_os[3]});
+        int32_t ang_v_2_sum = _ang_v_2_os[0] + _ang_v_2_os[1] + _ang_v_2_os[2] + _ang_v_2_os[3];
+        int32_t ang_v_2_trim_ave = (ang_v_2_sum - ang_v_2_max - ang_v_2_min) / 2;
+        _ang_v_2_os[0] = concatenate2Byte_int(outz_h_g, outz_l_g);
+
+        _ang_v_raw[2] = ang_v_2_trim_ave;
 
         _ang_v_c[0] = float(_ang_v_raw[0]) - _ang_v_offset[0];
         _ang_v_c[1] = float(_ang_v_raw[1]) - _ang_v_offset[1];

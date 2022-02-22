@@ -8,6 +8,9 @@ namespace module {
     class ImuDriver : public BaseModule<ImuDriver> {
       public:
         void update0();
+        void update1();
+        void update2();
+        void update3();
         void debug();
         void calibrateGyro(uint16_t num);
         void evalGyro(uint32_t num);
@@ -18,11 +21,13 @@ namespace module {
         friend class BaseModule<ImuDriver>;
         
         int16_t _ang_v_raw[3];
+        int16_t _ang_v_2_os[4];
+        
         int16_t _acc_raw[3];
         
         float _ang_v_c[3];
         float _acc_c[3];
-
+                
         float _ang_v_f[3];
         float _acc_f[3];
         float _acc_norm;
@@ -41,7 +46,7 @@ namespace module {
         void _writeReg(uint8_t adress, uint8_t data);
         uint8_t _readReg(uint8_t adress);
         void _readRegBurst(uint8_t* recv);
-        void _publish();
+        void _publish();        
     };
 
     int usrcmd_imuDriver(int argc, char **argv);

@@ -60,22 +60,25 @@ namespace module {
             setMaxVoltageDutyR(duty_r);
         }
         else if(out_msg.ctrl_mode == ECtrlMode::VEHICLE){
-/*
-            // duty飽和時には回転系制御を優先
-            if(duty(0) > 1.0 || duty(1) > 1.0) {
-                float duty_overflow = 0.0f;
-                if(duty(0) > duty(1) ) {
-                    duty_overflow = duty(0) - 1.0f;
-                } else {
-                    duty_overflow = duty(1) - 1.0f;
-                }
-                duty(0) -= duty_overflow;
-                duty(1) -= duty_overflow;
+            float duty_l = out_msg.duty_l;
+            float duty_r = out_msg.duty_r;
 
+            // duty飽和時には回転系制御を優先
+            if(duty_l > 1.0 || duty_r > 1.0) {
+                float duty_overflow = 0.0f;
+                if(duty_l > duty_r ) {
+                    duty_overflow = duty_l - 1.0f;
+                } else {
+                    duty_overflow = duty_r - 1.0f;
+                }
+                duty_l -= duty_overflow;
+                duty_r -= duty_overflow;
             }
-*/
-            float duty_l = std::clamp<float>(out_msg.duty_l, -duty_limit, duty_limit);
-            float duty_r = std::clamp<float>(out_msg.duty_r, -duty_limit, duty_limit);
+
+            duty_l = std::clamp<float>(duty_l, -duty_limit, duty_limit);
+            duty_r = std::clamp<float>(duty_r, -duty_limit, duty_limit);
+
+
             if(nav_msg.is_failsafe){
                 duty_l = 0.0f;
                 duty_r = 0.0f;

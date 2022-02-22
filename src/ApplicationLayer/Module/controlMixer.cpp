@@ -206,6 +206,7 @@ namespace module{
             // 壁制御量は曲率とみなし, 速度をかけることで角速度に変換
             float v_now = _pos_msg.v_xy_body_for_ctrl;
             if(v_now < 0.05f) v_now = 0.05f;
+            if(v_now > 1.0f) v_now = 1.0f;
             _setp_yawrate += v_now * _wall_pidf.getControlVal();
         }
         else{            
@@ -215,7 +216,8 @@ namespace module{
         // 斜め直進時の壁制御
         if(_turn_type == ETurnType::DIAGONAL_CENTER || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE) {
             float v_now = _pos_msg.v_xy_body_for_ctrl;
-            if(v_now < 0.1f) v_now = 0.1f;              
+            if(v_now < 0.1f) v_now = 0.1f;
+            if(v_now > 1.0f) v_now = 1.0f;        
             
             bool ctrl_ccw = false;
             bool ctrl_cw = false;
