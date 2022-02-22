@@ -279,6 +279,7 @@ namespace module {
             PRINTF_ASYNC("  end    :\r\n");
             PRINTF_ASYNC("  print  :\r\n");
             PRINTF_ASYNC("  pickle :\r\n");
+            PRINTF_ASYNC("  test   :\r\n");
             return 0;
         }
 
@@ -315,6 +316,32 @@ namespace module {
 
         if (ntlibc_strcmp(argv[1], "pickle") == 0){
             Logger::getInstance().printPickleMsg();
+            return 0;
+        }
+
+
+        if (ntlibc_strcmp(argv[1], "test") == 0){
+            {
+                uint32_t start_time = hal::getElapsedMsec();
+                PRINTF_ASYNC("  PRINT_PICKLE x 100 times| %f, %f, %f, %f, %f, %f, %f, %f \n", 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f);
+                for(uint16_t i=0;i<100;i++){
+                    PRINTF_PICKLE("  %f, %f, %f, %f, %f, %f, %f, %f\n", 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f);
+                }
+                uint32_t elapsed_time = hal::getElapsedMsec() - start_time;
+                PRINTF_ASYNC("  elapsed : %d [ms]\n", elapsed_time);
+                Logger::getInstance().printPickleMsg();
+            }
+            PRINTF_ASYNC("---------------\n");
+            {
+                uint32_t start_time = hal::getElapsedMsec();
+                PRINTF_ASYNC("  PRINTF_ASYNC x 100 times| %f, %f, %f, %f, %f, %f, %f, %f \n", 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f);
+                for(uint16_t i=0;i<100;i++){
+                    PRINTF_ASYNC("  %f, %f, %f, %f, %f, %f, %f, %f\n", 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f);
+                }
+                uint32_t elapsed_time = hal::getElapsedMsec() - start_time;
+                PRINTF_ASYNC("  elapsed : %d [ms]\n", elapsed_time);
+            }
+            return 0;
         }
 
         PRINTF_ASYNC("  Unknown sub command found\r\n");
