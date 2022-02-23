@@ -7,6 +7,7 @@
 #include "ntopt.h"
 #include "ntlibc.h"
 #include "ntshell.h"
+#include "text_history.h"
 
 
 #include "debugLog.h"
@@ -15,6 +16,7 @@
 #include "hal_uart.h"
 #include "hal_timerInterrupt.h"
 #include "hal_timer.h"
+#include "hal_flashRom.h"
 
 // Module
 #include "baseModule.h"
@@ -38,6 +40,18 @@
 #include "truthMaker.h"
 #include "gamepad.h"
 #include "seManager.h"
+#include "runAnalizer.h"
+
+
+
+static int usrcmd_ntopt_callback(int argc, char **argv, void *extobj);
+static int user_callback(const char *text, void *extobj);
+static int serial_read(char *buf, int cnt, void *extobj);
+static int serial_write(const char *buf, int cnt, void *extobj);
+static void readHistoryFromFlash(ntshell_t* nts);
+static void writeHistory2Flash(ntshell_t* nts);
+
+
 
 static int usrcmd_help(int argc, char **argv);
 static int usrcmd_info(int argc, char **argv);
@@ -83,8 +97,102 @@ static const cmd_table_t cmdlist[] = {
     { "wheel", "alias of wheelOdometry command.", module::usrcmd_wheelOdometry },
     { "truthMaker", "TruthMaker Module.", module::usrcmd_truthMaker },
     { "gamepad", "Gamepad Module.", module::usrcmd_gamepad },
-    { "seManager", "seManager Module.", module::usrcmd_seManager }
+    { "seManager", "seManager Module.", module::usrcmd_seManager },
+    { "runAnalizer", "runAnalizer Module.", module::usrcmd_runAnalizer }
 };
+
+int serial_write(const char *buf, int cnt, void *extobj)
+{
+    hal::putnbyteUart1((uint8_t*)buf, cnt);
+    return cnt;
+}
+
+int usrcmd_ntopt_callback(int argc, char **argv, void *extobj)
+{
+    if (argc == 0) {
+        return 0;
+    }
+    const cmd_table_t *p = &cmdlist[0];
+    for (uint16_t i = 0; i < sizeof(cmdlist) / sizeof(cmdlist[0]); i++) {
+        if (ntlibc_strcmp((const char *)argv[0], p->cmd) == 0) {
+            return p->func(argc, argv);
+        }
+        p++;
+    }
+    PRINTF_ASYNC("Unknown command found.\r\n");
+    return 0;
+}
+
+int user_callback(const char *text, void *extobj)
+{                
+    ntopt_parse(text, usrcmd_ntopt_callback, 0);
+    writeHistory2Flash(module::Shell::getInstance().getNtsPtr());
+    return 0;
+}
+
+
+int serial_read(char *buf, int cnt, void *extobj)
+{    
+
+    if(!hal::isEmptyRecvBufUart1()){
+        uint16_t recvBufsize = hal::getRecvBufUart1size();
+        uint16_t read_size = cnt;
+        if(cnt > recvBufsize){
+            read_size = recvBufsize;
+        }
+        bool rtn = hal::readnbyteUart1((uint8_t*)buf, read_size);
+        
+        if(rtn == false){
+            return 0;
+        } 
+        else{
+            return read_size;
+        }
+    }
+    else{
+        return 0;
+    }
+}
+
+
+void readHistoryFromFlash(ntshell_t* nts){    
+    constexpr uint16_t WRITE_TARGET_BLOCK = 768;
+    constexpr uint16_t START_INDEX = WRITE_TARGET_BLOCK * hal::FLASH_BLOCK_BYTE_SIZE;
+    constexpr uint16_t BLOCK_NUM = 16;
+    constexpr uint32_t LEN = hal::FLASH_BLOCK_BYTE_SIZE * BLOCK_NUM + 8;    
+    hal::readFlashRom(START_INDEX, &(nts->history.history[0]), LEN);    
+}
+
+void writeHistory2Flash(ntshell_t* nts){
+    constexpr uint16_t WRITE_TARGET_BLOCK = 768;
+    constexpr uint16_t START_INDEX = WRITE_TARGET_BLOCK * hal::FLASH_BLOCK_BYTE_SIZE;
+    constexpr uint16_t BLOCK_NUM = 17;
+    constexpr uint32_t LEN = hal::FLASH_BLOCK_BYTE_SIZE;
+
+    uint8_t* write_val = (uint8_t*)(&(nts->history.history[0]));
+
+    for(uint8_t i=0; i<BLOCK_NUM; i++) {
+        uint32_t index = START_INDEX + i*LEN;
+        while(1) {
+            if(hal::eraseCheckFlashRom(index, LEN) == false) {
+                hal::eraseFlashRom(index);
+            };
+            hal::writeFlashRom(index, &write_val[i*LEN], LEN);
+            uint8_t read_val[LEN];
+            hal::readFlashRom(index, &read_val[0], LEN);
+
+            bool check_result = true;
+            for(uint8_t j=0; j<LEN; j++) {
+                if(read_val[j] != write_val[i*LEN+j]) {
+                    PRINTF_ASYNC("write error!\n");
+                    check_result = false;
+                }
+            }
+            if(check_result) break;
+        }
+    }    
+}
+
 
 int usrcmd_help(int argc, char **argv)
 {
@@ -186,6 +294,9 @@ int usrcmd_top(int argc, char **argv)
     hal::waitmsec(10);
     module::SeManager::getInstance().printCycleTime();
     hal::waitmsec(10);
+    module::RunAnalizer::getInstance().printCycleTime();
+    hal::waitmsec(10);
+
 
     return 0;
 }
@@ -199,8 +310,10 @@ namespace module {
 
     Shell::Shell(){
         setModuleName("Shell");
-        void *extobj = 0;
+                
+        void *extobj = 0;        
         ntshell_init(&nts, serial_read, serial_write, user_callback, extobj);
+        readHistoryFromFlash(&nts);
         ntshell_set_prompt(&nts, "trrkuwaganon>");
     };
 
@@ -238,64 +351,9 @@ namespace module {
     }
 
 
-    int Shell::usrcmd_ntopt_callback(int argc, char **argv, void *extobj)
-    {
-        if (argc == 0) {
-            return 0;
-        }
-        const cmd_table_t *p = &cmdlist[0];
-        for (uint16_t i = 0; i < sizeof(cmdlist) / sizeof(cmdlist[0]); i++) {
-            if (ntlibc_strcmp((const char *)argv[0], p->cmd) == 0) {
-                return p->func(argc, argv);
-            }
-            p++;
-        }
-        PRINTF_ASYNC("Unknown command found.\r\n");
-        return 0;
-    }
-
-    int Shell::user_callback(const char *text, void *extobj)
-    {    
-        ntopt_parse(text, usrcmd_ntopt_callback, 0);
-        return 0;
-    }
-
-
-    int Shell::serial_read(char *buf, int cnt, void *extobj)
-    {    
-
-        if(!hal::isEmptyRecvBufUart1()){
-            uint16_t recvBufsize = hal::getRecvBufUart1size();
-            uint16_t read_size = cnt;
-            if(cnt > recvBufsize){
-                read_size = recvBufsize;
-            }
-            bool rtn = hal::readnbyteUart1((uint8_t*)buf, read_size);
-            
-            if(rtn == false){
-                return 0;
-            } 
-            else{
-                return read_size;
-            }
-        }
-        else{
-            return 0;
-        }
-    }
-
-    int Shell::serial_write(const char *buf, int cnt, void *extobj)
-    {
-        hal::putnbyteUart1((uint8_t*)buf, cnt);
-        return cnt;
-    }
-
-
     int usrcmd_shell(int argc, char **argv){
     	return 0;
     }
-
-
 }
 
 

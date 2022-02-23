@@ -13,16 +13,14 @@ namespace module {
         void update2();
         void update3();
         void updateInMainLoop();
+        ntshell_t* getNtsPtr(){
+            return &nts;
+        }
       private:
         friend class BaseModule<Shell>;
 
         ntshell_t nts;
-
         Shell();
-        static int usrcmd_ntopt_callback(int argc, char **argv, void *extobj);
-        static int user_callback(const char *text, void *extobj);
-        static int serial_read(char *buf, int cnt, void *extobj);
-        static int serial_write(const char *buf, int cnt, void *extobj);
     };
 
     int usrcmd_shell(int argc, char **argv);

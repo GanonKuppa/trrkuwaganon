@@ -29,6 +29,7 @@
 #include "positionEstimator.h"
 #include "powerTransmission.h"
 #include "pseudoDial.h"
+#include "runAnalizer.h"
 #include "seManager.h"
 #include "shell.h"
 #include "suction.h"
@@ -79,6 +80,7 @@ void timerInterrupt0() {
         module::Shell::getInstance().cycle0();        
         module::Navigator::getInstance().cycle0();
         module::WallSensor::getInstance().cycle0();
+        module::RunAnalizer::getInstance().cycle0();
         hal::setSlot0Time(hal::hrtGetElapsedUsec());
     }
     // スロット1
@@ -178,6 +180,7 @@ void object_init() {
     module::PositionEstimator::getInstance().setDeltaT(0.001f);
     module::PowerTransmission::getInstance().setDeltaT(0.001f);
     module::PseudoDial::getInstance().setDeltaT(0.001f);
+    module::RunAnalizer::getInstance();
     module::SeManager::getInstance();
     module::Shell::getInstance();
     module::Suction::getInstance().setDeltaT(0.00025f);
