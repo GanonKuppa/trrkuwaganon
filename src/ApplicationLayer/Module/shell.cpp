@@ -159,14 +159,14 @@ void readHistoryFromFlash(ntshell_t* nts){
     constexpr uint16_t WRITE_TARGET_BLOCK = 768;
     constexpr uint16_t START_INDEX = WRITE_TARGET_BLOCK * hal::FLASH_BLOCK_BYTE_SIZE;
     constexpr uint16_t BLOCK_NUM = 16;
-    constexpr uint32_t LEN = hal::FLASH_BLOCK_BYTE_SIZE * BLOCK_NUM + 8;    
+    constexpr uint32_t LEN = hal::FLASH_BLOCK_BYTE_SIZE * BLOCK_NUM + 8; // nts->historyのサイズ分 
     hal::readFlashRom(START_INDEX, &(nts->history.history[0]), LEN);    
 }
 
 void writeHistory2Flash(ntshell_t* nts){
     constexpr uint16_t WRITE_TARGET_BLOCK = 768;
     constexpr uint16_t START_INDEX = WRITE_TARGET_BLOCK * hal::FLASH_BLOCK_BYTE_SIZE;
-    constexpr uint16_t BLOCK_NUM = 17;
+    constexpr uint16_t BLOCK_NUM = 17; // nts->historyのサイズ分より大きく確保
     constexpr uint32_t LEN = hal::FLASH_BLOCK_BYTE_SIZE;
 
     uint8_t* write_val = (uint8_t*)(&(nts->history.history[0]));
@@ -183,8 +183,7 @@ void writeHistory2Flash(ntshell_t* nts){
 
             bool check_result = true;
             for(uint8_t j=0; j<LEN; j++) {
-                if(read_val[j] != write_val[i*LEN+j]) {
-                    PRINTF_ASYNC("write error!\n");
+                if(read_val[j] != write_val[i*LEN+j]) {                    
                     check_result = false;
                 }
             }
