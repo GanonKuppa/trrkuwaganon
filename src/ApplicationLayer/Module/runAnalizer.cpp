@@ -27,7 +27,8 @@ namespace module {
 
 RunAnalizer::RunAnalizer() :
 	_traj_info_num(0),
-    _in_detect_edge_area_pre(false)
+    _in_detect_edge_area_pre(false),
+    _detected_edge_pre(false)
 	{
 		setModuleName("RunAnalizer");
         for(uint8_t i=0;i<TRAJ_INFO_MAX;i++){
@@ -35,6 +36,10 @@ RunAnalizer::RunAnalizer() :
             _traj_info_list[i].turn_dir_next = ETurnDir::NO_TURN;
             _traj_info_list[i].wall_sensor_max = 0;
             _traj_info_list[i].wall_sensor_min = 32767;
+            _traj_info_list[i].end_x = 0.0f;
+            _traj_info_list[i].detected_x = 0.0f;
+            _traj_info_list[i].end_y = 0.0f;
+            _traj_info_list[i].detected_y = 0.0f;
             _traj_info_list[i].end_yaw = 0.0f;
         }
 	}
@@ -54,9 +59,9 @@ RunAnalizer::RunAnalizer() :
         PRINTF_ASYNC("  diag_corner_threshold_off_l : %8d\n", pm.wall_corner_threshold_off_l);
 
         PRINTF_ASYNC("  ------------------------------ \n");
-        PRINTF_ASYNC("  num, turn_type_next, dir, wall_max, wall_min, yaw\n");
+        PRINTF_ASYNC("  num, turn_type_next, dir, wall_max, wall_min,  end_yaw\n");
         for(uint32_t i=0; i<_traj_info_num; i++){    
-            PRINTF_ASYNC("  %03d, %-14s, %3s, %8d, %8d, %3d\n",
+            PRINTF_ASYNC("  %03d, %-14s, %3s, %8d, %8d, %8d\n",
               i,
               turnType2Str(_traj_info_list[i].turn_type_next).c_str(),
               turnDir2Str(_traj_info_list[i].turn_dir_next).c_str(),
@@ -64,6 +69,10 @@ RunAnalizer::RunAnalizer() :
               _traj_info_list[i].wall_sensor_min,
               (int16_t)(_traj_info_list[i].end_yaw * 180.0f /3.14159265)
             );
+            PRINTF_ASYNC("\n");
+            PRINTF_ASYNC("    x | %7.3f, %7.3f | %7.3f\n", _traj_info_list[i].end_x, _traj_info_list[i].detected_x, _traj_info_list[i].end_x - _traj_info_list[i].detected_x);
+            PRINTF_ASYNC("    y | %7.3f, %7.3f | %7.3f\n", _traj_info_list[i].end_y, _traj_info_list[i].detected_y, _traj_info_list[i].end_y - _traj_info_list[i].detected_y);
+
             hal::waitmsec(10);
         }
     }
@@ -102,6 +111,13 @@ RunAnalizer::RunAnalizer() :
                 _traj_info_list[_traj_info_num].wall_sensor_min = std::min(ws_msg.right, _traj_info_list[_traj_info_num].wall_sensor_min);
             }
             _traj_info_list[_traj_info_num].end_yaw = traj_msg.end_yaw_now;
+            _traj_info_list[_traj_info_num].end_x = traj_msg.end_x_now;
+            _traj_info_list[_traj_info_num].end_y = traj_msg.end_y_now;
+
+            if(!_detected_edge_pre && ctrl_msg.detected_edge){
+                _traj_info_list[_traj_info_num].detected_x = pos_msg.x;
+                _traj_info_list[_traj_info_num].detected_y = pos_msg.y;
+            }
         }
 
         if(_in_detect_edge_area_pre && !ctrl_msg.in_detect_edge_area && _traj_info_num < TRAJ_INFO_MAX){
@@ -109,6 +125,7 @@ RunAnalizer::RunAnalizer() :
         }
         
         _in_detect_edge_area_pre = ctrl_msg.in_detect_edge_area;
+        _detected_edge_pre = ctrl_msg.detected_edge;
     }
 
     int usrcmd_runAnalizer(int argc, char **argv){

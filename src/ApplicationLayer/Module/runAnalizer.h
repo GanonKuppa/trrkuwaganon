@@ -14,7 +14,11 @@ namespace module{
         ETurnDir turn_dir_next = ETurnDir::NO_TURN;
         int16_t wall_sensor_max = 0;
         int16_t wall_sensor_min = 32767;
-        float end_yaw;               
+        float end_yaw;
+        float end_x;
+        float detected_x;
+        float end_y;
+        float detected_y;   
     };
 
     class RunAnalizer : public BaseModule<RunAnalizer>{
@@ -27,6 +31,7 @@ namespace module{
         TrajInfo _traj_info_list[TRAJ_INFO_MAX];        
         uint16_t _traj_info_num;
         bool _in_detect_edge_area_pre;
+        bool _detected_edge_pre;
         friend class BaseModule<RunAnalizer>;
         RunAnalizer();
     };

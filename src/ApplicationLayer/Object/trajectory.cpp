@@ -178,7 +178,7 @@ float StraightTrajectory::getNecessaryTime(){
 void StraightTrajectory::update() {
     BaseTrajectory::update();
 
-    VehiclePositionMsg pos_msg;    
+    VehiclePositionMsg pos_msg;
     copyMsg(msg_id::VEHICLE_POSITION, &pos_msg);    
     _res_dist = _calcResidualDist(pos_msg.x, pos_msg.y);
 
@@ -268,7 +268,10 @@ void StraightTrajectory::update() {
     
 bool StraightTrajectory::isEnd() {
     WallSensorMsg ws_msg;
+    VehiclePositionMsg pos_msg;
+    copyMsg(msg_id::VEHICLE_POSITION, &pos_msg);
     copyMsg(msg_id::WALL_SENSOR, &ws_msg);
+    _res_dist = _calcResidualDist(pos_msg.x, pos_msg.y);    
         
     bool is_end = false;
 

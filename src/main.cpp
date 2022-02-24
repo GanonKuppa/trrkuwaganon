@@ -85,6 +85,7 @@ void timerInterrupt0() {
     }
     // スロット1
     if (int_tick_count % 4 == 1) {        
+        module::TrajectoryCommander::getInstance().cycle1();
         module::LedController::getInstance().cycle1();
         module::ImuDriver::getInstance().cycle1();
         module::Shell::getInstance().cycle1();

@@ -9,6 +9,7 @@ namespace module {
     class TrajectoryCommander : public BaseModule<TrajectoryCommander>{
       public:
         void update0();
+        void update1();
         
         void push(std::unique_ptr<BaseTrajectory>&& traj);
         void clear();

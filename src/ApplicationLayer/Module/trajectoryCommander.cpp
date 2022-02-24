@@ -54,9 +54,13 @@ namespace module {
         if(_lock_guard) return;
         
         if(!_traj_queue.empty()){
-
             _traj_queue.front()->update();
+        }        
+        _publish();
+    }
 
+    void TrajectoryCommander::update1(){
+        if(!_traj_queue.empty()){
             if(_traj_queue.front()->isEnd()){
                 _x = _traj_queue.front()->getEndX();
                 _y = _traj_queue.front()->getEndY();
@@ -71,9 +75,9 @@ namespace module {
                     _traj_queue.front()->setInitPos(_x, _y, _yaw);
                 }
             }
-        }        
-        _publish();
+        }
     }
+
 
     void TrajectoryCommander::debug(){
         constexpr float RAD2DEG = 180.0f / 3.14159265f;
