@@ -67,6 +67,7 @@ namespace module {
         uint8_t on_wall_center_correction_enable; //23
         uint8_t on_wall_read_correction_enable; //24
 
+        uint32_t dusty_tire_section_count; //29
 
         float duty_coef_left_p; //30
         float duty_offset_left_p; //31

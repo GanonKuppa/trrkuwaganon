@@ -11,6 +11,7 @@
 
 // Object
 #include "maze.h"
+#include "turnEnum.h"
 
 namespace module {
     class Navigator : public BaseModule<Navigator> {
@@ -41,6 +42,8 @@ namespace module {
         bool _done_outward;
         float _elapsed_time;
         float _search_limit_time;
+        uint32_t _cumulative_section_count;
+        uint32_t _dusty_tire_section_count;
         
         uint8_t _x_cur;
         uint8_t _y_cur;
@@ -72,13 +75,13 @@ namespace module {
         float _v_setp;
         ETurnType _turn_type;
 
-
         float _v;
         float _v_max;
         float _a;
         float _yawrate_max;
         float _yawacc;        
         float _wall2mouse_center_dist;
+        ETurnParamSet _turn_param_set;
 
         float _read_wall_offset1;
         float _read_wall_offset2;
@@ -98,6 +101,7 @@ namespace module {
         bool _existsRWall(float x, float y, EAzimuth azimuth);
         bool _existsLWall(float x, float y, EAzimuth azimuth);
         bool _watchedPillar(float x, float y, EAzimuth azimuth);
+        void _updateRunParameter();
         void _printWall();
         
         void _publish();

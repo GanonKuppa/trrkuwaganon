@@ -19,6 +19,7 @@
 // Module
 #include "parameterManager.h"
 #include "trajectoryFactory.h"
+#include "trajectoryInitializer.h"
 #include "ledController.h"
 
 
@@ -33,6 +34,8 @@ namespace module{
         _done_outward(false),
         _elapsed_time(0.0f),
         _search_limit_time(600.0f),
+        _cumulative_section_count(0),
+        _dusty_tire_section_count(100),
         _x_cur(0),
         _y_cur(0),
         _x_last(255),
@@ -61,6 +64,7 @@ namespace module{
         _yawrate_max(1000.0f * DEG2RAD),
         _yawacc(1000.0f * DEG2RAD),
         _wall2mouse_center_dist(0.0f),
+        _turn_param_set(ETurnParamSet::SEARCH),
         _read_wall_offset1(0.012f),
         _read_wall_offset2(0.0135f),
         _is_pre_read_l_wall(false),
@@ -83,15 +87,15 @@ namespace module{
         _sub_mode = sub_mode;
     }
 
-    void Navigator::startNavigation(){
-        while(_lock_guard) hal::waitusec(1);
-        _lock_guard = true;
-        while(!_nav_cmd_queue.empty()) _nav_cmd_queue.pop_front();
-        _nav_cmd_queue.push_back(ENavCommand::DO_FIRST_MOVE);
-        _lock_guard = false;
+    void Navigator::startNavigation(){        
+    	ParameterManager&pm = ParameterManager::getInstance();
+    	_done_outward = false;
+        _elapsed_time = 0.0f;        
+        _search_limit_time = pm.search_limit_time_sec;
+        _cumulative_section_count = 0;
+        _dusty_tire_section_count = pm.dusty_tire_section_count;
+        _updateRunParameter();
         
-        _done_outward = false;
-        _elapsed_time = 0.0f;
         _updateDestination();
         _maze.updateStartSectionWall();
         _maze.makeSearchMap(_x_dest, _y_dest);
@@ -105,6 +109,16 @@ namespace module{
         _slalom_count = 0;
         _x_last = 255;
         _y_last = 255;
+
+        _x_goal = pm.goal_x;
+        _y_goal = pm.goal_y;
+        _wall2mouse_center_dist = pm.wall2mouse_center_dist;
+
+        while(_lock_guard) hal::waitusec(1);
+        _lock_guard = true;
+        while(!_nav_cmd_queue.empty()) _nav_cmd_queue.pop_front();
+        _nav_cmd_queue.push_back(ENavCommand::DO_FIRST_MOVE);
+        _lock_guard = false;
     }
 
     void Navigator::endNavigation(){
@@ -211,7 +225,7 @@ namespace module{
 
             }
         }
-        
+                
         _elapsed_time += _delta_t;
         
         // navStateMsgをpublish
@@ -230,6 +244,7 @@ namespace module{
                 PRINTF_PICKLE("DO_FIRST_MOVE        | x_setp:%6.3f, y_setp:%6.3f | x:%6.3f, y:%6.3f\n",_x_setp/0.09f, _y_setp/0.09f, _x/0.09f, _y/0.09f);
             }
             else if(cmd == ENavCommand::GO_NEXT_SECTION){
+                _cumulative_section_count ++;
                 EAzimuth dest_dir = _maze.getSearchDirection(_x_cur, _y_cur, _azimuth);
                 EAzimuth min_dir = _maze.getMinDirection(_x_cur, _y_cur, _azimuth);
                 EAzimuth unknown_dir = _maze.getUnknownDirection(_x_cur, _y_cur, _azimuth);
@@ -317,11 +332,13 @@ namespace module{
                         StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2, _v, _v, 0.0f, _a, _a);                       
                         SpinTurnFactory::push(180.0f * DEG2RAD, _yawrate_max, _yawacc);                        
                     }
+
+                    _updateRunParameter(); // 所定区画以上移動していた場合に探索速度を遅くする
                     StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f + _read_wall_offset2, 0.0f, _v, _v, _a, _a);
                 }
                 else if(rot_times == 2) {
                     if(_slalom_count <= 6){
-                        CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_90, ETurnDir::CCW, -_read_wall_offset2 , _read_wall_offset2);
+                        CurveFactory::pushWithStraight(_turn_param_set, ETurnType::TURN_90, ETurnDir::CCW, -_read_wall_offset2 , _read_wall_offset2);
                     }
                     else{
                         if(_maze.existsAWall(_x_cur, _y_cur, _azimuth)){
@@ -347,7 +364,7 @@ namespace module{
                 }
                 else if(rot_times == -2){
                     if(_slalom_count <= 7){
-                        CurveFactory::pushWithStraight(ETurnParamSet::SEARCH, ETurnType::TURN_90, ETurnDir::CW, -_read_wall_offset2 , _read_wall_offset2);
+                        CurveFactory::pushWithStraight(_turn_param_set, ETurnType::TURN_90, ETurnDir::CW, -_read_wall_offset2 , _read_wall_offset2);
                     }
                     else{
                         if(_maze.existsAWall(_x_cur, _y_cur, _azimuth)){
@@ -472,12 +489,6 @@ namespace module{
         ParameterManager& pm = ParameterManager::getInstance();
         _x_goal = pm.goal_x;
         _y_goal = pm.goal_y;
-        _v = pm.v_search_run;
-        _a = pm.a_search_run;
-        _yawrate_max = pm.spin_yawrate_max * DEG2RAD;
-        _yawacc = pm.spin_yawacc * DEG2RAD;
-        _wall2mouse_center_dist = pm.wall2mouse_center_dist;
-        _search_limit_time = pm.search_limit_time_sec;
         
         copyMsg(msg_id::WALL_SENSOR, &_ws_msg);
 
@@ -681,6 +692,26 @@ namespace module{
         }
         else{
             return false;
+        }
+    }
+
+    void Navigator::_updateRunParameter(){
+    	ParameterManager& pm = ParameterManager::getInstance();
+        if(_cumulative_section_count < _dusty_tire_section_count){
+            _v = pm.v_search_run;
+            _a = pm.a_search_run;
+            _yawrate_max = pm.spin_yawrate_max * DEG2RAD;
+            _yawacc = pm.spin_yawacc * DEG2RAD;
+            _turn_param_set = ETurnParamSet::SEARCH;
+            _v_max = 1.0f;
+        }
+        else{
+            _v = TrajectoryInitializer::getInstance().getV(ETurnParamSet::SAFE, ETurnType::TURN_90);
+            _a = TrajectoryInitializer::getInstance().getAcc(ETurnParamSet::SAFE, ETurnType::STRAIGHT);
+            _yawrate_max = pm.spin_yawrate_max * DEG2RAD * 0.8f;
+            _yawacc = pm.spin_yawacc * DEG2RAD * 0.8f;
+            _turn_param_set = ETurnParamSet::SAFE;
+            _v_max = 0.6f;
         }
     }
 

@@ -56,7 +56,7 @@ class Maze {
     bool existsRWall(uint8_t x, uint8_t y, EAzimuth dir);
     bool existsLWall(uint8_t x, uint8_t y, EAzimuth dir);
 
-    bool watchedRWall(uint8_t x, uint8_t y, EAzimuth dir);    
+    bool watchedRWall(uint8_t x, uint8_t y, EAzimuth dir);
     bool watchedLWall(uint8_t x, uint8_t y, EAzimuth dir);
 
     bool existsGoalPath(uint8_t x, uint8_t y);

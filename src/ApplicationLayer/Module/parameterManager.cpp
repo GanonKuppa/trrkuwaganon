@@ -45,7 +45,7 @@ namespace module {
         ;//26
         ;//27
         ;//28
-        ;//29
+        registration<uint32_t>(29, dusty_tire_section_count, "dusty_tire_section_count", 100);;//29
         registration<float>(30, duty_coef_left_p, "duty_coef_left_p", 1.0f); //30
         registration<float>(31, duty_offset_left_p, "duty_offset_left_p", 0.0f); //31
         registration<float>(32, duty_coef_right_p, "duty_coef_right_p", 1.0f); //32

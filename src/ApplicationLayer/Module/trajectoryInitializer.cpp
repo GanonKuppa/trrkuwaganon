@@ -62,7 +62,7 @@ namespace module {
     void TrajectoryInitializer::_init(){
         ParameterManager& pm = ParameterManager::getInstance();
         _turnParamSet[ETurnParamSet::SEARCH] = TurnParameter(pm.v_search_run, pm.a_search_run);
-        _turnParamSet[ETurnParamSet::SAFE] = TurnParameter(0.3f, 4.0f);
+        _turnParamSet[ETurnParamSet::SAFE] = TurnParameter(0.35f, 4.0f);
         _turnParamSet[ETurnParamSet::FAST0] = TurnParameter(
                 pm.shortest_0_v, 
                 pm.shortest_0_v_d,
