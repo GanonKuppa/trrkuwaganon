@@ -84,12 +84,12 @@ class Maze {
     void makeFastestMap(uint8_t x, uint8_t y);
     void makeRandomNoEntryMaskMap(uint8_t x, uint8_t y);
 
-    void watchPotentialMap(void);
+    void watchPotentialMap();
 
     void serializeMazeData(uint8_t* byte_arr);
-    void writeMazeData2Flash(void);
-    void readMazeDataFromFlash(void);
-    uint32_t xor32(void);    
+    void writeMazeData2Flash();
+    void readMazeDataFromFlash();
+    uint32_t xor32();    
 };
 
 

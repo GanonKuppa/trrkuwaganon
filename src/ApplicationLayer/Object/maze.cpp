@@ -764,8 +764,6 @@ void Maze::watchPotentialMap(void) {
 }
 
 
-
-    //
 void Maze::serializeMazeData(uint8_t* byte_arr) {
     uint8_t* p;
 

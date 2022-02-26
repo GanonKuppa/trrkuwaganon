@@ -311,7 +311,7 @@ namespace module{
                     else StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.09f * block_count, _v, _v_max, _v, _a, _a);                    
                 } 
                 else if (std::abs(rot_times) == 4) {
-                    //_nav_cmd_queue.push_back(ENavCommand::SAVE_MAZE);   
+                    _nav_cmd_queue.push_back(ENavCommand::SAVE_MAZE); 
                     if(_maze.existsAWall(_x_cur, _y_cur, _azimuth)){
                         StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2 - 0.02f, _v, _v, _v, _a, _a);                        
                         AheadWallCorrectionFactory::push(0.2f, 0.05f);
@@ -341,6 +341,7 @@ namespace module{
                         CurveFactory::pushWithStraight(_turn_param_set, ETurnType::TURN_90, ETurnDir::CCW, -_read_wall_offset2 , _read_wall_offset2);
                     }
                     else{
+                        _nav_cmd_queue.push_back(ENavCommand::SAVE_MAZE);
                         if(_maze.existsAWall(_x_cur, _y_cur, _azimuth)){
                             StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2 - 0.02f, _v, _v, _v, _a, _a);                        
                             AheadWallCorrectionFactory::push(0.2f, 0.05f);
@@ -363,10 +364,11 @@ namespace module{
                     }
                 }
                 else if(rot_times == -2){
-                    if(_slalom_count <= 7){
+                    if(_slalom_count <= 6){
                         CurveFactory::pushWithStraight(_turn_param_set, ETurnType::TURN_90, ETurnDir::CW, -_read_wall_offset2 , _read_wall_offset2);
                     }
                     else{
+                        _nav_cmd_queue.push_back(ENavCommand::SAVE_MAZE);
                         if(_maze.existsAWall(_x_cur, _y_cur, _azimuth)){
                             StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2 - 0.02f, _v, _v, _v, _a, _a);                        
                             AheadWallCorrectionFactory::push(0.2f, 0.05f);
