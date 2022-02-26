@@ -31,6 +31,8 @@ namespace module{
         _lock_guard(false),
         _navigating(false),
         _done_outward(false),
+        _elapsed_time(0.0f),
+        _search_limit_time(600.0f),
         _x_cur(0),
         _y_cur(0),
         _x_last(255),
@@ -89,6 +91,7 @@ namespace module{
         _lock_guard = false;
         
         _done_outward = false;
+        _elapsed_time = 0.0f;
         _updateDestination();
         _maze.updateStartSectionWall();
         _maze.makeSearchMap(_x_dest, _y_dest);
@@ -117,7 +120,7 @@ namespace module{
         _lock_guard = false;
     }
     
-    void Navigator::update0(){
+    void Navigator::update0(){        
         if(_lock_guard) return;
 
         // パラメータの更新
@@ -176,11 +179,13 @@ namespace module{
                 _maze.updateWall(_x_cur, _y_cur, _azimuth, ws_msg_temp);
             }
 
-            if(_x_cur == _x_dest && _y_cur == _y_dest && 
-               (  _sub_mode == ENavSubMode::START2GOAL ||
-                  (_sub_mode == ENavSubMode::START2GOAL2START && _done_outward) ||
-                  (_sub_mode == ENavSubMode::ALL_AREA_SEARCH && _done_outward)
-               )
+            if( (_elapsed_time > _search_limit_time && _done_outward) ||
+                (_x_cur == _x_dest && _y_cur == _y_dest && 
+                    (  _sub_mode == ENavSubMode::START2GOAL ||
+                        (_sub_mode == ENavSubMode::START2GOAL2START && _done_outward) ||
+                        (_sub_mode == ENavSubMode::ALL_AREA_SEARCH && _done_outward)
+                    )
+                )
             ){                
                 _nav_cmd_queue.push_back(ENavCommand::GO_CENTER);
                 _nav_cmd_queue.push_back(ENavCommand::SAVE_MAZE);
@@ -207,6 +212,8 @@ namespace module{
             }
         }
         
+        _elapsed_time += _delta_t;
+        
         // navStateMsgをpublish
         _publish();
     }
@@ -226,7 +233,15 @@ namespace module{
                 EAzimuth dest_dir = _maze.getSearchDirection(_x_cur, _y_cur, _azimuth);
                 EAzimuth min_dir = _maze.getMinDirection(_x_cur, _y_cur, _azimuth);
                 EAzimuth unknown_dir = _maze.getUnknownDirection(_x_cur, _y_cur, _azimuth);
-                int8_t rot_times = _maze.calcRotTimes(dest_dir, _azimuth);
+                int8_t rot_times;
+                
+                // 探索リミット時間を過ぎたら未知区画の優先をやめてポテンシャル最小の方向に進む
+                if(_elapsed_time < _search_limit_time){
+                     rot_times = _maze.calcRotTimes(dest_dir, _azimuth);
+                }
+                else{
+                    rot_times = _maze.calcRotTimes(min_dir, _azimuth);
+                }
 
                 // 櫛対策に4区画連続で十字路だったらとりあえず左に曲がる
                 if(_maze.isCrossroads(_x_cur, _y_cur)){
@@ -364,11 +379,13 @@ namespace module{
             else if(cmd == ENavCommand::GO_CENTER){
                 float target_dist = 0.045f - _read_wall_offset2;
                 StraightFactory::push(ETurnType::STRAIGHT_CENTER, target_dist, _v, _v, 0.0f, _a, _a);
-                AheadWallCorrectionFactory::push(0.2f, 0.05f);
+                if(_maze.existsAWall(_x_cur, _y_cur, _azimuth)){
+                    AheadWallCorrectionFactory::push(0.2f, 0.05f);
+                }
                 StopFactory::push(1.0f);
             }
             else if(cmd == ENavCommand::UPDATE_POTENTIAL_MAP){
-                if(_sub_mode == ENavSubMode::ALL_AREA_SEARCH){
+                if(_sub_mode == ENavSubMode::ALL_AREA_SEARCH && _elapsed_time < _search_limit_time){
                     _maze.makeAllAreaSearchMap(_x_dest, _y_dest);
                 }
                 else{
@@ -460,6 +477,7 @@ namespace module{
         _yawrate_max = pm.spin_yawrate_max * DEG2RAD;
         _yawacc = pm.spin_yawacc * DEG2RAD;
         _wall2mouse_center_dist = pm.wall2mouse_center_dist;
+        _search_limit_time = pm.search_limit_time_sec;
         
         copyMsg(msg_id::WALL_SENSOR, &_ws_msg);
 

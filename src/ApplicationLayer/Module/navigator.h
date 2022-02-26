@@ -38,7 +38,9 @@ namespace module {
         bool _lock_guard;
         std::deque<ENavCommand> _nav_cmd_queue;
         bool _navigating;
-        bool _done_outward;        
+        bool _done_outward;
+        float _elapsed_time;
+        float _search_limit_time;
         
         uint8_t _x_cur;
         uint8_t _y_cur;
