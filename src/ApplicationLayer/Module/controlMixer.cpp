@@ -350,7 +350,8 @@ namespace module{
         if( !(_turn_type == ETurnType::AHEAD_WALL_CORRECTION || _turn_type == ETurnType::AHEAD_WALL_YAW_CORRECTION) &&
             (std::fabs(_yawrate_pidf.getError()) > YAWRATE_ERROR_TH || 
             std::fabs(_v_pidf.getError()) > V_ERROR_TH ||
-            std::fabs(_yaw_pidf.getError()) > YAW_ERROR_TH)
+            std::fabs(_yaw_pidf.getError()) > YAW_ERROR_TH) ||
+            (std::fabs(_pos_msg.v_xy_body_enc) < 0.1f && _setp_msg.v_xy_body > 0.1f)
         ){
             _error_sec += _delta_t;
         }                

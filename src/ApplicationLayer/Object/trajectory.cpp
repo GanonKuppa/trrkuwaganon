@@ -189,7 +189,7 @@ void StraightTrajectory::update() {
         _in_detect_edge_area = true;
     }
     else if( (_turn_type == ETurnType::DIAGONAL_CENTER_EDGE || (_turn_type == ETurnType::DIAGONAL_EDGE)) && 
-             _res_dist < 0.08f)
+             _target_dist - _cumulative_dist < 0.09f)
     {
         _in_detect_edge_area = true;
     }
