@@ -213,8 +213,10 @@ namespace module{
             _wall_pidf.reset();
         }
 
-        // 斜め直進時の壁制御
-        if(_turn_type == ETurnType::DIAGONAL_CENTER || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE) {
+        // 斜め直進または直進時の壁制御
+        if(_turn_type == ETurnType::DIAGONAL_CENTER || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE ||
+           (_turn_type == ETurnType::STRAIGHT_CENTER_EDGE && !_setp_msg.in_detect_edge_area && !_nav_msg.r_wall_enable && !_nav_msg.l_wall_enable)
+        ) {
             float v_now = _pos_msg.v_xy_body_for_ctrl;
             if(v_now < 0.1f) v_now = 0.1f;
             if(v_now > 1.0f) v_now = 1.0f;        
@@ -235,12 +237,20 @@ namespace module{
             }
             
             if (ctrl_ccw) {
-                _wall_diag_pidf.update(_ws_msg.dist_al, pm.diag_ctrl_dist_thr_l);
+                float target = 1.0f;
+                if(_turn_type == ETurnType::DIAGONAL_CENTER || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE) target = pm.diag_ctrl_dist_thr_r;
+                else target = pm.ca_ctrl_dist_thr_r; 
+
+                _wall_diag_pidf.update(_ws_msg.dist_al, target);
                 _setp_yawrate += v_now * _wall_diag_pidf.getControlVal();
                 LedController::getInstance().turnFcled(1, 0, 0);
             } 
             else if (ctrl_cw) {
-                _wall_diag_pidf.update(_ws_msg.dist_ar, pm.diag_ctrl_dist_thr_r);
+                float target = 1.0f;
+                if(_turn_type == ETurnType::DIAGONAL_CENTER || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE) target = pm.diag_ctrl_dist_thr_l;
+                else target = pm.ca_ctrl_dist_thr_l;
+
+                _wall_diag_pidf.update(_ws_msg.dist_ar, target);
                 _setp_yawrate += - v_now * _wall_diag_pidf.getControlVal();
                 LedController::getInstance().turnFcled(1, 0, 1);
             }

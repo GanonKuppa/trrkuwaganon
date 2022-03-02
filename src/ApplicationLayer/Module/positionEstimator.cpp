@@ -279,7 +279,9 @@ namespace module {
         float position_dist_thr = 0.0f;
         float yaw_dist_thr = 0.0f;
         float ang = _yaw * RAD2DEG;
-        if(_on_wall_center_dist > 0.03f && _on_wall_center_dist <= 0.06f && nav_msg.mode == ENavMode::SEARCH) {
+        if( (_on_wall_center_dist > 0.03f && _on_wall_center_dist <= 0.06f && nav_msg.mode == ENavMode::SEARCH) ||
+            (_on_wall_center_dist > 0.135f && nav_msg.mode == ENavMode::FASTEST)        
+        ) {
             if(ang >= 315.0 || ang < 45.0) {
                 _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;                
             } 
@@ -295,8 +297,7 @@ namespace module {
             //PRINTF_PICKLE("ON_WALL_CENTER | x:%6.3f, x_pre:%6.3f, y:%6.3f, y_pre:%6.3f yaw:%6.3f, yaw_pre:%6.3f\n", _x, x_pre, _y, y_pre, _yaw*RAD2DEG, yaw_pre*RAD2DEG);
             //module::LedController::getInstance().oneshotFcled(0, 0, 1, 0.05, 0.05);
         }
-        else if( (_on_wall_center_dist > 0.05f && nav_msg.mode == ENavMode::SEARCH) ||
-                 (_on_wall_center_dist > 0.135f && nav_msg.mode == ENavMode::FASTEST)
+        else if( (_on_wall_center_dist > 0.05f && nav_msg.mode == ENavMode::SEARCH) 
         ){
             if(ang >= 315.0 || ang < 45.0) {
                 _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;

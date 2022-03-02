@@ -572,8 +572,8 @@ namespace module{
             y_thr = 0.1f;
         }
         else{
-            x_thr = 0.1f;
-            y_thr = 0.1f;
+            x_thr = 0.3f;
+            y_thr = 0.3f;
         }
 
         float ang_diff = _yaw - _yaw_setp;

@@ -83,10 +83,10 @@ namespace module {
         registration<uint8_t>(64, wall_diag_fb_enable, "wall_diag_fb_enable", 1); //64
         registration<uint8_t>(65, wall_diag_saturation_enable, "wall_diag_saturation_enable", 0); //65
         registration<uint8_t>(66, wall_diag_i_saturation_enable, "wall_diag_i_saturation_enable", 0); //66
-        registration<float>(67, diag_ctrl_dist_thr_r, "diag_ctrl_dist_thr_r", 1.0f);//67
-        registration<float>(68, diag_ctrl_dist_thr_l, "diag_ctrl_dist_thr_l", 1.0f);//68
-        ;//69
-        ;//70
+        registration<float>(67, diag_ctrl_dist_thr_r, "diag_ctrl_dist_thr_r", 0.08f); //67
+        registration<float>(68, diag_ctrl_dist_thr_l, "diag_ctrl_dist_thr_l", 0.08f); //68
+        registration<float>(69, ca_ctrl_dist_thr_r, "ca_ctrl_dist_thr_r", 0.1f); //69
+        registration<float>(70, ca_ctrl_dist_thr_l, "ca_ctrl_dist_thr_l", 0.1f); //70
         ;//71
         ;//72
         ;//73
