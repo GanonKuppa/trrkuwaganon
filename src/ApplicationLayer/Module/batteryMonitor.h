@@ -8,6 +8,7 @@ namespace module {
       public:
         void update0();
         void debug();
+        bool checkVoltageSync();
         void evalBatteryLife();
       private:
         friend class BaseModule<BatteryMonitor>;

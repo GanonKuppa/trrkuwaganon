@@ -63,6 +63,14 @@ namespace module {
         }
     }
 
+    bool BatteryMonitor::checkVoltageSync(){
+        int16_t ad = hal::startAD0();
+        ad = hal::startAD0(); // 電荷を抜くために複数回AD変換
+        _voltage = _ad2Voltage(ad);
+        return (_voltage > ALERT_VOL);
+    }
+
+
     void BatteryMonitor::debug() {
         PRINTF_ASYNC("  ================\n");
         PRINTF_ASYNC("  now:%f \n", _voltage);

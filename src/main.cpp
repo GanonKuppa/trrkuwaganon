@@ -171,13 +171,17 @@ void startUpInit() {
 
 void object_init() {
     module::BatteryMonitor::getInstance().setDeltaT(0.001f);
+
+    // バッテリー電圧が所定値以下の場合無限待ち ParameterManagerのフラッシュアクセス時の電断防止    
+    while(!module::BatteryMonitor::getInstance().checkVoltageSync());
+
+    module::ParameterManager::getInstance();            
     module::ControlMixer::getInstance().setDeltaT(0.001f);
     module::Gamepad::getInstance().setDeltaT(0.001f);
     module::Heater::getInstance().setDeltaT(0.00025f);
     module::ImuDriver::getInstance().setDeltaT(0.001f);
     module::LedController::getInstance().setDeltaT(0.001f);
-    module::Navigator::getInstance().setDeltaT(0.001f);
-    module::ParameterManager::getInstance();
+    module::Navigator::getInstance().setDeltaT(0.001f);    
     module::PositionEstimator::getInstance().setDeltaT(0.001f);
     module::PowerTransmission::getInstance().setDeltaT(0.001f);
     module::PseudoDial::getInstance().setDeltaT(0.001f);
