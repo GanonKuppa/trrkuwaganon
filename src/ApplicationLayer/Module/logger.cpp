@@ -26,7 +26,7 @@
 #include "navStateMsg.h"
 #include "trajTripletMsg.h"
 
-static float _log_data[1500][52];
+static float _log_data[1500][53];
 
 namespace module {
 
@@ -92,7 +92,8 @@ namespace module {
             "not_corner_l_elapsed_time,"
             "not_corner_r_elapsed_time,"
             "in_detect_edge_area,"
-            "detected_edge"
+            "detected_edge,"
+            "three_section_ahead_dist"
             "\n"
         );
     }
@@ -108,7 +109,7 @@ namespace module {
                          "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f,"
                          "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f,"
                          "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f,"
-                         "%f, %f\n"
+                         "%f, %f, %f\n"
                         ,
                         _log_data[i][0],  _log_data[i][1],  _log_data[i][2],  _log_data[i][3],  _log_data[i][4],
                         _log_data[i][5],  _log_data[i][6],  _log_data[i][7],  _log_data[i][8],  _log_data[i][9],
@@ -120,7 +121,7 @@ namespace module {
                         _log_data[i][35], _log_data[i][36], _log_data[i][37], _log_data[i][38], _log_data[i][39],
                         _log_data[i][40], _log_data[i][41], _log_data[i][42], _log_data[i][43], _log_data[i][44],
                         _log_data[i][45], _log_data[i][46], _log_data[i][47], _log_data[i][48], _log_data[i][49],
-                        _log_data[i][50], _log_data[i][51]
+                        _log_data[i][50], _log_data[i][51], _log_data[i][52]
             );
             hal::waitusec(1300);
         }
@@ -266,6 +267,7 @@ namespace module {
             _log_data[_data_num][49] = ws_msg.not_corner_r_elapsed_time;
             _log_data[_data_num][50] = ctrl_msg.in_detect_edge_area * (int8_t)traj_msg.turn_dir_next;
             _log_data[_data_num][51] = ctrl_msg.detected_edge;
+            _log_data[_data_num][52] = 0.09f * 3.0f - pos_msg.y;
 
             _data_num++;
         }

@@ -20,6 +20,7 @@
 #include "positionEstimator.h"
 #include "imuDriver.h"
 #include "logger.h"
+#include "suction.h"
 
 #include "ledController.h"
 
@@ -63,6 +64,11 @@ namespace activity{
         module::ImuDriver::getInstance().calibrateGyro(1000);
         module::TrajectoryCommander::getInstance().reset(0.045f, 0.045f, 90.0f * DEG2RAD);
         module::PositionEstimator::getInstance().reset(0.045f, 0.045f, 90.0f * DEG2RAD);
+
+        float suction_duty = module::ParameterManager::getInstance().suction_duty_search;
+        module::Suction::getInstance().setDuty(suction_duty);
+        hal::waitmsec(2000);
+
         
         if(mode == 1){
             StopFactory::push(20.0f);
@@ -96,12 +102,14 @@ namespace activity{
                 turn_type = ETurnType::STRAIGHT;
             }
 
-            float target_dist = pm.test_run_x;
+            module::TrajectoryCommander::getInstance().reset(0.045f, 0.045f - pm.wall2mouse_center_dist, 90.0f * DEG2RAD);
+            module::PositionEstimator::getInstance().reset(0.045f, 0.045f - pm.wall2mouse_center_dist, 90.0f * DEG2RAD);
+        	float target_dist = 0.09 * 2.0f + pm.wall2mouse_center_dist * 2 - 0.002f;          
             float v_0 = 0.0f;
-            float v_max = pm.test_run_v;
+            float v_max = 0.1f;
             float v_end = 0.0f;
-            float a_acc = pm.test_run_a;
-            float a_dec = pm.test_run_a;
+            float a_acc = 1.0f;
+            float a_dec = 1.0f;
             StraightFactory::push(turn_type, target_dist, v_0, v_max, v_end, a_acc, a_dec);
             StopFactory::push(2.0f);
         }
@@ -112,10 +120,10 @@ namespace activity{
             module::PositionEstimator::getInstance().reset(0.045f, 0.045f - pm.wall2mouse_center_dist, 90.0f * DEG2RAD);
         	float target_dist = 0.09 * 8.0f + pm.wall2mouse_center_dist;
             float v_0 = 0.0f;
-            float v_max = pm.v_search_run;
+            float v_max = 0.1f;
             float v_end = 0.0f;
-            float a_acc = pm.a_search_run;
-            float a_dec = pm.a_search_run;
+            float a_acc = 0.5f;
+            float a_dec = 0.5f;
             StraightFactory::push(turn_type, target_dist, v_0, v_max, v_end, a_acc, a_dec);
             StopFactory::push(2.0f);
         }
@@ -167,14 +175,17 @@ namespace activity{
 
         }
         
-        module::Logger::getInstance().start();        
+        module::Logger::getInstance().start();       
         module::LedController::getInstance().flashFcled(1,1,1, 0.5, 0.5);
         hal::waitmsec(100);
         
     }
     
     
-    void DebugActivity::onFinish(){ }
+    void DebugActivity::onFinish(){
+        module::Logger::getInstance().end();
+        module::Suction::getInstance().setDuty(0.0f);
+     }
 
 
     DebugActivity::ELoopStatus DebugActivity::loop() {

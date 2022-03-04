@@ -77,7 +77,11 @@ namespace module {
         float duty_offset_left_m; //35
         float duty_coef_right_m; //36
         float duty_offset_right_m; //37
- 
+
+        float al_dist_coef_a; // 40
+        float al_dist_coef_b; // 41
+        float ar_dist_coef_a; // 42
+        float ar_dist_coef_b; // 43
 
         uint8_t v_fb_enable; //50
         uint8_t v_ff_enable; //51

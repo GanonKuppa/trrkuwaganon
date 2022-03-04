@@ -56,10 +56,10 @@ namespace module {
         registration<float>(37, duty_offset_right_m, "duty_offset_right_m", 0.0f); //37
         ;//38
         ;//39
-        ;//40
-        ;//41
-        ;//42
-        ;//43
+        registration<float>(40, al_dist_coef_a, "al_dist_coef_a", 0.0f);;//40
+        registration<float>(41, al_dist_coef_b, "al_dist_coef_b", 0.0f);;//41
+        registration<float>(42, ar_dist_coef_a, "ar_dist_coef_a", 0.0f);;//42
+        registration<float>(43, ar_dist_coef_b, "ar_dist_coef_b", 0.0f);;//43
         ;//44
         ;//45
         ;//46

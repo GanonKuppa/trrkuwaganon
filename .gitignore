@@ -10,4 +10,4 @@ trrkuwaganon HardwareDebug.launch
 *build/
 tool/doxygen/html
 tool/doxygen/*.tmp
-*.ipynb_checkpoints/
+*/.ipynb_checkpoints

@@ -361,15 +361,17 @@ namespace module {
     }
 
     float  WallSensor::_aheadDistL(float ad){
-        constexpr float a = 0.97343693f;
-        constexpr float b = -0.40873802f;
+        ParameterManager &pm = ParameterManager::getInstance();
+        float a = pm.al_dist_coef_a;
+        float b = pm.al_dist_coef_b;
         float x = std::max(ad, 1.0f);
         return a * std::pow(ad, b);
     }
 
     float  WallSensor::_aheadDistR(float ad){
-        constexpr float a = 0.74718993f;
-        constexpr float b = -0.36178926f;
+        ParameterManager &pm = ParameterManager::getInstance();
+        float a = pm.ar_dist_coef_a;
+        float b = pm.ar_dist_coef_b;
         float x = std::max(ad, 1.0f);
         return a * std::pow(ad, b);
     }
