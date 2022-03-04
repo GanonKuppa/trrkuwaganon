@@ -77,6 +77,7 @@ class StraightTrajectory : public BaseTrajectory {
     float _v_0;
     float _target_dist;
     float _res_dist;
+    bool _in_constant_vel_area;
 
     float _calcResidualDist(float x_esti, float y_esti);
 };

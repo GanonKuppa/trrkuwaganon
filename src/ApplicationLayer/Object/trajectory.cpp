@@ -39,7 +39,7 @@ BaseTrajectory::BaseTrajectory() :
     _detected_edge(false),
     _traj_type(ETrajType::NONE),
     _turn_type(ETurnType::NONE),
-    _turn_dir(ETurnDir::NO_TURN)
+    _turn_dir(ETurnDir::NO_TURN)    
 {
 
 }
@@ -136,11 +136,12 @@ StraightTrajectory::StraightTrajectory(ETurnType turn_type, float target_dist, f
     _a_dec = a_dec;
     _target_dist = target_dist;
     _v_end = v_end;
-    _v_min = 0.05f;
+    _v_min = 0.025f;
     _v_max = v_max;
     _v_0 = v_0;
     _v_xy_body = v_0;
-    _a_xy_body = a_acc;    
+    _a_xy_body = a_acc;
+    _in_constant_vel_area = false;
 
     _traj_type = ETrajType::STRAIGHT;
     if(isTurnStraight(turn_type)){
@@ -232,7 +233,7 @@ void StraightTrajectory::update() {
     if(_target_dist > (0.09f + 0.045f) && _v_end > 0.3f){
         dist = _target_dist - 0.045f;
     }else{
-        dist = _target_dist - 0.005f;
+        dist = _target_dist - 0.01f;
     }
 
     if (_a_dec != 0.0f){
@@ -258,6 +259,13 @@ void StraightTrajectory::update() {
         _a_xy_body = 0.0f;
     }
 
+    if(_cumulative_dist >= dist){
+        _in_constant_vel_area = true;
+    }
+    else{
+        _in_constant_vel_area = false;
+    }
+
     if(_cumulative_dist >= _target_dist){
         _x = getEndX();
         _y = getEndY();
@@ -281,7 +289,9 @@ bool StraightTrajectory::isEnd() {
                  (_in_detect_edge_area && !_detected_edge && ws_msg.dist_a < 0.1f);
     }
     else{
-        is_end = (_res_dist <= 0.0f && _cumulative_dist >= _target_dist) || ws_msg.dist_a < 0.045f;
+        is_end = (_res_dist <= 0.0f && _cumulative_dist >= _target_dist) || 
+                 (_in_constant_vel_area && _res_dist <= 0.0f) ||
+                 ( ws_msg.dist_a < 0.045f );
     }
     #else
     is_end = (_cumulative_dist >= _target_dist);
