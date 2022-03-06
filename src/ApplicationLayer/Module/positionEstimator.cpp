@@ -16,6 +16,7 @@
 #include "vehiclePositionMsg.h"
 #include "navStateMsg.h"
 #include "wallSensorMsg.h"
+#include "pidControlValMsg.h"
 
 // Module
 #include "parameterManager.h"
@@ -54,6 +55,7 @@ namespace module {
 	_yawrate(0.0f),
 	_rollrate(0.0f),
 	_pitchrate(0.0f),
+    _yaw_error_accum(0.0f),
     _turn_type(ETurnType::NONE),
 	_beta_expiration_time(0.0f),
     _on_wall_center_dist(0.0f),
@@ -92,12 +94,14 @@ namespace module {
         WallSensorMsg ws_msg;
         NavStateMsg nav_msg;
         TrajTripletMsg traj_msg;
+        PidControlValMsg pid_msg;
         copyMsg(msg_id::IMU, &imu_msg);
         copyMsg(msg_id::WHEEL_ODOMETRY, &wodo_msg);
         copyMsg(msg_id::CTRL_SETPOINT, &ctrl_msg);
         copyMsg(msg_id::WALL_SENSOR, &ws_msg);
         copyMsg(msg_id::NAV_STATE, &nav_msg);
         copyMsg(msg_id::TRAJ_TRIPLET, &traj_msg);
+        copyMsg(msg_id::PID_CONTROL_VAL, &pid_msg);
 
         float yawrate_pre = _yawrate; // yawrateは今期に取得したものは今期のデータ
         float yaw_pre = _yaw;
@@ -173,20 +177,27 @@ namespace module {
             _beta_dot = 0.0f;
             _beta = 0.0f;
         }
+        
 
+        // 壁制御中のyawリセット
+        if(_turn_type == ETurnType::STRAIGHT_CENTER_EDGE && std::fabs(pid_msg.wall_p) > 0.0f){
+            _wallCtrlEngagedCorrection();
+        }
 
         // 壁中心判定による補正
         if((_turn_type == ETurnType::STRAIGHT_CENTER || _turn_type == ETurnType::STRAIGHT_CENTER_EDGE) && 
             ws_msg.is_on_wall_center &&
             !ws_msg.is_ahead && 
             _v_xy_body_for_odom > 0.1f && 
-            std::fabs(_yawrate) < 50.0f * DEG2RAD &&
+            std::fabs(_yawrate) < 150.0f * DEG2RAD &&
             pm.on_wall_center_correction_enable
         ){
             _on_wall_center_dist += _v_xy_body_for_odom * _delta_t;
+            _yaw_error_accum += std::fabs(_yawrate) * _delta_t;
         }
         else{
             _on_wall_center_dist = 0.0f;
+            _yaw_error_accum = 0.0f;
         }
         _onWallCenterCorrection(nav_msg);
 
@@ -272,6 +283,23 @@ namespace module {
         _publish_vehicle_attitude();
     }
 
+    void PositionEstimator::_wallCtrlEngagedCorrection() {
+        float ang = _yaw * RAD2DEG; 
+        if(ang >= 315.0 || ang < 45.0) {
+            _yaw = 0.0 * DEG2RAD;
+        } 
+        else if(ang >= 45.0 && ang < 135.0) {
+            _yaw = 90.0f * DEG2RAD;
+        } 
+        else if(ang >= 135.0f && ang < 225.0f) {
+            _yaw = 180.0 * DEG2RAD;
+        } 
+        else if(ang >= 225.0f && ang < 315.0f) {
+            _yaw = 270.0f * DEG2RAD;
+        }
+    }
+
+
     void PositionEstimator::_onWallCenterCorrection(NavStateMsg &nav_msg) {
         float x_pre = _x;
         float y_pre = _y;
@@ -280,7 +308,7 @@ namespace module {
         float yaw_dist_thr = 0.0f;
         float ang = _yaw * RAD2DEG;
         if( (_on_wall_center_dist > 0.03f && _on_wall_center_dist <= 0.06f && nav_msg.mode == ENavMode::SEARCH) ||
-            (_on_wall_center_dist > 0.135f && nav_msg.mode == ENavMode::FASTEST)        
+            (_on_wall_center_dist > 0.04f && nav_msg.mode == ENavMode::FASTEST)        
         ) {
             if(ang >= 315.0 || ang < 45.0) {
                 _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;                
@@ -296,8 +324,10 @@ namespace module {
             }            
             //PRINTF_PICKLE("ON_WALL_CENTER | x:%6.3f, x_pre:%6.3f, y:%6.3f, y_pre:%6.3f yaw:%6.3f, yaw_pre:%6.3f\n", _x, x_pre, _y, y_pre, _yaw*RAD2DEG, yaw_pre*RAD2DEG);
             //module::LedController::getInstance().oneshotFcled(0, 0, 1, 0.05, 0.05);
+            _yaw_error_accum = 0.0f;
         }
-        else if( (_on_wall_center_dist > 0.05f && nav_msg.mode == ENavMode::SEARCH) 
+        else if( (_on_wall_center_dist > 0.05f && nav_msg.mode == ENavMode::SEARCH)||
+                 (_on_wall_center_dist > 0.07f && nav_msg.mode == ENavMode::FASTEST && _yaw_error_accum < 1.0f * DEG2RAD)
         ){
             if(ang >= 315.0 || ang < 45.0) {
                 _y = (uint8_t)(_y / 0.09f) * 0.09f + 0.09f/2.0f;
@@ -316,6 +346,7 @@ namespace module {
                 _yaw = 270.0f * DEG2RAD;
             }
             _on_wall_center_dist = 0.02f;
+            _yaw_error_accum = 0.0f;
             //module::LedController::getInstance().oneshotFcled(1, 0, 1, 0.05, 0.05);
             //PRINTF_PICKLE("ON_WALL_CENTER YAW| x:%6.3f, x_pre:%6.3f, y:%6.3f, y_pre:%6.3f yaw:%6.3f, yaw_pre:%6.3f\n", _x, x_pre, _y, y_pre, _yaw*RAD2DEG, yaw_pre*RAD2DEG);            
         }        

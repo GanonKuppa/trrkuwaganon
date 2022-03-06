@@ -5,7 +5,7 @@
 #include "turnIterator.h"
 
 #include "mollifier.h"
-
+#include "parameterManager.h"
 
 TurnPreCalculation::TurnPreCalculation(float shape_factor,
         float path_length,
@@ -139,6 +139,8 @@ void TurnPreCalculation::_init180(){
         float pl = 0.5 * (path_length_min + path_length_max);
         _path_length = pl;
         _init();
+        _move_y += module::ParameterManager::getInstance().offset_y_180;
+
         error_y = _move_y - _end_y;        
         if(error_y > 0.0f){
             path_length_max = pl;
@@ -150,6 +152,8 @@ void TurnPreCalculation::_init180(){
             break;
         }
     }
-    _pre_dist = 0.027f; // 180度ターンのみ前距離は任意の値で成立し得るので壁にぶつからない値をセット
+
+    _move_y -= module::ParameterManager::getInstance().offset_y_180;
+    _pre_dist = 0.022f; // 180度ターンのみ前距離は任意の値で成立し得るので壁にぶつからない値をセット
     _fol_dist = _pre_dist + _move_x;
 }

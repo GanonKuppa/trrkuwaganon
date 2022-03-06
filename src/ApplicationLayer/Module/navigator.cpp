@@ -15,6 +15,7 @@
 #include "msgBroker.h"
 #include "vehiclePositionMsg.h"
 #include "vehicleAttitudeMsg.h"
+#include "trajTripletMsg.h"
 
 // Module
 #include "parameterManager.h"
@@ -50,6 +51,7 @@ namespace module{
         _is_actuator_error(false),
         _is_failsafe(false),
         _in_read_wall_area(false),
+        _in_reread_ahead_area(false),
         _x(0.045f),
         _y(0.045f),
         _yaw(90.0f * DEG2RAD),
@@ -226,6 +228,25 @@ namespace module{
             }
         }
                 
+        // 区画中心付近での前壁再確認
+        bool pre_in_reread_ahead_area = _in_reread_ahead_area;
+        _in_reread_ahead_area = _inReadWallArea(0.04f, 0.042f);
+        
+        if((_in_reread_ahead_area && !pre_in_reread_ahead_area &&           
+            _navigating &&
+            _mode == ENavMode::SEARCH &&
+            _ws_msg.dist_a < 0.065f &&
+            _traj_msg.traj_type_now == ETrajType::STRAIGHT &&
+            _traj_msg.traj_type_next != ETrajType::CURVE
+           ) ||
+           ( _mode == ENavMode::SEARCH &&
+             _traj_msg.traj_type_pre == ETrajType::CURVE && 
+             _traj_msg.traj_type_now == ETrajType::STRAIGHT &&
+             _ws_msg.dist_a < 0.065f)        
+        ){   
+            _nav_cmd_queue.push_back(ENavCommand::RE_UPDATE_NEXT_SECTION);
+        }
+
         _elapsed_time += _delta_t;
         
         // navStateMsgをpublish
@@ -380,7 +401,7 @@ namespace module{
                         if(_maze.existsLWall(_x_cur, _y_cur, _azimuth)){
                             SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
                             AheadWallCorrectionFactory::push(0.2f, 0.1f, true);
-                            SpinTurnFactory::push(180.0f * DEG2RAD, _yawrate_max, _yawacc);                            
+                            SpinTurnFactory::push(180.0f * DEG2RAD, _yawrate_max, _yawacc);                       
                         }
                         else{
                             SpinTurnFactory::push(-90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
@@ -409,7 +430,7 @@ namespace module{
                 }
                 else{
                     _maze.makeSearchMap(_x_dest, _y_dest);
-                }                
+                }
                 PRINTF_PICKLE("UPDATE_POTENTIAL_MAP | x_setp:%6.3f, y_setp:%6.3f | x:%6.3f, y:%6.3f\n",_x_setp/0.09f, _y_setp/0.09f, _x/0.09f, _y/0.09f);
             }
             else if(cmd == ENavCommand::SAVE_MAZE){
@@ -417,8 +438,52 @@ namespace module{
                 _maze.writeMazeData2Flash();
                 //hal::leaveCriticalSection();
             }
+            else if(cmd == ENavCommand::RE_UPDATE_NEXT_SECTION){
+                EAzimuth azimuth_start = _azimuth;
+                bool is_a = true;
+                bool is_l = false;
+                bool is_r = false;                
+                AheadWallCorrectionFactory::push(1.5f, 1.0f, true);                         
+                SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
+                hal::waitmsec(10);
+                while(_turn_type != ETurnType::NONE)hal::waitmsec(1);
+                if(_ws_msg.is_ahead){
+                    is_l = true;
+                    AheadWallCorrectionFactory::push(0.2f, 0.05f);
+                }
+                
+                SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
+                hal::waitmsec(10);
+                while(_turn_type != ETurnType::NONE)hal::waitmsec(1);
+                if(_ws_msg.is_ahead){                    
+                    AheadWallCorrectionFactory::push(0.2f, 0.05f);
+                }                
+                
+                SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
+                hal::waitmsec(10);
+                while(_turn_type != ETurnType::NONE)hal::waitmsec(1);                
+                if(_ws_msg.is_ahead){
+                    AheadWallCorrectionFactory::push(0.2f, 0.05f);
+                    is_r = true;
+                }
+
+                SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
+                AheadWallCorrectionFactory::push(0.2f, 0.05f);
+
+                _maze.updateWall(_x_cur, _y_cur, azimuth_start, is_l, is_a, is_r);
+                if(_sub_mode == ENavSubMode::ALL_AREA_SEARCH && _elapsed_time < _search_limit_time){
+                    _maze.makeAllAreaSearchMap(_x_dest, _y_dest);
+                }
+                else{
+                    _maze.makeSearchMap(_x_dest, _y_dest);                    
+                }
+                EAzimuth dest_dir_next = _maze.getSearchDirection(_x_cur, _y_cur, _azimuth);
+                int8_t rot_times = _maze.calcRotTimes(dest_dir_next, azimuth_start);
+                SpinTurnFactory::push((float)rot_times * 45.0f * DEG2RAD, _yawrate_max, _yawacc);
+                StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f + _read_wall_offset2, 0.0f, _v, _v, _a, _a);
+            }
         }
-        _lock_guard = false;       
+        _lock_guard = false;
 
     }
 
@@ -493,6 +558,7 @@ namespace module{
         _y_goal = pm.goal_y;
         
         copyMsg(msg_id::WALL_SENSOR, &_ws_msg);
+        copyMsg(msg_id::TRAJ_TRIPLET, &_traj_msg);
 
         VehiclePositionMsg pos_msg;
         VehicleAttitudeMsg att_msg;
@@ -502,6 +568,7 @@ namespace module{
         copyMsg(msg_id::VEHICLE_ATTITUDE, &att_msg);
         copyMsg(msg_id::CTRL_SETPOINT, &setp_msg);
         copyMsg(msg_id::ACTUATOR_OUTPUT, &aout_msg);
+        
 
         _x = pos_msg.x;
         _y = pos_msg.y;
@@ -705,7 +772,7 @@ namespace module{
             _yawrate_max = pm.spin_yawrate_max * DEG2RAD;
             _yawacc = pm.spin_yawacc * DEG2RAD;
             _turn_param_set = ETurnParamSet::SEARCH;
-            _v_max = 1.0f;
+            _v_max = 0.8f;
         }
         else{
             _v = TrajectoryInitializer::getInstance().getV(ETurnParamSet::SAFE, ETurnType::TURN_90);
@@ -713,7 +780,7 @@ namespace module{
             _yawrate_max = pm.spin_yawrate_max * DEG2RAD * 0.8f;
             _yawacc = pm.spin_yawacc * DEG2RAD * 0.8f;
             _turn_param_set = ETurnParamSet::SAFE;
-            _v_max = 0.6f;
+            _v_max = 0.5f;
         }
     }
 

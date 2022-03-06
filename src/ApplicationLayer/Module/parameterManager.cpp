@@ -87,7 +87,7 @@ namespace module {
         registration<float>(68, diag_ctrl_dist_thr_l, "diag_ctrl_dist_thr_l", 0.08f); //68
         registration<float>(69, ca_ctrl_dist_thr_r, "ca_ctrl_dist_thr_r", 0.1f); //69
         registration<float>(70, ca_ctrl_dist_thr_l, "ca_ctrl_dist_thr_l", 0.1f); //70
-        ;//71
+        registration<float>(71, offset_y_180, "offset_y_180", 0.0f) //71;
         ;//72
         ;//73
         ;//74

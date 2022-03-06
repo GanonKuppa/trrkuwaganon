@@ -22,6 +22,7 @@ namespace module {
         friend class BaseModule<PositionEstimator>;
                 
         PositionEstimator();
+        void _wallCtrlEngagedCorrection();
         void _onWallCenterCorrection(NavStateMsg &nav_msg);
         void _aheadWallCorrection(bool is_correct_yaw);
         void _cornerLCorrection();
@@ -71,6 +72,8 @@ namespace module {
         float _yawrate;
         float _rollrate;
         float _pitchrate;
+
+        float _yaw_error_accum;
 
         ETurnType _turn_type;
 

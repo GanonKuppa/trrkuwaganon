@@ -109,6 +109,8 @@ namespace module {
         float diag_ctrl_dist_thr_l; //68
         float ca_ctrl_dist_thr_r; //69
         float ca_ctrl_dist_thr_l; //70
+
+        float offset_y_180; //71
       
         
         float v_ff_coef; //80

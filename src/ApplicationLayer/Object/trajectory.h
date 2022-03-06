@@ -47,7 +47,7 @@ class BaseTrajectory {
     float _cumulative_t;    
 
     bool _in_detect_edge_area;
-    bool _detected_edge;
+    bool _detected_edge;    
 
     ETrajType _traj_type;
     ETurnType _turn_type;
@@ -78,6 +78,7 @@ class StraightTrajectory : public BaseTrajectory {
     float _target_dist;
     float _res_dist;
     bool _in_constant_vel_area;
+    bool _is_ahead_wall_end;
 
     float _calcResidualDist(float x_esti, float y_esti);
 };

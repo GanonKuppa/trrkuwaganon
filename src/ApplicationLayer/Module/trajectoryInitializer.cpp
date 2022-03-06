@@ -44,7 +44,7 @@ namespace module {
     }
 
     float TrajectoryInitializer::getMoveY(ETurnParamSet tp, ETurnType tt){
-        return _turnPreCalcs.at(tp).getMoveY(tt);
+        return _turnPreCalcs.at(tp).getMoveY(tt);        
     }
 
     float TrajectoryInitializer::getTrajEndTime(ETurnParamSet tp, ETurnType tt){

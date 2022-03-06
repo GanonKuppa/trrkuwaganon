@@ -344,7 +344,7 @@ void Maze::writeWall(uint8_t x, uint8_t y, EAzimuth dir, WallSensorMsg& ws_msg) 
 // return 1:  探索済みの区画に来て、迷路情報と現在の壁情報が一致
 // return 0:  未探索の区画に現在の壁情報を書き込み
 // return -1: 探索済みの区画に来たが、現在の迷路情報と現在の壁情報が矛盾
-int8_t Maze::updateWall(uint8_t x, uint8_t y, EAzimuth dir, WallSensorMsg& ws_msg) {
+EUpdateWallStatus Maze::updateWall(uint8_t x, uint8_t y, EAzimuth dir, WallSensorMsg& ws_msg) {
     if(x == 0 && y == 0) {
         writeReached(x, y, true);
         Wall wall;
@@ -352,7 +352,7 @@ int8_t Maze::updateWall(uint8_t x, uint8_t y, EAzimuth dir, WallSensorMsg& ws_ms
         wall.N = 0;
         wall.W = 1;
         writeWall(x, y, wall);
-        return 0;
+        return EUpdateWallStatus::UPDATED;
     }
 
     /////////////探索済み区画に来た時//////////////////
@@ -362,38 +362,38 @@ int8_t Maze::updateWall(uint8_t x, uint8_t y, EAzimuth dir, WallSensorMsg& ws_ms
                 if(readWall(x,y).E != ws_msg.is_ahead ||
                         readWall(x,y).S != ws_msg.is_right ||
                         readWall(x,y).N != ws_msg.is_left
-                    ) return -1;
+                    ) return EUpdateWallStatus::REACHED_ERROR;
                 break;
             case EAzimuth::N:
                 if(readWall(x,y).N != ws_msg.is_ahead ||
                         readWall(x,y).E != ws_msg.is_right ||
-                        readWall(x,y).W != ws_msg.is_left) return -1;
+                        readWall(x,y).W != ws_msg.is_left) return EUpdateWallStatus::REACHED_ERROR;
                 break;
             case EAzimuth::W:
                 if(readWall(x,y).W != ws_msg.is_ahead||
                         readWall(x,y).N != ws_msg.is_left||
-                        readWall(x,y).S != ws_msg.is_right) return -1;
+                        readWall(x,y).S != ws_msg.is_right) return EUpdateWallStatus::REACHED_ERROR;
                 break;
             case EAzimuth::S:
                 if(readWall(x,y).S != ws_msg.is_ahead ||
                         readWall(x,y).W != ws_msg.is_right||
-                        readWall(x,y).E != ws_msg.is_left) return -1;
+                        readWall(x,y).E != ws_msg.is_left) return EUpdateWallStatus::REACHED_ERROR;
                 break;
             default:
                 //do nothing;
                 break;
         }
-        return 1;
+        return EUpdateWallStatus::REACHED;
     }
     ///////////未探索区画に来た時//////////
     else {
         writeReached(x, y, true);
         writeWall(x, y, dir, ws_msg);
-        return 0;
+        return EUpdateWallStatus::UPDATED;
     } //end else
 }
 
-int8_t Maze::updateWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool a, bool r) {
+EUpdateWallStatus Maze::updateWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool a, bool r) {
     if(x==0 && y==0) {
         writeReached(x,y,true);
         Wall wall;
@@ -401,12 +401,12 @@ int8_t Maze::updateWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool a, bool
         wall.N = 0;
         wall.W = 1;
         writeWall(x, y, wall);
-        return 0;
+        return EUpdateWallStatus::UPDATED;
     }
 
     writeReached(x,y,true);
     writeWall(x, y, dir, l, a, r);
-    return 1;
+    return EUpdateWallStatus::UPDATED;
 }
 
 void Maze::updateStartSectionWall() {

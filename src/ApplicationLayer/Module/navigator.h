@@ -8,6 +8,7 @@
 #include "wallSensorMsg.h"
 #include "actuatorOutputMsg.h"
 #include "ctrlSetpointMsg.h"
+#include "trajTripletMsg.h"
 
 // Object
 #include "maze.h"
@@ -63,8 +64,10 @@ namespace module {
         bool _is_actuator_error;
         bool _is_failsafe;
         bool _in_read_wall_area;
+        bool _in_reread_ahead_area;
         
         WallSensorMsg _ws_msg;
+        TrajTripletMsg _traj_msg;
         float _x;
         float _y;
         float _yaw;

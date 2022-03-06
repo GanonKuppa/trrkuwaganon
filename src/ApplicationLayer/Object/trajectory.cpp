@@ -120,6 +120,9 @@ StraightTrajectory::StraightTrajectory(ETurnType turn_type, float target_dist, f
     _v_0 = v_0;
     _v_xy_body = v_0;
     _a_xy_body = 0.0f;
+    _in_constant_vel_area = false;
+    _is_ahead_wall_end = false;
+
     _traj_type = ETrajType::STRAIGHT;
     if(isTurnStraight(turn_type)){
         _turn_type = turn_type;
@@ -128,6 +131,7 @@ StraightTrajectory::StraightTrajectory(ETurnType turn_type, float target_dist, f
         _turn_type = ETurnType::STRAIGHT;
     }
     _turn_dir = ETurnDir::NO_TURN;
+    _res_dist = target_dist;
 }
 
 StraightTrajectory::StraightTrajectory(ETurnType turn_type, float target_dist, float v_0, float v_max, float v_end, float a_acc, float a_dec) :
@@ -142,6 +146,7 @@ StraightTrajectory::StraightTrajectory(ETurnType turn_type, float target_dist, f
     _v_xy_body = v_0;
     _a_xy_body = a_acc;
     _in_constant_vel_area = false;
+    _is_ahead_wall_end = false;
 
     _traj_type = ETrajType::STRAIGHT;
     if(isTurnStraight(turn_type)){
@@ -155,11 +160,13 @@ StraightTrajectory::StraightTrajectory(ETurnType turn_type, float target_dist, f
 }
 
 float StraightTrajectory::getEndX(){
-    return _x_0 + _target_dist * cosf(_yaw_0);
+    if(_is_ahead_wall_end) return _x;
+    else return _x_0 + _target_dist * cosf(_yaw_0);
 }
     
 float StraightTrajectory::getEndY(){
-    return _y_0 + _target_dist * sinf(_yaw_0);
+    if(_is_ahead_wall_end) return _y;
+    else return _y_0 + _target_dist * sinf(_yaw_0);
 }
 
 float StraightTrajectory::getEndYaw(){
@@ -282,6 +289,7 @@ bool StraightTrajectory::isEnd() {
     _res_dist = _calcResidualDist(pos_msg.x, pos_msg.y);    
         
     bool is_end = false;
+    _is_ahead_wall_end = false;
 
     #ifndef SILS
     if(_turn_type == ETurnType::STRAIGHT_CENTER_EDGE || _turn_type == ETurnType::DIAGONAL_EDGE || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE){
@@ -292,17 +300,29 @@ bool StraightTrajectory::isEnd() {
         is_end = (_res_dist <= 0.0f && _cumulative_dist >= _target_dist) || 
                  (_in_constant_vel_area && _res_dist <= 0.0f) ||
                  ( ws_msg.dist_a < 0.045f );
+
+        _is_ahead_wall_end = !(_res_dist <= 0.0f && _cumulative_dist >= _target_dist) &&
+                 !(_in_constant_vel_area && _res_dist <= 0.0f) &&
+                 ( ws_msg.dist_a < 0.045f );
+
     }
     #else
     is_end = (_cumulative_dist >= _target_dist);
     #endif
 
-    if (is_end) {
+    if (is_end && !_is_ahead_wall_end) {
         _x = getEndX();
         _y = getEndY();
         _yaw = getEndYaw();
         return true;
-    } else {
+    } 
+    else if (is_end && _is_ahead_wall_end) {
+        _x = ((uint8_t)(pos_msg.x / 0.09f)) * 0.09f + 0.045f;
+        _y = ((uint8_t)(pos_msg.y / 0.09f)) * 0.09f + 0.045f;
+        _yaw = getEndYaw();
+        return true;
+    }
+    else {
         return false;
     }
 }

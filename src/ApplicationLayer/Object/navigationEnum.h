@@ -35,7 +35,8 @@ enum class ENavCommand : uint8_t{
     GO_NEXT_SECTION, 
     GO_CENTER,
     UPDATE_POTENTIAL_MAP,
-    SAVE_MAZE                
+    SAVE_MAZE,
+    RE_UPDATE_NEXT_SECTION
 };
 
 inline EAzimuth yaw2Azimuth(float yaw){

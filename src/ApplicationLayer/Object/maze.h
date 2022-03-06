@@ -25,6 +25,12 @@ class Wall {
     Wall(EAzimuth dir, bool l, bool a, bool r);
 };
 
+enum class EUpdateWallStatus : int8_t{
+    REACHED = 1,
+    UPDATED = 0,
+    REACHED_ERROR = -1
+};
+
 class Maze {
   public:
     Maze();
@@ -69,8 +75,8 @@ class Maze {
     void writeWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool a, bool r);
     void writeWall(uint8_t x, uint8_t y, EAzimuth dir, WallSensorMsg& ws_msg);
     
-    int8_t updateWall(uint8_t x, uint8_t y, EAzimuth dir, WallSensorMsg& ws_msg);
-    int8_t updateWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool a, bool r);
+    EUpdateWallStatus updateWall(uint8_t x, uint8_t y, EAzimuth dir, WallSensorMsg& ws_msg);
+    EUpdateWallStatus updateWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool a, bool r);
     void updateStartSectionWall();
 
     EAzimuth getMinDirection(uint8_t x, uint8_t y, EAzimuth dir);

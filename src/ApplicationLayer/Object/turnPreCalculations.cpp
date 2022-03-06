@@ -15,10 +15,10 @@
     constexpr float PATH_LENGTH_90 = 0.048f;
     constexpr float PATH_LENGTH_L_90 = 0.11f;
     constexpr float PATH_LENGTH_180 = 0.1f;
-    constexpr float PATH_LENGTH_S2D_45 = 0.04f;
+    constexpr float PATH_LENGTH_S2D_45 = 0.042f;
     constexpr float PATH_LENGTH_S2D_135 = 0.1f;
-    constexpr float PATH_LENGTH_D_90 = 0.05f;
-    constexpr float PATH_LENGTH_D2S_45 = 0.04f;
+    constexpr float PATH_LENGTH_D_90 = 0.054f;
+    constexpr float PATH_LENGTH_D2S_45 = 0.042f;
     constexpr float PATH_LENGTH_D2S_135 = 0.1f;
 
     constexpr float TARGET_ANG_90 = 90.0f * DEG2RAD;
