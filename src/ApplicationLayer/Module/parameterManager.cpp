@@ -605,46 +605,53 @@ namespace module {
                 Type_e val_type = pm.typeMap[val_num];
 
                 if(val_type == Type_e::FLOAT){
+                    float param_val_pre = pm.read<float>(val_num);
                     float param_val = std::stof(param_val_str);
                     std::string type_str = "float";
                     pm.write<float>(val_num, param_val);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %f\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %f -> %f\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val_pre, param_val);
                 }
                 else if(val_type == Type_e::UINT8){
+                    uint8_t param_val_pre = pm.read<uint8_t>(val_num);
                     uint8_t param_val = std::stoi(param_val_str);
                     std::string type_str = "uint8_t";
                     pm.write<uint8_t>(val_num, param_val);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d -> %d\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val_pre, param_val);
                 }
                 else if(val_type == Type_e::UINT16){
+                    uint16_t param_val_pre = pm.read<uint16_t>(val_num);
                     uint16_t param_val = std::stoi(param_val_str);
                     std::string type_str = "uint16_t";
                     pm.write<uint16_t>(val_num, param_val);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d -> %d\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val_pre, param_val);
                 }
                 else if(val_type == Type_e::UINT32){
+                    uint32_t param_val_pre = pm.read<uint32_t>(val_num);
                     uint32_t param_val = std::stoi(param_val_str);
                     std::string type_str = "uint32_t";
                     pm.write<uint32_t>(val_num, param_val);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d -> %d\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val_pre, param_val);
                 }
                 else if(val_type == Type_e::INT8){
+                    int8_t param_val_pre = pm.read<int8_t>(val_num);
                     int8_t param_val = std::stoi(param_val_str);
                     std::string type_str = "int8_t";
                     pm.write<int8_t>(val_num, param_val);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d -> %d\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val_pre, param_val);
                 }
                 else if(val_type == Type_e::INT16){
+                    int16_t param_val_pre = pm.read<int16_t>(val_num);
                     int16_t param_val = std::stoi(param_val_str);
                     std::string type_str = "int16_t";
                     pm.write<int16_t>(val_num, param_val);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d -> %d\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val_pre, param_val);
                 }
                 else if(val_type == Type_e::INT32){
+                    int32_t param_val_pre = pm.read<int32_t>(val_num);
                     int32_t param_val = std::stoi(param_val_str);
                     std::string type_str = "int32_t";
                     pm.write<int32_t>(val_num, param_val);
-                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val);
+                    PRINTF_ASYNC("    %3d , %-7s, %-20s, %d -> %d\n", val_num, type_str.c_str(), param_name_str.c_str(), param_val_pre, param_val);
                 }
                 else{
                     PRINTF_ASYNC("  invalid type!\n");

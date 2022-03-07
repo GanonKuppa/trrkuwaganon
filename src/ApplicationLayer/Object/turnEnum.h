@@ -14,29 +14,29 @@ enum class ETrajType : uint8_t{
 
 enum class ETurnType : uint8_t{
     STOP = 0,
-    SPINTURN,
-    STRAIGHT,
-    STRAIGHT_CENTER,
-    STRAIGHT_CENTER_EDGE,
-    DIAGONAL,
-    DIAGONAL_EDGE,
-    DIAGONAL_CENTER,
-    DIAGONAL_CENTER_EDGE,
-    TURN_90,
-    TURN_L_90,
-    TURN_180,
-    TURN_S2D_45,
-    TURN_S2D_135,
-    TURN_D_90,
-    TURN_D2S_45,
-    TURN_D2S_135,    
-    CIRCULAR,
-    AHEAD_WALL_CORRECTION,
-    AHEAD_WALL_YAW_CORRECTION,
-    NONE
+    SPINTURN = 1,
+    STRAIGHT = 2,
+    STRAIGHT_CENTER = 3,
+    STRAIGHT_CENTER_EDGE = 4,
+    DIAGONAL = 5,
+    DIAGONAL_EDGE = 6,
+    DIAGONAL_CENTER = 7,
+    DIAGONAL_CENTER_EDGE = 8,
+    TURN_90 = 9,
+    TURN_L_90 = 10,
+    TURN_180 = 11,
+    TURN_S2D_45 = 12,
+    TURN_S2D_135 = 13,
+    TURN_D_90 = 14,
+    TURN_D2S_45 = 15,
+    TURN_D2S_135 = 16,    
+    CIRCULAR = 17,
+    AHEAD_WALL_CORRECTION = 18,
+    AHEAD_WALL_YAW_CORRECTION = 19,
+    NONE = 20
 };
 
-enum class ETurnDir : int8_t{
+enum class ETurnDir : int8_t{F
     CW = -1, 
     NO_TURN = 0, 
     CCW = 1

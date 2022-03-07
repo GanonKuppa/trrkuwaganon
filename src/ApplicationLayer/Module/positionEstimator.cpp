@@ -180,9 +180,9 @@ namespace module {
         
 
         // 壁制御中のyawリセット
-        if(_turn_type == ETurnType::STRAIGHT_CENTER_EDGE && std::fabs(pid_msg.wall_p) > 0.0f){
-            _wallCtrlEngagedCorrection();
-        }
+        //if(_turn_type == ETurnType::STRAIGHT_CENTER_EDGE && std::fabs(pid_msg.wall_p) > 0.0f){
+        //    _wallCtrlEngagedCorrection();
+        //}
 
         // 壁中心判定による補正
         if((_turn_type == ETurnType::STRAIGHT_CENTER || _turn_type == ETurnType::STRAIGHT_CENTER_EDGE) && 

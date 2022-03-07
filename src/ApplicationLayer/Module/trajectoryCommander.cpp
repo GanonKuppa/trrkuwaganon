@@ -60,6 +60,8 @@ namespace module {
     }
 
     void TrajectoryCommander::update1(){
+        if(_lock_guard) return;
+        
         if(!_traj_queue.empty()){
             if(_traj_queue.front()->isEnd()){
                 _x = _traj_queue.front()->getEndX();

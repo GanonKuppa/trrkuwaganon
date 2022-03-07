@@ -289,10 +289,11 @@ namespace module{
         }
 
         // 角度制御
-        if(_wall_pidf.engaged() || _turn_type == ETurnType::AHEAD_WALL_YAW_CORRECTION){
+        if( _turn_type == ETurnType::DIAGONAL_CENTER || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE ||
+            _wall_pidf.engaged() || _wall_diag_pidf.engaged() ||_turn_type == ETurnType::AHEAD_WALL_YAW_CORRECTION){
             _yaw_pidf.reset();
         }
-        else{            
+        else{
             _yaw_pidf.update(_setp_yaw, _att_msg.yaw);
             _setp_yawrate += _yaw_pidf.getControlVal();
         }

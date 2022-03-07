@@ -154,7 +154,7 @@ namespace module{
         }
 
         if(!is_failsafe_pre && _is_failsafe){
-            PRINTF_PICKLE("!!!!FAILSAFE!!!!      | cor_setp:(%6.3f, %6.3f)| x_setp:%6.3f, x:%6.3f |y_setp %6.3f, y:%6.3f |aout_err:%d\n",_x_setp/0.09f,_y_setp/0.09f, _x_setp, _x, _y_setp, _y, _is_actuator_error);
+            PRINTF_PICKLE("!!!!FAILSAFE!!!!      | cor_setp:(%6.3f, %6.3f) |yaw: %6.3| x_error :%6.3f | y_error:%6.3f | aout_err:%d\n",_x_setp/0.09f,_y_setp/0.09f,_yaw, _x_setp - _x, _y_setp - _y, _is_actuator_error);
         }
 
         // 現在区画の更新
@@ -639,8 +639,8 @@ namespace module{
             y_thr = 0.1f;
         }
         else{
-            x_thr = 0.3f;
-            y_thr = 0.3f;
+            x_thr = 0.6f;
+            y_thr = 0.6f;
         }
 
         float ang_diff = _yaw - _yaw_setp;
@@ -651,7 +651,7 @@ namespace module{
         return (_ctrl_mode == ECtrlMode::VEHICLE &&
            (std::fabs(_x - _x_setp) > x_thr || 
             std::fabs(_y - _y_setp) > y_thr ||
-            std::fabs(ang_diff) > 30.0f * DEG2RAD
+            std::fabs(ang_diff) > 60.0f * DEG2RAD
             || _is_actuator_error
            )
         );
