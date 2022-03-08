@@ -118,8 +118,12 @@ namespace module{
 
         while(_lock_guard) hal::waitusec(1);
         _lock_guard = true;
-        while(!_nav_cmd_queue.empty()) _nav_cmd_queue.pop_front();
+        
+        _section_queue.clear();
+        _nav_cmd_queue.clear();
+
         _nav_cmd_queue.push_back(ENavCommand::DO_FIRST_MOVE);
+                
         _lock_guard = false;
     }
 
@@ -174,6 +178,7 @@ namespace module{
         // 壁の更新エリアに入ったときの動作
         bool pre_in_read_wall_area = _in_read_wall_area;
         _in_read_wall_area = _inReadWallArea(_read_wall_offset1, _read_wall_offset2);
+        
         if(_in_read_wall_area && !pre_in_read_wall_area && 
            !(_x_last == _x_cur && _y_last == _y_cur ) &&
            _navigating &&
@@ -738,6 +743,15 @@ namespace module{
         }
     }
 
+    bool Navigator::_inSkewersArea(float x, float y, EAzimuth azimuth){                
+        uint8_t x_int = (uint8_t)(x / 0.09f);
+        uint8_t y_int = (uint8_t)(y / 0.09f);
+
+        return _maze.watchedRWall(x_int, y_int, azimuth) && _maze.watchedLWall(x_int, y_int, azimuth) &&
+               !_maze.existsRWall(x_int, y_int, azimuth) && !_maze.existsLWall(x_int, y_int, azimuth) &&
+               !_existsLWall(x, y, azimuth) && !_existsLWall(x, y, azimuth);
+    }
+
     bool Navigator::_watchedPillar(float x, float y, EAzimuth azimuth){
         // マウスと同じ角度の座標系における区画の入口からの距離
         float fmod_x = fmodf(x, 0.09f);
@@ -761,6 +775,26 @@ namespace module{
         }
         else{
             return false;
+        }
+    }
+
+    ECornerType Navigator::_cornerType(float end_x, float end_y, float end_yaw, ETurnType turn_type, ETurnDir turn_dir_next){
+        if(turn_type != ETurnType::STRAIGHT_CENTER_EDGE){
+            return ECornerType::NONE;
+        }
+        
+        uint8_t x_corner = (uint8_t)(end_x / 0.09f);
+        uint8_t y_corner = (uint8_t)(end_y / 0.09f);
+        EAzimuth azimuth = yaw2Azimuth(end_yaw);        
+
+        if(turn_dir_next == ETurnDir::CCW && _maze.existsLWall(x_corner, y_corner, azimuth)){
+            return ECornerType::WALL;             
+        }
+        else if(turn_dir_next == ETurnDir::CW && _maze.existsRWall(x_corner, y_corner, azimuth)){
+            return ECornerType::WALL;
+        }
+        else{
+            return ECornerType::PILLAR;
         }
     }
 
@@ -872,8 +906,12 @@ namespace module{
         msg.azimuth = _azimuth;
         msg.r_wall_enable = _r_wall_enable;
         msg.l_wall_enable = _l_wall_enable;
+        msg.is_r_wall = _existsRWall(_x, _y, _azimuth);
+        msg.is_l_wall = _existsLWall(_x, _y, _azimuth);
+        msg.in_skewers_area = _inSkewersArea(_x, _y, _azimuth);
         msg.in_read_wall_area = _in_read_wall_area;
         msg.is_failsafe = _is_failsafe;        
+        msg.corner_type = _cornerType(_traj_msg.end_x_now, _traj_msg.end_y_now, _traj_msg.end_yaw_now, _traj_msg.turn_type_now, _traj_msg.turn_dir_next);
         publishMsg(msg_id::NAV_STATE, &msg);
     }
 

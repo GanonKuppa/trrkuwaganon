@@ -83,6 +83,8 @@ namespace module {
         bool _isCornerR();
         bool _isDiagCornerL();
         bool _isDiagCornerR();
+        int16_t _leftMax();
+        int16_t _rightMax();
 
         uint16_t _trimAverage(uint16_t ad_array[], uint16_t num, uint16_t trim_num);
 

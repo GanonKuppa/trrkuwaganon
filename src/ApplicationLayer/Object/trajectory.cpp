@@ -293,8 +293,8 @@ bool StraightTrajectory::isEnd() {
 
     #ifndef SILS
     if(_turn_type == ETurnType::STRAIGHT_CENTER_EDGE || _turn_type == ETurnType::DIAGONAL_EDGE || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE){
-        is_end = (_in_detect_edge_area && _detected_edge && _res_dist <= 0.0f) ||
-                 (_in_detect_edge_area && !_detected_edge && ws_msg.dist_a < 0.1f);
+        is_end = (_in_detect_edge_area && _detected_edge && _res_dist <= 0.0f); //||
+                 //(_in_detect_edge_area && !_detected_edge && ws_msg.dist_a < 0.1f);
     }
     else{
         is_end = (_res_dist <= 0.0f && _cumulative_dist >= _target_dist) || 

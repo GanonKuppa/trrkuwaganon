@@ -111,7 +111,9 @@ namespace module {
         float ca_ctrl_dist_thr_l; //70
 
         float offset_y_180; //71
-      
+        float pillar_corner_read_offset_r; //72
+        float pillar_corner_read_offset_l; //73
+
         
         float v_ff_coef; //80
         float v_ff_offset; //81

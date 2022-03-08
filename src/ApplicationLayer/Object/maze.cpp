@@ -510,7 +510,7 @@ EAzimuth Maze::getSearchDirection(uint8_t x, uint8_t y, EAzimuth dir) {
 }
 
 void Maze::makeSearchMap(uint8_t x, uint8_t y) {
-    std::queue<std::pair<uint8_t, uint8_t>> que;            
+    std::queue<std::pair<uint8_t, uint8_t>> que;
 
     //歩数マップの初期化
     for(uint8_t i=0; i<32; i++) {

@@ -242,7 +242,7 @@ namespace module {
                 traj_msg.turn_type_now == ETurnType::STRAIGHT_CENTER_EDGE &&
                 ws_msg.is_corner_r
             ){
-                _edgeRCorrection(traj_msg);
+                _edgeRCorrection(traj_msg, nav_msg);
                 _detected_edge = true;
             }
             // 最短時の左壁切れ
@@ -250,7 +250,7 @@ namespace module {
                 traj_msg.turn_type_now == ETurnType::STRAIGHT_CENTER_EDGE &&
                 ws_msg.is_corner_l
             ){
-                _edgeLCorrection(traj_msg);
+                _edgeLCorrection(traj_msg, nav_msg);
                 _detected_edge = true;
             }
         }
@@ -439,13 +439,16 @@ namespace module {
         }
     }
 
-    void PositionEstimator::_edgeLCorrection(TrajTripletMsg &traj_msg) {
+    void PositionEstimator::_edgeLCorrection(TrajTripletMsg &traj_msg, NavStateMsg &nav_msg) {
         ParameterManager& pm = ParameterManager::getInstance();
         if(pm.wall_corner_read_offset_l < 0.0f) return;
 
         float x = traj_msg.end_x_now;
         float y = traj_msg.end_y_now;
-        float r = pm.wall_corner_read_offset_l;
+        float r = 0.0f;
+        if(nav_msg.corner_type == ECornerType::WALL) r = pm.wall_corner_read_offset_l;
+        else if(nav_msg.corner_type == ECornerType::PILLAR) r = pm.wall_corner_read_offset_l;
+
         float end_yaw = traj_msg.end_yaw_now;
 
         float ang = end_yaw * RAD2DEG;
@@ -464,12 +467,14 @@ namespace module {
         module::LedController::getInstance().oneshotFcled(1, 0, 0, 0.005, 0.005);
     }
 
-    void PositionEstimator::_edgeRCorrection(TrajTripletMsg &traj_msg) {
+    void PositionEstimator::_edgeRCorrection(TrajTripletMsg &traj_msg, NavStateMsg &nav_msg) {
         ParameterManager& pm = ParameterManager::getInstance();        
 
         float x = traj_msg.end_x_now;
         float y = traj_msg.end_y_now;
-        float r = pm.wall_corner_read_offset_r;
+        float r = 0.0f;
+        if(nav_msg.corner_type == ECornerType::WALL) r = pm.wall_corner_read_offset_r;
+        else if(nav_msg.corner_type == ECornerType::PILLAR) r = pm.wall_corner_read_offset_r;
         float end_yaw = traj_msg.end_yaw_now;
 
         float ang = end_yaw * RAD2DEG;

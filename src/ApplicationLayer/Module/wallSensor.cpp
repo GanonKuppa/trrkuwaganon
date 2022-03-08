@@ -330,6 +330,9 @@ namespace module {
         msg.ahead_r = _ahead_r_q.at(0);
         msg.left = _left_q.at(0);
         msg.right = _right_q.at(0);
+        msg.left_max_in_buff = _leftMax();
+        msg.right_max_in_buff = _rightMax();
+
         msg.dist_al = _dist_al;
         msg.dist_ar = _dist_ar;
         msg.dist_a = _dist_a;
@@ -460,6 +463,26 @@ namespace module {
         constexpr float b = -0.3775151f;
         float x = std::max(ad, 1.0f);
         return a * std::pow(ad, b);
+    }
+
+    int16_t WallSensor::_leftMax(){
+        int16_t max_val = 0;
+        for(int i=0; i<BUFF_SIZE; i++) {
+            if(_left_q.at(i) >= max_val) {
+                max_val = _left_q.at(i);
+            }
+        }
+        return max_val;
+    }
+
+    int16_t WallSensor::_rightMax(){
+        int16_t max_val = 0;
+        for(int i=0; i<BUFF_SIZE; i++) {
+            if(_right_q.at(i) >= max_val) {
+                max_val = _right_q.at(i);
+            }
+        }
+        return max_val;
     }
 
     uint16_t WallSensor::_trimAverage(uint16_t ad_array[], uint16_t num, uint16_t trim_num){

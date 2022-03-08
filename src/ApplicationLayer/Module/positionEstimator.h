@@ -32,8 +32,8 @@ namespace module {
         void _aheadWallCorrectionOnWallRead(float dist_a);
 
 
-        void _edgeLCorrection(TrajTripletMsg &traj_msg);
-        void _edgeRCorrection(TrajTripletMsg &traj_msg);
+        void _edgeLCorrection(TrajTripletMsg &traj_msg, NavStateMsg &nav_msg);
+        void _edgeRCorrection(TrajTripletMsg &traj_msg, NavStateMsg &nav_msg);
         void _diagEdgeLCorrection(TrajTripletMsg &traj_msg);
         void _diagEdgeRCorrection(TrajTripletMsg &traj_msg);
         

@@ -51,6 +51,7 @@ namespace module {
         uint8_t _x_last;
         uint8_t _y_last;
         EAzimuth _azimuth;
+        std::deque<std::pair<uint8_t, uint8_t>> _section_queue;
         
         uint8_t _x_dest;
         uint8_t _y_dest;
@@ -103,7 +104,9 @@ namespace module {
 
         bool _existsRWall(float x, float y, EAzimuth azimuth);
         bool _existsLWall(float x, float y, EAzimuth azimuth);
+        bool _inSkewersArea(float x, float y, EAzimuth azimuth);
         bool _watchedPillar(float x, float y, EAzimuth azimuth);
+        ECornerType _cornerType(float end_x, float end_y, float end_yaw, ETurnType turn_type, ETurnDir turn_dir_next);
         void _updateRunParameter();
         void _printWall();
         

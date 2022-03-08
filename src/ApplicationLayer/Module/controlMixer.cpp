@@ -215,7 +215,7 @@ namespace module{
 
         // 斜め直進または直進時の壁制御
         if(_turn_type == ETurnType::DIAGONAL_CENTER || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE ||
-           (_turn_type == ETurnType::STRAIGHT_CENTER_EDGE && !_setp_msg.in_detect_edge_area && !_nav_msg.r_wall_enable || !_nav_msg.l_wall_enable )
+           (_turn_type == ETurnType::STRAIGHT_CENTER_EDGE && !_setp_msg.in_detect_edge_area && (_nav_msg.in_skewers_area))
         ) {
             float v_now = _pos_msg.v_xy_body_for_ctrl;
             if(v_now < 0.1f) v_now = 0.1f;
@@ -234,7 +234,7 @@ namespace module{
             }
             else if(_ws_msg.dist_ar < pm.diag_ctrl_dist_thr_r){
                 ctrl_ccw = true;
-            }
+            }            
             
             if (ctrl_ccw) {
                 float target = 1.0f;
@@ -261,6 +261,7 @@ namespace module{
         }
         else{
             _wall_diag_pidf.reset();
+            LedController::getInstance().turnFcled(0, 0, 0);
         }
 
         // 前壁姿勢位置補正
@@ -291,7 +292,7 @@ namespace module{
         // 角度制御
         if( _turn_type == ETurnType::DIAGONAL_CENTER || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE ||
             _wall_pidf.engaged() || _wall_diag_pidf.engaged() ||_turn_type == ETurnType::AHEAD_WALL_YAW_CORRECTION){
-            _yaw_pidf.reset();
+                _yaw_pidf.reset();      
         }
         else{
             _yaw_pidf.update(_setp_yaw, _att_msg.yaw);

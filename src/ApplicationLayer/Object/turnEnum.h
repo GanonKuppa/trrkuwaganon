@@ -36,10 +36,16 @@ enum class ETurnType : uint8_t{
     NONE = 20
 };
 
-enum class ETurnDir : int8_t{F
+enum class ETurnDir : int8_t{
     CW = -1, 
     NO_TURN = 0, 
     CCW = 1
+};
+
+enum class ECornerType : int8_t{
+    WALL = 0,
+    PILLAR,
+    NONE
 };
 
 enum class ETurnParamSet : uint8_t{
@@ -63,7 +69,7 @@ inline std::string turnDir2Str(ETurnDir td){
         default:
             return std::string("");
     }
-};
+}
 
 inline std::string trajType2Str(ETrajType tt){    
     switch (tt) {
@@ -82,7 +88,7 @@ inline std::string trajType2Str(ETrajType tt){
         default:
             return std::string("");
     }
-};
+}
 
 inline std::string turnType2Str(ETurnType tt){    
     switch (tt) {
@@ -129,7 +135,7 @@ inline std::string turnType2Str(ETurnType tt){
         default:
             return std::string("");
     }
-};
+}
 
 inline std::string turnParamSet2Str(ETurnParamSet tp){    
     switch (tp) {
@@ -150,7 +156,20 @@ inline std::string turnParamSet2Str(ETurnParamSet tp){
         default:
             return std::string("");
     }
-};
+}
+
+inline std::string cornerType2Str(ECornerType ct){    
+    switch (ct) {
+        case ECornerType::PILLAR:
+            return std::string("PILLAR");
+        case ECornerType::WALL:
+            return std::string("WALL");
+        case ECornerType::NONE:
+            return std::string("NONE");      
+        default:
+            return std::string("");
+    }
+}
 
 inline bool isTurnStraight(ETurnType turn_type){
     if(turn_type == ETurnType::STRAIGHT ||

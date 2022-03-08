@@ -12,13 +12,15 @@ namespace module{
       public:
         ETurnType turn_type_next = ETurnType::NONE;
         ETurnDir turn_dir_next = ETurnDir::NO_TURN;
+        ECornerType corner_type = ECornerType::NONE;
         int16_t wall_sensor_max = 0;
         int16_t wall_sensor_min = 32767;
+        int16_t wall_sensor_buff_max = 0;
         float end_yaw;
         float end_x;
         float detected_x;
         float end_y;
-        float detected_y;   
+        float detected_y;
     };
 
     class RunAnalizer : public BaseModule<RunAnalizer>{

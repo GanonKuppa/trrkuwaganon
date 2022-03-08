@@ -34,8 +34,10 @@ RunAnalizer::RunAnalizer() :
         for(uint8_t i=0;i<TRAJ_INFO_MAX;i++){
             _traj_info_list[i].turn_type_next = ETurnType::NONE;
             _traj_info_list[i].turn_dir_next = ETurnDir::NO_TURN;
+            _traj_info_list[i].corner_type = ECornerType::NONE;
             _traj_info_list[i].wall_sensor_max = 0;
             _traj_info_list[i].wall_sensor_min = 32767;
+            _traj_info_list[i].wall_sensor_buff_max = 0;
             _traj_info_list[i].end_x = 0.0f;
             _traj_info_list[i].detected_x = 0.0f;
             _traj_info_list[i].end_y = 0.0f;
@@ -59,15 +61,22 @@ RunAnalizer::RunAnalizer() :
         PRINTF_ASYNC("  diag_corner_threshold_off_l : %8d\n", pm.wall_corner_threshold_off_l);
 
         PRINTF_ASYNC("  ------------------------------ \n");
-        PRINTF_ASYNC("  num, turn_type_next, dir, wall_max, wall_min,  end_yaw\n");
+        PRINTF_ASYNC("  num, turn_type_next, dir, wall_max, wall_min, buff_max,     end_yaw, corner_type\n");
         for(uint32_t i=0; i<_traj_info_num; i++){    
-            PRINTF_ASYNC("  %03d, %-14s, %3s, %8d, %8d, %8d\n",
+            char c = ' ';
+            int16_t ang = (int16_t)(_traj_info_list[i].end_yaw * 180.0f /3.14159265);
+            if(ang % 90 == 0) c = 'S';
+            else c = 'D';
+            PRINTF_ASYNC("  %03d, %-14s, %3s, %8d, %8d, %8d, %8d(%c), %s\n",
               i,
               turnType2Str(_traj_info_list[i].turn_type_next).c_str(),
               turnDir2Str(_traj_info_list[i].turn_dir_next).c_str(),
               _traj_info_list[i].wall_sensor_max,
               _traj_info_list[i].wall_sensor_min,
-              (int16_t)(_traj_info_list[i].end_yaw * 180.0f /3.14159265)
+              _traj_info_list[i].wall_sensor_buff_max,
+              ang,
+              c,
+              cornerType2Str(_traj_info_list[i].corner_type).c_str()
             );
             PRINTF_ASYNC("\n");
             PRINTF_ASYNC("    x | %7.3f, %7.3f | %7.3f\n", _traj_info_list[i].end_x, _traj_info_list[i].detected_x, _traj_info_list[i].end_x - _traj_info_list[i].detected_x);
@@ -100,12 +109,12 @@ RunAnalizer::RunAnalizer() :
         if(ctrl_msg.in_detect_edge_area){
             _traj_info_list[_traj_info_num].turn_type_next = traj_msg.turn_type_next;
             _traj_info_list[_traj_info_num].turn_dir_next = traj_msg.turn_dir_next;
+            _traj_info_list[_traj_info_num].corner_type = nav_msg.corner_type;
 
             if(traj_msg.turn_dir_next == ETurnDir::CCW && ws_msg.dist_a > 0.09f){
             	_traj_info_list[_traj_info_num].wall_sensor_max = std::max(ws_msg.left, _traj_info_list[_traj_info_num].wall_sensor_max);
                 _traj_info_list[_traj_info_num].wall_sensor_min = std::min(ws_msg.left, _traj_info_list[_traj_info_num].wall_sensor_min);
             }
-
             else if(traj_msg.turn_dir_next == ETurnDir::CW && ws_msg.dist_a > 0.09f){
                 _traj_info_list[_traj_info_num].wall_sensor_max = std::max(ws_msg.right, _traj_info_list[_traj_info_num].wall_sensor_max);
                 _traj_info_list[_traj_info_num].wall_sensor_min = std::min(ws_msg.right, _traj_info_list[_traj_info_num].wall_sensor_min);
@@ -115,6 +124,13 @@ RunAnalizer::RunAnalizer() :
             _traj_info_list[_traj_info_num].end_y = traj_msg.end_y_now;
 
             if(!_detected_edge_pre && ctrl_msg.detected_edge){
+                
+                if(traj_msg.turn_dir_next == ETurnDir::CCW){
+                    _traj_info_list[_traj_info_num].wall_sensor_buff_max = ws_msg.left_max_in_buff;
+                }                
+                else if(traj_msg.turn_dir_next == ETurnDir::CW){
+                    _traj_info_list[_traj_info_num].wall_sensor_buff_max = ws_msg.right_max_in_buff;
+                }
                 _traj_info_list[_traj_info_num].detected_x = pos_msg.x;
                 _traj_info_list[_traj_info_num].detected_y = pos_msg.y;
             }

@@ -8,7 +8,10 @@ class WallSensorMsg : public BaseMsg{
     int16_t ahead_r = 0;               // [12bit AD]
     int16_t left = 0;                  // [12bit AD]
     int16_t right = 0;                 // [12bit AD]
-    
+
+    int16_t left_max_in_buff = 0;      // [12bit AD]
+    int16_t right_max_in_buff = 0;     // [12bit AD]
+
     float dist_al = 0.0f;              // [m]
     float dist_ar = 0.0f;              // [m]
     float dist_a = 0.0f;               // [m]
