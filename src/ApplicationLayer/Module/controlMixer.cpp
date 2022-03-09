@@ -223,23 +223,39 @@ namespace module{
             
             bool ctrl_ccw = false;
             bool ctrl_cw = false;
+            float thr_al = 0.0f;
+            float thr_ar = 0.0f;
+            if(_turn_type == ETurnType::DIAGONAL_CENTER || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE){
+                thr_al = pm.diag_ctrl_dist_thr_l;
+                thr_ar = pm.diag_ctrl_dist_thr_r;
+            }
+            else{
+                thr_al = pm.ca_ctrl_dist_thr_l;
+                thr_ar = pm.ca_ctrl_dist_thr_r;
+            }
 
             //両方の前壁センサが反応している場合
-            if(_ws_msg.dist_al < pm.diag_ctrl_dist_thr_l && _ws_msg.dist_ar < pm.diag_ctrl_dist_thr_r){
-                ctrl_ccw = false;
-                ctrl_cw = false;
+            if(_ws_msg.dist_al < thr_al && _ws_msg.dist_ar < thr_ar){
+                if(_turn_type == ETurnType::DIAGONAL_CENTER || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE){
+                    ctrl_ccw = false;
+                    ctrl_cw = false;
+                }
+                else{
+                    if(_ws_msg.dist_al < _ws_msg.dist_ar) ctrl_cw = true;
+                    else ctrl_ccw = true;
+                } 
             }
-            else if(_ws_msg.dist_al < pm.diag_ctrl_dist_thr_l){
+            else if(_ws_msg.dist_al < thr_al){
                 ctrl_cw = true;
             }
-            else if(_ws_msg.dist_ar < pm.diag_ctrl_dist_thr_r){
+            else if(_ws_msg.dist_ar < thr_ar){
                 ctrl_ccw = true;
             }            
             
             if (ctrl_ccw) {
-                float target = 1.0f;
-                if(_turn_type == ETurnType::DIAGONAL_CENTER || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE) target = pm.diag_ctrl_dist_thr_r;
-                else target = pm.ca_ctrl_dist_thr_r; 
+                float target = 1.0f;                
+                if(_turn_type == ETurnType::DIAGONAL_CENTER || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE) target = pm.diag_ctrl_dist_thr_l;
+                else target = pm.ca_ctrl_dist_thr_l; 
 
                 _wall_diag_pidf.update(_ws_msg.dist_al, target);
                 _setp_yawrate += v_now * _wall_diag_pidf.getControlVal();
@@ -247,8 +263,8 @@ namespace module{
             } 
             else if (ctrl_cw) {
                 float target = 1.0f;
-                if(_turn_type == ETurnType::DIAGONAL_CENTER || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE) target = pm.diag_ctrl_dist_thr_l;
-                else target = pm.ca_ctrl_dist_thr_l;
+                if(_turn_type == ETurnType::DIAGONAL_CENTER || _turn_type == ETurnType::DIAGONAL_CENTER_EDGE) target = pm.diag_ctrl_dist_thr_r;
+                else target = pm.ca_ctrl_dist_thr_r;
 
                 _wall_diag_pidf.update(_ws_msg.dist_ar, target);
                 _setp_yawrate += - v_now * _wall_diag_pidf.getControlVal();

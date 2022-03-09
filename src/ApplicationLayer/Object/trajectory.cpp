@@ -240,7 +240,7 @@ void StraightTrajectory::update() {
     if(_target_dist > (0.09f + 0.045f) && _v_end > 0.3f){
         dist = _target_dist - 0.045f;
     }else{
-        dist = _target_dist - 0.01f;
+        dist = _target_dist - 0.005f;
     }
 
     if (_a_dec != 0.0f){

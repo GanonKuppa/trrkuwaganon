@@ -137,7 +137,7 @@ namespace module{
         setNavMode(ENavMode::STANDBY);
         setNavSubMode(ENavSubMode::STANDBY);
 
-        PRINTF_PICKLE("-- updated_section_queue execution --\n" )
+        PRINTF_PICKLE("-- updated_section_queue execution --\n" );
         if(_is_failsafe){
             uint8_t i = 0;
             
@@ -151,6 +151,9 @@ namespace module{
             }
             _maze.writeMazeData2Flash();
         }
+        PRINTF_PICKLE("-- navigation result --\n");
+        PRINTF_PICKLE("  cumulative_section_count : %5d [cnt]\n", _cumulative_section_count);
+        PRINTF_PICKLE("  elapsed_time             : %5.2f [sec]\n", _elapsed_time);
 
         _lock_guard = false;
     }
@@ -212,7 +215,7 @@ namespace module{
             ws_msg_temp.is_right = _is_pre_read_r_wall;                
             EUpdateWallStatus update_wall_status = _maze.updateWall(_x_cur, _y_cur, _azimuth, ws_msg_temp);
 
-            if(!_maze.isReached(_x_cur, _y_cur)){                               
+            if(update_wall_status == EUpdateWallStatus::UPDATED){                               
                 //PRINTF_PICKLE("UPDATE_WALL          | x_setp:%6.3f, y_setp:%6.3f | x:%6.3f, y:%6.3f | azimuth:%c\n",_x_setp/0.09f, _y_setp/0.09f, _x/0.09f, _y/0.09f, azimuth2Char(_azimuth));
                 //PRINTF_PICKLE("  dist: %.3f, %.3f, %.3f, %.3f\n", _ws_msg.dist_al, _ws_msg.dist_l, _ws_msg.dist_r, _ws_msg.dist_ar);
                 //PRINTF_PICKLE("  dist: %.3f, %.3f, %.3f, %.3f\n", ws_msg_temp.dist_al, ws_msg_temp.dist_l, ws_msg_temp.dist_r, ws_msg_temp.dist_ar);
@@ -253,9 +256,9 @@ namespace module{
                         _nav_cmd_queue.push_back(ENavCommand::UPDATE_POTENTIAL_MAP);                
                         _nav_cmd_queue.push_back(ENavCommand::GO_NEXT_SECTION);
                     //}
-                    if (update_wall_status == EUpdateWallStatus::REACHED_ERROR ){
-                        _nav_cmd_queue.push_back(ENavCommand::WALL_ERROR);
-                    }
+                    //else{
+                    //    _nav_cmd_queue.push_back(ENavCommand::WALL_ERROR);                        
+                    //}
                     _lock_guard = false;
                 }
 
@@ -265,22 +268,18 @@ namespace module{
         // 区画中心付近での前壁再確認
         /*
         bool pre_in_reread_ahead_area = _in_reread_ahead_area;
-        _in_reread_ahead_area = _inReadWallArea(0.04f, 0.042f);
+        _in_reread_ahead_area = _inReadWallArea(0.04f, 0.055f);
         
-        if((_in_reread_ahead_area && !pre_in_reread_ahead_area &&
-            _navigating &&
-            _mode == ENavMode::SEARCH &&
-            _ws_msg.dist_a < 0.065f &&
-            _traj_msg.traj_type_now == ETrajType::STRAIGHT &&
-            _traj_msg.traj_type_next != ETrajType::CURVE
-           ) ||
-           ( _in_reread_ahead_area && !pre_in_reread_ahead_area &&
-             _navigating &&
-             _mode == ENavMode::SEARCH &&
-             _ws_msg.dist_a < 0.065f &&
-             _traj_msg.traj_type_pre == ETrajType::CURVE && 
-             _traj_msg.traj_type_now == ETrajType::STRAIGHT
-           )        
+        if(
+           (    _in_reread_ahead_area && !pre_in_reread_ahead_area &&
+                _navigating &&
+                _mode == ENavMode::SEARCH &&
+                !_is_failsafe
+           ) &&
+           (
+                (_traj_msg.traj_type_pre == ETrajType::STRAIGHT &&_traj_msg.traj_type_now == ETrajType::STRAIGHT && _traj_msg.traj_type_next != ETrajType::CURVE && _ws_msg.dist_a < 0.055f) ||
+                (_traj_msg.traj_type_pre == ETrajType::CURVE && _traj_msg.traj_type_now == ETrajType::STRAIGHT && _ws_msg.dist_a < 0.046f)
+           )
         ){   
             _nav_cmd_queue.push_back(ENavCommand::RE_UPDATE_NEXT_SECTION);
         }
@@ -469,7 +468,7 @@ namespace module{
                 else{
                     _maze.makeSearchMap(_x_dest, _y_dest);
                 }
-                PRINTF_PICKLE("UPDATE_POTENTIAL_MAP | x_setp:%6.3f, y_setp:%6.3f | x:%6.3f, y:%6.3f\n",_x_setp/0.09f, _y_setp/0.09f, _x/0.09f, _y/0.09f);
+                PRINTF_PICKLE("UPDATE_POTENTIAL_MAP | updated_section_queue size %d\n",_updated_section_queue.size());
             }
             else if(cmd == ENavCommand::SAVE_MAZE){
                 //hal::enterCriticalSection();
@@ -478,25 +477,19 @@ namespace module{
             }
             else if(cmd == ENavCommand::RE_UPDATE_NEXT_SECTION){
                 EAzimuth azimuth_start = _azimuth;
-                bool is_a = false;
+                bool is_a = true;
                 bool is_l = false;
                 bool is_r = false;
                 bool is_b = false;               
                 
-                if(_ws_msg.is_ahead){
-                    is_a = true;
-                    AheadWallCorrectionFactory::push(1.5f, 1.0f, true);                         
-                }
-                else{                    
-                    StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2, _v, _v, 0.0f, _a, _a);
-                }
+                AheadWallCorrectionFactory::push(1.5f, 1.0f, true);                         
                 hal::waitmsec(10);
                 while(_turn_type != ETurnType::NONE)hal::waitmsec(1);
                 
                 SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
                 hal::waitmsec(10);
                 while(_turn_type != ETurnType::NONE)hal::waitmsec(1);
-                if(_ws_msg.is_ahead){
+                if(_ws_msg.dist_a < 0.065f){
                     is_l = true;
                     AheadWallCorrectionFactory::push(0.2f, 0.05f);
                 }
@@ -504,7 +497,7 @@ namespace module{
                 SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
                 hal::waitmsec(10);
                 while(_turn_type != ETurnType::NONE)hal::waitmsec(1);
-                if(_ws_msg.is_ahead){
+                if(_ws_msg.dist_a < 0.065f){
                     is_b = true;
                     AheadWallCorrectionFactory::push(0.2f, 0.05f);
                 }                
@@ -512,7 +505,7 @@ namespace module{
                 SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
                 hal::waitmsec(10);
                 while(_turn_type != ETurnType::NONE)hal::waitmsec(1);                
-                if(_ws_msg.is_ahead){
+                if(_ws_msg.dist_a < 0.065f){
                     AheadWallCorrectionFactory::push(0.2f, 0.05f);
                     is_r = true;
                 }
@@ -534,6 +527,62 @@ namespace module{
             }
             else if(cmd == ENavCommand::WALL_ERROR){
                 PRINTF_PICKLE("WALL_ERROR | x_setp:%6.3f, y_setp:%6.3f | x:%6.3f, y:%6.3f\n",_x_setp/0.09f, _y_setp/0.09f, _x/0.09f, _y/0.09f);
+                EAzimuth azimuth_start = _azimuth;
+                bool is_a = false;
+                bool is_l = false;
+                bool is_r = false;
+                bool is_b = false;               
+                
+                StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2, _v, _v, 0.0f, _a, _a);
+                hal::waitmsec(10);
+                while(_turn_type != ETurnType::NONE)hal::waitmsec(1);
+
+                if(_ws_msg.dist_a < 0.065f){
+                    is_a = true;
+                    AheadWallCorrectionFactory::push(0.2f, 0.05f, true);                         
+                }
+                hal::waitmsec(10);
+                while(_turn_type != ETurnType::NONE)hal::waitmsec(1);
+                
+                SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
+                hal::waitmsec(10);
+                while(_turn_type != ETurnType::NONE)hal::waitmsec(1);
+                if(_ws_msg.dist_a < 0.065f){
+                    is_l = true;
+                    AheadWallCorrectionFactory::push(0.2f, 0.05f, true);
+                }
+                
+                SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
+                hal::waitmsec(10);
+                while(_turn_type != ETurnType::NONE)hal::waitmsec(1);
+                if(_ws_msg.dist_a < 0.065f){
+                    is_b = true;
+                    AheadWallCorrectionFactory::push(0.2f, 0.05f, true);
+                }                
+                
+                SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
+                hal::waitmsec(10);
+                while(_turn_type != ETurnType::NONE)hal::waitmsec(1);                
+                if(_ws_msg.dist_a < 0.065f){
+                    AheadWallCorrectionFactory::push(0.2f, 0.05f, true);
+                    is_r = true;
+                }
+
+                SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);                
+
+                _maze.writeWall(_x_cur, _y_cur, azimuth_start, is_l, is_a, is_r, is_b);
+                if(_sub_mode == ENavSubMode::ALL_AREA_SEARCH && _elapsed_time < _search_limit_time){
+                    _maze.makeAllAreaSearchMap(_x_dest, _y_dest);
+                }
+                else{
+                    _maze.makeSearchMap(_x_dest, _y_dest);                    
+                }
+                EAzimuth dest_dir_next = _maze.getSearchDirection(_x_cur, _y_cur, _azimuth);
+                int8_t rot_times = _maze.calcRotTimes(dest_dir_next, azimuth_start);
+                SpinTurnFactory::push((float)rot_times * 45.0f * DEG2RAD, _yawrate_max, _yawacc);
+                StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f + _read_wall_offset2, 0.0f, _v, _v, _a, _a);
+
+
             }
         }
         _lock_guard = false;

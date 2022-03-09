@@ -14,6 +14,7 @@
 #include "imuDriver.h"
 #include "logger.h"
 #include "suction.h"
+#include "wallSensor.h"
 
 // Msg
 #include "msgBroker.h"

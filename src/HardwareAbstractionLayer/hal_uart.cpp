@@ -141,7 +141,7 @@ namespace hal {
         return len;
     }
 
-    int feedPickleWithPrintfAsync(){        
+    int feedPickleWithPrintfAsync(){
 #ifndef SILS
         for(auto &c : _pickleBuf){            
             peripheral_driver::put1byteSCIFA9(c);

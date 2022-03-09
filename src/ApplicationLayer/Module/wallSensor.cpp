@@ -20,6 +20,7 @@
 // Msg
 #include "wallSensorMsg.h"
 #include "msgBroker.h"
+#include "ctrlSetpointMsg.h"
 
 
 namespace module {
@@ -80,6 +81,16 @@ namespace module {
         if(!_enable){            
             return;
         }
+
+        CtrlSetpointMsg setp_msg;
+        copyMsg(msg_id::CTRL_SETPOINT, &setp_msg);
+
+        if(setp_msg.turn_type == ETurnType::TURN_90 ||
+          (setp_msg.traj_type == ETrajType::SPINTURN && setp_msg.yawrate * setp_msg.yawacc >= 0.0) //超信知旋回の後半減角速度部分を除きたい
+        ){
+            return;
+        }
+
         _updateOffVal(1, 1, 1, 1);
         _modulateVal();
 

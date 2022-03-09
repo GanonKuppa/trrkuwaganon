@@ -409,8 +409,21 @@ EUpdateWallStatus Maze::updateWall(uint8_t x, uint8_t y, EAzimuth dir, WallSenso
     else {
         writeReached(x, y, true);
         writeWall(x, y, dir, ws_msg);
+
+        fourWallUpdatedSectionCheck(x+1, y);
+        fourWallUpdatedSectionCheck(x-1, y);
+        fourWallUpdatedSectionCheck(x , y+1);
+        fourWallUpdatedSectionCheck(x , y-1);
         return EUpdateWallStatus::UPDATED;
     } //end else
+}
+
+void Maze::fourWallUpdatedSectionCheck(uint8_t x, uint8_t y){
+    if(0 <= x && x <= 31 && 0 <= y && y <=31 && !isReached(x, y)){
+        Wall wall = readWall(x,y);
+        uint8_t watched_wall_num = wall.EF + wall.NF + wall.WF + wall.SF;
+        if(watched_wall_num == 4) writeReached(x, y, true);
+    }
 }
 
 EUpdateWallStatus Maze::updateWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool a, bool r) {
