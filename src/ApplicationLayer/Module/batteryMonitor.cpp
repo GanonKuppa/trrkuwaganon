@@ -67,7 +67,7 @@ namespace module {
         int16_t ad = hal::startAD0();
         ad = hal::startAD0(); // 電荷を抜くために複数回AD変換
         _voltage = _ad2Voltage(ad);
-        return (_voltage > ALERT_VOL);
+        return (_voltage > EMERGENCY_VOL);
     }
 
 

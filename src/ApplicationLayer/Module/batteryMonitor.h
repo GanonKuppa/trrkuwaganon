@@ -26,6 +26,7 @@ namespace module {
         const float REG_VOLTAGE = 3.0f;
         const float V_COEF = 30.0f/20.0f;
         const float ALERT_VOL = 3.4f;
+        const float EMERGENCY_VOL = 3.1f;
     };
 
     int usrcmd_batteryMonitor(int argc, char **argv);
