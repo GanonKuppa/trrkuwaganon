@@ -51,7 +51,7 @@ namespace module {
         uint8_t _x_last;
         uint8_t _y_last;
         EAzimuth _azimuth;
-        std::deque<std::pair<uint8_t, uint8_t>> _section_queue;
+        std::deque<std::pair<uint8_t, uint8_t>> _updated_section_queue;
         
         uint8_t _x_dest;
         uint8_t _y_dest;
@@ -112,6 +112,7 @@ namespace module {
         
         void _publish();
         const float DEG2RAD = 3.14159265f / 180.0f;
+        const uint8_t UPDATED_SECTION_QUEUE_MAX = 3;
 
     };
 

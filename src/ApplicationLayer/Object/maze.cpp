@@ -300,29 +300,29 @@ void Maze::writeWall(uint8_t x, uint8_t y, Wall wall) {
     }
 }
 
-void Maze::writeWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool a, bool r) {
+void Maze::writeWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool a, bool r, bool b) {
     Wall wall = readWall(x,y);
     switch(dir) {
         case EAzimuth::E:  //まうすは東向き
-            wall.W = 0;
+            wall.W = b;
             wall.S = r;
             wall.E = a;
             wall.N = l;
             break;
         case EAzimuth::N://まうすは北向き
-            wall.S = 0;
+            wall.S = b;
             wall.E = r;
             wall.N = a;
             wall.W = l;
             break;
         case EAzimuth::W://まうすは西向き
-            wall.E = 0;
+            wall.E = b;
             wall.N = r;
             wall.W = a;
             wall.S = l;
             break;
         case EAzimuth::S://まうすは南向き
-            wall.N = 0;
+            wall.N = b;
             wall.W = r;
             wall.S = a;
             wall.E = l;
@@ -339,6 +339,26 @@ void Maze::writeWall(uint8_t x, uint8_t y, EAzimuth dir, WallSensorMsg& ws_msg) 
     bool a = ws_msg.is_ahead;
     bool r = ws_msg.is_right;
     writeWall(x, y, dir, l, a, r);
+}
+
+void Maze::clearAdjacentWall(uint8_t x, uint8_t y){
+    Wall no_wall;
+    no_wall.setByUint8(0);
+    
+    writeReached(x, y, false);
+    writeWall(x, y, no_wall);
+
+    writeReached(x+1, y, false);
+    writeWall(x+1, y, no_wall);
+
+    writeReached(x-1, y, false);
+    writeWall(x-1, y, no_wall);
+
+    writeReached(x, y+1, false);
+    writeWall(x, y+1, no_wall);
+    
+    writeReached(x, y-1, false);
+    writeWall(x, y-1, no_wall);
 }
 
 // return 1:  探索済みの区画に来て、迷路情報と現在の壁情報が一致
@@ -623,7 +643,7 @@ void Maze::makeRandomFastestMap(uint8_t x, uint8_t y) {
     p_map[x][y] = 0; //目的地のテンシャルは0
 
     que.push_back(std::make_pair(x,y));
-    while(que.empty() == false) {
+    while(!que.empty()) {
         x = que.front().first;
         y = que.front().second;
         Wall wall = readWall(x, y);
@@ -662,7 +682,7 @@ void Maze::makeFastestMap(uint8_t x, uint8_t y) {
     p_map[x][y] = 0; //目的地のテンシャルは0
 
     que.push_back(std::make_pair(x,y));
-    while(que.empty() == false) {
+    while(!que.empty()) {
         x = que.front().first;
         y = que.front().second;
         Wall wall = readWall(x, y);
@@ -699,7 +719,7 @@ void Maze::makeRandomNoEntryMaskMap(uint8_t x, uint8_t y) {
     p_map[x][y] = 0; //目的地のテンシャルは0
 
     que.push_back(std::make_pair(x,y));
-    while(que.empty() == false) {
+    while(!que.empty()) {
         x = que.front().first;
         y = que.front().second;
         Wall wall = readWall((uint8_t)(que.front().first), (uint8_t)(que.front().second));

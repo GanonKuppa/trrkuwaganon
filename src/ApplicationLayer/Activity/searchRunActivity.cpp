@@ -66,9 +66,7 @@ namespace activity{
     }
     
     
-    void SearchRunActivity::onFinish(){
-        module::TrajectoryCommander::getInstance().clear();
-        module::Suction::getInstance().setDuty(0.0f);
+    void SearchRunActivity::onFinish(){                
         module::Navigator::getInstance().endNavigation();
         module::Logger::getInstance().end();
     }
@@ -83,6 +81,8 @@ namespace activity{
 
 
         if((!nav_msg.navigating && ctrl_msg.traj_type == ETrajType::NONE )|| nav_msg.is_failsafe){ 
+            module::TrajectoryCommander::getInstance().clear();
+            module::Suction::getInstance().setDuty(0.0f);
             loop_status = ELoopStatus::FINISH;
         }
 

@@ -72,8 +72,9 @@ class Maze {
     void writeAheadWall(uint8_t x, uint8_t y, EAzimuth dir, bool ahead);
     void writeSideWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool r);
     void writeWall(uint8_t x, uint8_t y, Wall wall);
-    void writeWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool a, bool r);
+    void writeWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool a, bool r, bool b=false);
     void writeWall(uint8_t x, uint8_t y, EAzimuth dir, WallSensorMsg& ws_msg);
+    void clearAdjacentWall(uint8_t x, uint8_t y);
     
     EUpdateWallStatus updateWall(uint8_t x, uint8_t y, EAzimuth dir, WallSensorMsg& ws_msg);
     EUpdateWallStatus updateWall(uint8_t x, uint8_t y, EAzimuth dir, bool l, bool a, bool r);

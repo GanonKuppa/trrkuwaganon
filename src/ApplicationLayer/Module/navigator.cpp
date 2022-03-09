@@ -81,8 +81,7 @@ namespace module{
     }
     
     void Navigator::setNavMode(ENavMode mode){
-        _mode = mode;
-        _is_failsafe = false;
+        _mode = mode;        
     }
 
     void Navigator::setNavSubMode(ENavSubMode sub_mode){
@@ -119,7 +118,7 @@ namespace module{
         while(_lock_guard) hal::waitusec(1);
         _lock_guard = true;
         
-        _section_queue.clear();
+        _updated_section_queue.clear();
         _nav_cmd_queue.clear();
 
         _nav_cmd_queue.push_back(ENavCommand::DO_FIRST_MOVE);
@@ -128,15 +127,31 @@ namespace module{
     }
 
     void Navigator::endNavigation(){
-        if(_lock_guard) hal::waitusec(1);
+        while(_lock_guard) hal::waitusec(1);
         _lock_guard = true;
-        while(!_nav_cmd_queue.empty()) _nav_cmd_queue.pop_front();
+        _nav_cmd_queue.clear();
         
         _x_last = 255;
         _y_last = 255;
         _navigating = false;
         setNavMode(ENavMode::STANDBY);
         setNavSubMode(ENavSubMode::STANDBY);
+
+        PRINTF_PICKLE("-- updated_section_queue execution --\n" )
+        if(_is_failsafe){
+            uint8_t i = 0;
+            
+            while(!_updated_section_queue.empty()){                
+                uint8_t x = _updated_section_queue.front().first;
+                uint8_t y = _updated_section_queue.front().second;
+                _maze.clearAdjacentWall(x, y);
+                PRINTF_PICKLE("  %d|(%d, %d)\n", i, x, y);
+                if(!_updated_section_queue.empty())_updated_section_queue.pop_front();
+                i++;
+            }
+            _maze.writeMazeData2Flash();
+        }
+
         _lock_guard = false;
     }
     
@@ -182,23 +197,32 @@ namespace module{
         if(_in_read_wall_area && !pre_in_read_wall_area && 
            !(_x_last == _x_cur && _y_last == _y_cur ) &&
            _navigating &&
-           _mode == ENavMode::SEARCH
+           _mode == ENavMode::SEARCH &&
+           isTurnStraight(_turn_type) &&
+           !_is_failsafe
         ){
             // LEDの点灯
             module::LedController::getInstance().oneshotFcled(1, 1, 0, 0.005, 0.005);
 
             // 迷路の壁情報更新
+            WallSensorMsg ws_msg_temp = _ws_msg;
+            ws_msg_temp.dist_l = _pre_read_l_wall_dist;
+            ws_msg_temp.dist_r = _pre_read_r_wall_dist;
+            ws_msg_temp.is_left = _is_pre_read_l_wall;
+            ws_msg_temp.is_right = _is_pre_read_r_wall;                
+            EUpdateWallStatus update_wall_status = _maze.updateWall(_x_cur, _y_cur, _azimuth, ws_msg_temp);
+
             if(!_maze.isReached(_x_cur, _y_cur)){                               
                 //PRINTF_PICKLE("UPDATE_WALL          | x_setp:%6.3f, y_setp:%6.3f | x:%6.3f, y:%6.3f | azimuth:%c\n",_x_setp/0.09f, _y_setp/0.09f, _x/0.09f, _y/0.09f, azimuth2Char(_azimuth));
-                WallSensorMsg ws_msg_temp = _ws_msg;
-                ws_msg_temp.dist_l = _pre_read_l_wall_dist;
-                ws_msg_temp.dist_r = _pre_read_r_wall_dist;
-                ws_msg_temp.is_left = _is_pre_read_l_wall;
-                ws_msg_temp.is_right = _is_pre_read_r_wall;                
                 //PRINTF_PICKLE("  dist: %.3f, %.3f, %.3f, %.3f\n", _ws_msg.dist_al, _ws_msg.dist_l, _ws_msg.dist_r, _ws_msg.dist_ar);
                 //PRINTF_PICKLE("  dist: %.3f, %.3f, %.3f, %.3f\n", ws_msg_temp.dist_al, ws_msg_temp.dist_l, ws_msg_temp.dist_r, ws_msg_temp.dist_ar);
-                _maze.updateWall(_x_cur, _y_cur, _azimuth, ws_msg_temp);
-            }
+                _updated_section_queue.push_back(std::make_pair(_x_cur, _y_cur));
+                if(_updated_section_queue.size() > UPDATED_SECTION_QUEUE_MAX){
+                    _updated_section_queue.pop_front();
+                }
+            }else{
+                if(!_updated_section_queue.empty())_updated_section_queue.pop_front();
+            }            
 
             if( (_elapsed_time > _search_limit_time && _done_outward) ||
                 (_x_cur == _x_dest && _y_cur == _y_dest && 
@@ -224,9 +248,14 @@ namespace module{
                 _x_last = _x_cur;
                 _y_last = _y_cur;
                 if(_v_setp <= _v){ // 既知区画加速中か判定
-                    _lock_guard = true;                
-                    _nav_cmd_queue.push_back(ENavCommand::UPDATE_POTENTIAL_MAP);                
-                    _nav_cmd_queue.push_back(ENavCommand::GO_NEXT_SECTION);
+                    _lock_guard = true;
+                    //if(update_wall_status != EUpdateWallStatus::REACHED_ERROR ){
+                        _nav_cmd_queue.push_back(ENavCommand::UPDATE_POTENTIAL_MAP);                
+                        _nav_cmd_queue.push_back(ENavCommand::GO_NEXT_SECTION);
+                    //}
+                    if (update_wall_status == EUpdateWallStatus::REACHED_ERROR ){
+                        _nav_cmd_queue.push_back(ENavCommand::WALL_ERROR);
+                    }
                     _lock_guard = false;
                 }
 
@@ -234,23 +263,28 @@ namespace module{
         }
                 
         // 区画中心付近での前壁再確認
+        /*
         bool pre_in_reread_ahead_area = _in_reread_ahead_area;
         _in_reread_ahead_area = _inReadWallArea(0.04f, 0.042f);
         
-        if((_in_reread_ahead_area && !pre_in_reread_ahead_area &&           
+        if((_in_reread_ahead_area && !pre_in_reread_ahead_area &&
             _navigating &&
             _mode == ENavMode::SEARCH &&
             _ws_msg.dist_a < 0.065f &&
             _traj_msg.traj_type_now == ETrajType::STRAIGHT &&
             _traj_msg.traj_type_next != ETrajType::CURVE
            ) ||
-           ( _mode == ENavMode::SEARCH &&
+           ( _in_reread_ahead_area && !pre_in_reread_ahead_area &&
+             _navigating &&
+             _mode == ENavMode::SEARCH &&
+             _ws_msg.dist_a < 0.065f &&
              _traj_msg.traj_type_pre == ETrajType::CURVE && 
-             _traj_msg.traj_type_now == ETrajType::STRAIGHT &&
-             _ws_msg.dist_a < 0.065f)        
+             _traj_msg.traj_type_now == ETrajType::STRAIGHT
+           )        
         ){   
             _nav_cmd_queue.push_back(ENavCommand::RE_UPDATE_NEXT_SECTION);
         }
+        */
 
         _elapsed_time += _delta_t;
         
@@ -262,7 +296,7 @@ namespace module{
         _lock_guard = true;
         if(!_nav_cmd_queue.empty()){
             ENavCommand cmd = _nav_cmd_queue.front();
-            _nav_cmd_queue.pop_front();
+            if(!_nav_cmd_queue.empty())_nav_cmd_queue.pop_front();
             _lock_guard = false;
             if(cmd == ENavCommand::DO_FIRST_MOVE){    
                 float target_dist = _wall2mouse_center_dist + 0.045f + _read_wall_offset2;
@@ -337,7 +371,8 @@ namespace module{
                     else StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.09f * block_count, _v, _v_max, _v, _a, _a);                    
                 } 
                 else if (std::abs(rot_times) == 4) {
-                    _nav_cmd_queue.push_back(ENavCommand::SAVE_MAZE); 
+                    _maze.writeMazeData2Flash();
+
                     if(_maze.existsAWall(_x_cur, _y_cur, _azimuth)){
                         StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2 - 0.02f, _v, _v, _v, _a, _a);                        
                         AheadWallCorrectionFactory::push(0.2f, 0.05f);
@@ -366,8 +401,7 @@ namespace module{
                     if(_slalom_count <= 6){
                         CurveFactory::pushWithStraight(_turn_param_set, ETurnType::TURN_90, ETurnDir::CCW, -_read_wall_offset2 , _read_wall_offset2);
                     }
-                    else{
-                        _nav_cmd_queue.push_back(ENavCommand::SAVE_MAZE);
+                    else{                        
                         if(_maze.existsAWall(_x_cur, _y_cur, _azimuth)){
                             StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2 - 0.02f, _v, _v, _v, _a, _a);                        
                             AheadWallCorrectionFactory::push(0.2f, 0.05f);
@@ -393,8 +427,7 @@ namespace module{
                     if(_slalom_count <= 6){
                         CurveFactory::pushWithStraight(_turn_param_set, ETurnType::TURN_90, ETurnDir::CW, -_read_wall_offset2 , _read_wall_offset2);
                     }
-                    else{
-                        _nav_cmd_queue.push_back(ENavCommand::SAVE_MAZE);
+                    else{                        
                         if(_maze.existsAWall(_x_cur, _y_cur, _azimuth)){
                             StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2 - 0.02f, _v, _v, _v, _a, _a);                        
                             AheadWallCorrectionFactory::push(0.2f, 0.05f);
@@ -445,10 +478,21 @@ namespace module{
             }
             else if(cmd == ENavCommand::RE_UPDATE_NEXT_SECTION){
                 EAzimuth azimuth_start = _azimuth;
-                bool is_a = true;
+                bool is_a = false;
                 bool is_l = false;
-                bool is_r = false;                
-                AheadWallCorrectionFactory::push(1.5f, 1.0f, true);                         
+                bool is_r = false;
+                bool is_b = false;               
+                
+                if(_ws_msg.is_ahead){
+                    is_a = true;
+                    AheadWallCorrectionFactory::push(1.5f, 1.0f, true);                         
+                }
+                else{                    
+                    StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2, _v, _v, 0.0f, _a, _a);
+                }
+                hal::waitmsec(10);
+                while(_turn_type != ETurnType::NONE)hal::waitmsec(1);
+                
                 SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
                 hal::waitmsec(10);
                 while(_turn_type != ETurnType::NONE)hal::waitmsec(1);
@@ -460,7 +504,8 @@ namespace module{
                 SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
                 hal::waitmsec(10);
                 while(_turn_type != ETurnType::NONE)hal::waitmsec(1);
-                if(_ws_msg.is_ahead){                    
+                if(_ws_msg.is_ahead){
+                    is_b = true;
                     AheadWallCorrectionFactory::push(0.2f, 0.05f);
                 }                
                 
@@ -475,7 +520,7 @@ namespace module{
                 SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
                 AheadWallCorrectionFactory::push(0.2f, 0.05f);
 
-                _maze.updateWall(_x_cur, _y_cur, azimuth_start, is_l, is_a, is_r);
+                _maze.writeWall(_x_cur, _y_cur, azimuth_start, is_l, is_a, is_r, is_b);
                 if(_sub_mode == ENavSubMode::ALL_AREA_SEARCH && _elapsed_time < _search_limit_time){
                     _maze.makeAllAreaSearchMap(_x_dest, _y_dest);
                 }
@@ -486,6 +531,9 @@ namespace module{
                 int8_t rot_times = _maze.calcRotTimes(dest_dir_next, azimuth_start);
                 SpinTurnFactory::push((float)rot_times * 45.0f * DEG2RAD, _yawrate_max, _yawacc);
                 StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f + _read_wall_offset2, 0.0f, _v, _v, _a, _a);
+            }
+            else if(cmd == ENavCommand::WALL_ERROR){
+                PRINTF_PICKLE("WALL_ERROR | x_setp:%6.3f, y_setp:%6.3f | x:%6.3f, y:%6.3f\n",_x_setp/0.09f, _y_setp/0.09f, _x/0.09f, _y/0.09f);
             }
         }
         _lock_guard = false;
@@ -644,8 +692,8 @@ namespace module{
             y_thr = 0.1f;
         }
         else{
-            x_thr = 0.6f;
-            y_thr = 0.6f;
+            x_thr = 0.2f;
+            y_thr = 0.2f;
         }
 
         float ang_diff = _yaw - _yaw_setp;
@@ -656,7 +704,7 @@ namespace module{
         return (_ctrl_mode == ECtrlMode::VEHICLE &&
            (std::fabs(_x - _x_setp) > x_thr || 
             std::fabs(_y - _y_setp) > y_thr ||
-            std::fabs(ang_diff) > 60.0f * DEG2RAD
+            std::fabs(ang_diff) > 90.0f * DEG2RAD
             || _is_actuator_error
            )
         );

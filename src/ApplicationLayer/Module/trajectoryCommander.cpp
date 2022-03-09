@@ -60,8 +60,6 @@ namespace module {
     }
 
     void TrajectoryCommander::update1(){
-        if(_lock_guard) return;
-        
         if(!_traj_queue.empty()){
             if(_traj_queue.front()->isEnd()){
                 _x = _traj_queue.front()->getEndX();
@@ -72,7 +70,7 @@ namespace module {
                 _turn_type_pre = _traj_queue.front()->getTurnType();
                 _turn_dir_pre = _traj_queue.front()->getTurnDir();
 
-                _traj_queue.pop_front();
+                if(!_traj_queue.empty())_traj_queue.pop_front();
                 if(!_traj_queue.empty()){
                     _traj_queue.front()->setInitPos(_x, _y, _yaw);
                 }

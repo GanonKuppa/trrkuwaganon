@@ -129,7 +129,7 @@ namespace peripheral_driver {
             recv_lock = true;
             for(int i=0;i<len;i++){
                 buf[i] = recvBuf.front();
-                recvBuf.pop_front();
+                if(!recvBuf.empty())recvBuf.pop_front();
             }
             recv_lock = false;
             return true;
@@ -189,7 +189,7 @@ namespace peripheral_driver {
                 return;
             }
             SCIFA9.FTDR = sendBuf.front();
-            sendBuf.pop_front();
+            if(!sendBuf.empty())sendBuf.pop_front();
             while(SCIFA9.FDR.BIT.T == 0x10);
             count++;            
         }

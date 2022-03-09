@@ -132,7 +132,7 @@ namespace hal {
                 _pickleBuf.push_back(buffer[i]);
             }
             else{
-                _pickleBuf.pop_front();
+                if(!_pickleBuf.empty())_pickleBuf.pop_front();
                 _pickleBuf.push_back(buffer[i]);
             }
         }
