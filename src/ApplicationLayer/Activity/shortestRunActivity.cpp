@@ -73,7 +73,7 @@ namespace activity{
 
         makeFastestDiagonalPath(500, tp, pm.goal_x, pm.goal_y, maze, path_vec);
 
-        StopFactory::push(2.1f);
+        StopFactory::push(1.6f);
         float suction_duty = module::ParameterManager::getInstance().suction_duty_shortest;
         module::Suction::getInstance().setDuty(suction_duty);
         CtrlSetpointMsg ctrl_msg;

@@ -374,15 +374,15 @@ namespace module{
 
                     if(_maze.existsAWall(_x_cur, _y_cur, _azimuth)){
                         StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2 - 0.02f, _v, _v, _v, _a, _a);                        
-                        AheadWallCorrectionFactory::push(0.2f, 0.05f);
+                        AheadWallCorrectionFactory::push(0.4f, 0.1f);
                         if(_maze.existsRWall(_x_cur, _y_cur, _azimuth)){
                             SpinTurnFactory::push(-90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
-                            AheadWallCorrectionFactory::push(0.2f, 0.1f, true);
+                            AheadWallCorrectionFactory::push(0.4f, 0.1f, true);
                             SpinTurnFactory::push(-90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
                         }
                         else if(_maze.existsLWall(_x_cur, _y_cur, _azimuth)){
                             SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
-                            AheadWallCorrectionFactory::push(0.2f, 0.1f, true);
+                            AheadWallCorrectionFactory::push(0.4f, 0.1f, true);
                             SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
                         }
                         else{
@@ -403,7 +403,7 @@ namespace module{
                     else{                        
                         if(_maze.existsAWall(_x_cur, _y_cur, _azimuth)){
                             StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2 - 0.02f, _v, _v, _v, _a, _a);                        
-                            AheadWallCorrectionFactory::push(0.2f, 0.05f);
+                            AheadWallCorrectionFactory::push(0.4f, 0.1f);
                         }
                         else{
                             StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2, _v, _v, 0.0f, _a, _a);                       
@@ -411,7 +411,7 @@ namespace module{
 
                         if(_maze.existsRWall(_x_cur, _y_cur, _azimuth)){
                             SpinTurnFactory::push(-90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
-                            AheadWallCorrectionFactory::push(0.2f, 0.1f, true);
+                            AheadWallCorrectionFactory::push(0.4f, 0.1f, true);
                             SpinTurnFactory::push(180.0f * DEG2RAD, _yawrate_max, _yawacc);                            
                         }
                         else{
@@ -429,7 +429,7 @@ namespace module{
                     else{                        
                         if(_maze.existsAWall(_x_cur, _y_cur, _azimuth)){
                             StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2 - 0.02f, _v, _v, _v, _a, _a);                        
-                            AheadWallCorrectionFactory::push(0.2f, 0.05f);
+                            AheadWallCorrectionFactory::push(0.4f, 0.1f);
                         }
                         else{
                             StraightFactory::push(ETurnType::STRAIGHT_CENTER, 0.045f - _read_wall_offset2, _v, _v, 0.0f, _a, _a);                       
@@ -437,7 +437,7 @@ namespace module{
 
                         if(_maze.existsLWall(_x_cur, _y_cur, _azimuth)){
                             SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);                            
-                            AheadWallCorrectionFactory::push(0.2f, 0.1f, true);
+                            AheadWallCorrectionFactory::push(0.4f, 0.1f, true);
                             SpinTurnFactory::push(180.0f * DEG2RAD, _yawrate_max, _yawacc);                       
                         }
                         else{
@@ -457,12 +457,12 @@ namespace module{
                 float target_dist = 0.045f - _read_wall_offset2;
                 StraightFactory::push(ETurnType::STRAIGHT_CENTER, target_dist, _v, _v, 0.0f, _a, _a);
                 if(_maze.existsAWall(_x_cur, _y_cur, _azimuth)){
-                    AheadWallCorrectionFactory::push(0.2f, 0.05f);
+                    AheadWallCorrectionFactory::push(0.4f, 0.05f);
                 }
                 StopFactory::push(1.0f);
             }
             else if(cmd == ENavCommand::UPDATE_POTENTIAL_MAP){
-                if(_sub_mode == ENavSubMode::ALL_AREA_SEARCH && _elapsed_time < _search_limit_time){
+                if(_sub_mode == ENavSubMode::ALL_AREA_SEARCH && _elapsed_time < _search_limit_time && !_done_outward){
                     _maze.makeAllAreaSearchMap(_x_dest, _y_dest);
                 }
                 else{
@@ -491,7 +491,7 @@ namespace module{
                 while(_turn_type != ETurnType::NONE)hal::waitmsec(1);
                 if(_ws_msg.dist_a < 0.065f){
                     is_l = true;
-                    AheadWallCorrectionFactory::push(0.2f, 0.05f);
+                    AheadWallCorrectionFactory::push(0.4f, 0.1f);
                 }
                 
                 SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
@@ -499,19 +499,19 @@ namespace module{
                 while(_turn_type != ETurnType::NONE)hal::waitmsec(1);
                 if(_ws_msg.dist_a < 0.065f){
                     is_b = true;
-                    AheadWallCorrectionFactory::push(0.2f, 0.05f);
+                    AheadWallCorrectionFactory::push(0.4f, 0.1f);
                 }                
                 
                 SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
                 hal::waitmsec(10);
                 while(_turn_type != ETurnType::NONE)hal::waitmsec(1);                
                 if(_ws_msg.dist_a < 0.065f){
-                    AheadWallCorrectionFactory::push(0.2f, 0.05f);
+                    AheadWallCorrectionFactory::push(0.4f, 0.1f);
                     is_r = true;
                 }
 
                 SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
-                AheadWallCorrectionFactory::push(0.2f, 0.05f);
+                AheadWallCorrectionFactory::push(0.4f, 0.1f);
 
                 _maze.writeWall(_x_cur, _y_cur, azimuth_start, is_l, is_a, is_r, is_b);
                 if(_sub_mode == ENavSubMode::ALL_AREA_SEARCH && _elapsed_time < _search_limit_time){
@@ -539,7 +539,7 @@ namespace module{
 
                 if(_ws_msg.dist_a < 0.065f){
                     is_a = true;
-                    AheadWallCorrectionFactory::push(0.2f, 0.05f, true);                         
+                    AheadWallCorrectionFactory::push(0.2f, 0.1f, true);                         
                 }
                 hal::waitmsec(10);
                 while(_turn_type != ETurnType::NONE)hal::waitmsec(1);
@@ -549,7 +549,7 @@ namespace module{
                 while(_turn_type != ETurnType::NONE)hal::waitmsec(1);
                 if(_ws_msg.dist_a < 0.065f){
                     is_l = true;
-                    AheadWallCorrectionFactory::push(0.2f, 0.05f, true);
+                    AheadWallCorrectionFactory::push(0.2f, 0.1f, true);
                 }
                 
                 SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
@@ -557,14 +557,14 @@ namespace module{
                 while(_turn_type != ETurnType::NONE)hal::waitmsec(1);
                 if(_ws_msg.dist_a < 0.065f){
                     is_b = true;
-                    AheadWallCorrectionFactory::push(0.2f, 0.05f, true);
+                    AheadWallCorrectionFactory::push(0.2f, 0.1f, true);
                 }                
                 
                 SpinTurnFactory::push(90.0f * DEG2RAD, _yawrate_max, _yawacc);
                 hal::waitmsec(10);
                 while(_turn_type != ETurnType::NONE)hal::waitmsec(1);                
                 if(_ws_msg.dist_a < 0.065f){
-                    AheadWallCorrectionFactory::push(0.2f, 0.05f, true);
+                    AheadWallCorrectionFactory::push(0.2f, 0.1f, true);
                     is_r = true;
                 }
 

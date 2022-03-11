@@ -101,6 +101,10 @@ namespace module {
         _dist_r = _distR((float)_right_q.at(0));
 
         ParameterManager& pm = ParameterManager::getInstance();
+        float wall_center_r = pm.wall_center_r;
+        float wall_center_l = pm.wall_center_l;
+
+
         _is_ahead_l = (_dist_al <= pm.wall_al_thr);
         _is_ahead_r = (_dist_ar <= pm.wall_ar_thr);
         _is_ahead = (_is_ahead_l && _is_ahead_r);
@@ -108,8 +112,8 @@ namespace module {
         _is_right = (_dist_r <= pm.wall_r_thr);
         _is_left_ctrl = _is_left;
         _is_right_ctrl = _is_right;
-        _is_contact_wall = (_dist_al < 0.04) && (_dist_ar < 0.04);
-        _is_on_wall_center = (std::fabs(_dist_r - 0.045f) < 0.005) || (std::fabs(_dist_l - 0.045f) < 0.005);
+        _is_contact_wall = (_dist_al < 0.04f) && (_dist_ar < 0.04f);
+        _is_on_wall_center = (std::fabs(_dist_r - wall_center_r) < 0.005f) || (std::fabs(_dist_l - wall_center_l) < 0.005f);
         _is_corner_l = _isCornerL();
         _is_corner_r = _isCornerR();
         _is_diag_corner_l = _isDiagCornerL();

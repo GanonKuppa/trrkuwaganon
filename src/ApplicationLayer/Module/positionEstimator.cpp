@@ -237,6 +237,7 @@ namespace module {
         }
 
         if(pm.s_turn_pre_edge_correction_enable && ctrl_msg.in_detect_edge_area && !_detected_edge){
+            module::LedController::getInstance().turnFcled(0, 0, 1);
             // 最短時の右壁切れ
             if(traj_msg.turn_dir_next == ETurnDir::CW &&
                 traj_msg.turn_type_now == ETurnType::STRAIGHT_CENTER_EDGE &&
@@ -256,6 +257,7 @@ namespace module {
         }
 
         if(pm.d_turn_pre_edge_correction_enable && ctrl_msg.in_detect_edge_area && !_detected_edge){
+            module::LedController::getInstance().turnFcled(0, 0, 1);
             // 最短時の右斜め壁切れ
             if(traj_msg.turn_dir_next == ETurnDir::CW &&
                 (traj_msg.turn_type_now == ETurnType::DIAGONAL_CENTER_EDGE || traj_msg.turn_type_now == ETurnType::DIAGONAL_EDGE) &&

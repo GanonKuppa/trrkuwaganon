@@ -9,6 +9,7 @@
 #include "ctrlSetpointMsg.h"
 #include "wallSensorMsg.h"
 #include "trajTripletMsg.h"
+#include "navStateMsg.h"
 
 // Mod
 #include "trajectoryInitializer.h"
@@ -187,13 +188,16 @@ void StraightTrajectory::update() {
     BaseTrajectory::update();
 
     VehiclePositionMsg pos_msg;
-    copyMsg(msg_id::VEHICLE_POSITION, &pos_msg);    
+    NavStateMsg nav_msg;
+    copyMsg(msg_id::VEHICLE_POSITION, &pos_msg);
+    copyMsg(msg_id::NAV_STATE, &nav_msg);
+
     _res_dist = _calcResidualDist(pos_msg.x, pos_msg.y);
 
-    if(_turn_type == ETurnType::STRAIGHT_CENTER_EDGE && _target_dist < 0.36f  && (_target_dist - _cumulative_dist) < 0.06f){
+    if(_turn_type == ETurnType::STRAIGHT_CENTER_EDGE && nav_msg.corner_type == ECornerType::WALL  && (_target_dist - _cumulative_dist) < 0.07f){
         _in_detect_edge_area = true;
     }
-    else if(_turn_type == ETurnType::STRAIGHT_CENTER_EDGE && _target_dist >= 0.36f && (_target_dist - _cumulative_dist) < 0.045f){
+    else if(_turn_type == ETurnType::STRAIGHT_CENTER_EDGE && nav_msg.corner_type == ECornerType::PILLAR && (_target_dist - _cumulative_dist) < 0.045f){
         _in_detect_edge_area = true;
     }
     else if( (_turn_type == ETurnType::DIAGONAL_CENTER_EDGE || (_turn_type == ETurnType::DIAGONAL_EDGE)) && 
