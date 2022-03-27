@@ -70,6 +70,7 @@ int main() {
         }
 
         trajCommander.update0();
+        trajCommander.update1();
         
         copyMsg(msg_id::CTRL_SETPOINT, &setp_msg);
         coor_x = (int)(setp_msg.x/0.09f);

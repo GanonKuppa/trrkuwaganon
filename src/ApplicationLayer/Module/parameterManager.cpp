@@ -216,16 +216,16 @@ namespace module {
         registration<float>(197, wall_ar_thr, "wall_ar_thr", 0.12f);//197
         registration<float>(198, wall_center_l, "wall_center_l", 0.045f);//198
         registration<float>(199, wall_center_r, "wall_center_r", 0.045f);//199
-        registration<float>(200, shortest_0_v, "shortest_0_v", 0.4f); //200
-        registration<float>(201, shortest_0_v_d, "shortest_0_v_d", 0.4f); //201
+        registration<float>(200, shortest_0_v, "shortest_0_v", 2.0f); //200
+        registration<float>(201, shortest_0_v_d, "shortest_0_v_d", 1.0f); //201
         registration<float>(202, shortest_0_v_90, "shortest_0_v_90", 0.4f); //202
         registration<float>(203, shortest_0_v_l90, "shortest_0_v_l90", 0.4f); //203
         registration<float>(204, shortest_0_v_180, "shortest_0_v_180", 0.4f); //204
         registration<float>(205, shortest_0_v_d90, "shortest_0_v_d90", 0.4f); //205
         registration<float>(206, shortest_0_v_45, "shortest_0_v_45", 0.4f); //206
         registration<float>(207, shortest_0_v_135, "shortest_0_v_135", 0.4f); //207
-        registration<float>(208, shortest_0_a, "shortest_0_a", 3.0f); //208
-        registration<float>(209, shortest_0_a_diag, "shortest_0_a_diag", 3.0f); //209
+        registration<float>(208, shortest_0_a, "shortest_0_a", 4.0f); //208
+        registration<float>(209, shortest_0_a_diag, "shortest_0_a_diag", 4.0f); //209
         ;//210
         ;//211
         ;//212
@@ -236,16 +236,16 @@ namespace module {
         ;//217
         ;//218
         ;//219
-        registration<float>(220, shortest_1_v, "shortest_1_v", 0.5f); //220
-        registration<float>(221, shortest_1_v_d, "shortest_1_v_d", 0.5f); //221
+        registration<float>(220, shortest_1_v, "shortest_1_v", 2.5f); //220
+        registration<float>(221, shortest_1_v_d, "shortest_1_v_d", 2.0f); //221
         registration<float>(222, shortest_1_v_90, "shortest_1_v_90", 0.5f); //222
         registration<float>(223, shortest_1_v_l90, "shortest_1_v_l90", 0.5f); //223
         registration<float>(224, shortest_1_v_180, "shortest_1_v_180", 0.5f); //224
         registration<float>(225, shortest_1_v_d90, "shortest_1_v_d90", 0.5f); //225
         registration<float>(226, shortest_1_v_45, "shortest_1_v_45", 0.5f); //226
         registration<float>(227, shortest_1_v_135, "shortest_1_v_135", 0.5f); //227
-        registration<float>(228, shortest_1_a, "shortest_1_a", 3.0f); //228
-        registration<float>(229, shortest_1_a_diag, "shortest_1_a_diag", 3.0f); //229
+        registration<float>(228, shortest_1_a, "shortest_1_a", 6.0f); //228
+        registration<float>(229, shortest_1_a_diag, "shortest_1_a_diag", 5.0f); //229
         ;//230
         ;//231
         ;//232
@@ -256,16 +256,16 @@ namespace module {
         ;//237
         ;//238
         ;//239
-        registration<float>(240, shortest_2_v, "shortest_2_v", 0.6f); //240
-        registration<float>(241, shortest_2_v_d, "shortest_2_v_d", 0.6f); //241
-        registration<float>(242, shortest_2_v_90, "shortest_2_v_90", 0.6f); //242
-        registration<float>(243, shortest_2_v_l90, "shortest_2_v_l90", 0.6f); //243
-        registration<float>(244, shortest_2_v_180, "shortest_2_v_180", 0.6f); //244
+        registration<float>(240, shortest_2_v, "shortest_2_v", 3.2f); //240
+        registration<float>(241, shortest_2_v_d, "shortest_2_v_d", 2.0f); //241
+        registration<float>(242, shortest_2_v_90, "shortest_2_v_90", 0.4f); //242
+        registration<float>(243, shortest_2_v_l90, "shortest_2_v_l90", 0.65f); //243
+        registration<float>(244, shortest_2_v_180, "shortest_2_v_180", 0.62f); //244
         registration<float>(245, shortest_2_v_d90, "shortest_2_v_d90", 0.6f); //245
-        registration<float>(246, shortest_2_v_45, "shortest_2_v_45", 0.6f); //246
-        registration<float>(247, shortest_2_v_135, "shortest_2_v_135", 0.6f); //247
-        registration<float>(248, shortest_2_a, "shortest_2_a", 3.0f); //248
-        registration<float>(249, shortest_2_a_diag, "shortest_2_a_diag", 3.0f); //249
+        registration<float>(246, shortest_2_v_45, "shortest_2_v_45", 0.67f); //246
+        registration<float>(247, shortest_2_v_135, "shortest_2_v_135", 0.62f); //247
+        registration<float>(248, shortest_2_a, "shortest_2_a", 6.0f); //248
+        registration<float>(249, shortest_2_a_diag, "shortest_2_a_diag", 6.0f); //249
         ;//250
         ;//251
         ;//252
@@ -276,16 +276,16 @@ namespace module {
         ;//257
         ;//258
         ;//259
-        registration<float>(260, shortest_3_v, "shortest_3_v", 3.0f); //260
-        registration<float>(261, shortest_3_v_d, "shortest_3_v_d", 2.0f); //261
-        registration<float>(262, shortest_3_v_90, "shortest_3_v_90", 1.0f); //262
-        registration<float>(263, shortest_3_v_l90, "shortest_3_v_l90", 1.1f); //263
-        registration<float>(264, shortest_3_v_180, "shortest_3_v_180", 1.05f); //264
-        registration<float>(265, shortest_3_v_d90, "shortest_3_v_d90", 0.8f); //265
+        registration<float>(260, shortest_3_v, "shortest_3_v", 4.5f); //260
+        registration<float>(261, shortest_3_v_d, "shortest_3_v_d", 3.0f); //261
+        registration<float>(262, shortest_3_v_90, "shortest_3_v_90", 0.4f); //262
+        registration<float>(263, shortest_3_v_l90, "shortest_3_v_l90", 0.9f); //263
+        registration<float>(264, shortest_3_v_180, "shortest_3_v_180", 0.9f); //264
+        registration<float>(265, shortest_3_v_d90, "shortest_3_v_d90", 0.9f); //265
         registration<float>(266, shortest_3_v_45, "shortest_3_v_45", 0.9f); //266
-        registration<float>(267, shortest_3_v_135, "shortest_3_v_135", 0.8f); //267
-        registration<float>(268, shortest_3_a, "shortest_3_a", 10.0f); //268
-        registration<float>(269, shortest_3_a_diag, "shortest_3_a_diag", 5.0f); //269
+        registration<float>(267, shortest_3_v_135, "shortest_3_v_135", 0.9f); //267
+        registration<float>(268, shortest_3_a, "shortest_3_a", 12.0f); //268
+        registration<float>(269, shortest_3_a_diag, "shortest_3_a_diag", 8.0f); //269
         ;//270
         ;//271
         ;//272
@@ -296,16 +296,16 @@ namespace module {
         ;//277
         ;//278
         ;//279
-        registration<float>(280, shortest_4_v, "shortest_4_v", 3.0f); //280
-        registration<float>(281, shortest_4_v_d, "shortest_4_v_d", 2.0f); //281
-        registration<float>(282, shortest_4_v_90, "shortest_4_v_90", 1.0f); //282
-        registration<float>(283, shortest_4_v_l90, "shortest_4_v_l90", 1.1f); //283
-        registration<float>(284, shortest_4_v_180, "shortest_4_v_180", 1.05f); //284
-        registration<float>(285, shortest_4_v_d90, "shortest_4_v_d90", 0.8f); //285
-        registration<float>(286, shortest_4_v_45, "shortest_4_v_45", 0.9f); //286
-        registration<float>(287, shortest_4_v_135, "shortest_4_v_135", 0.8f); //287
-        registration<float>(288, shortest_4_a, "shortest_4_a", 10.0f); //288
-        registration<float>(289, shortest_4_a_diag, "shortest_4_a_diag", 5.0f); //289        
+        registration<float>(280, shortest_4_v, "shortest_4_v", 5.0f); //280
+        registration<float>(281, shortest_4_v_d, "shortest_4_v_d", 4.0f); //281
+        registration<float>(282, shortest_4_v_90, "shortest_4_v_90", 0.4f); //282
+        registration<float>(283, shortest_4_v_l90, "shortest_4_v_l90", 1.55f); //283
+        registration<float>(284, shortest_4_v_180, "shortest_4_v_180", 1.33f); //284
+        registration<float>(285, shortest_4_v_d90, "shortest_4_v_d90", 1.3f); //285
+        registration<float>(286, shortest_4_v_45, "shortest_4_v_45", 1.36f); //286
+        registration<float>(287, shortest_4_v_135, "shortest_4_v_135", 1.32f); //287
+        registration<float>(288, shortest_4_a, "shortest_4_a", 17.0f); //288
+        registration<float>(289, shortest_4_a_diag, "shortest_4_a_diag", 12.0f); //289        
     }
     
 //プログラム中の変数にデータフラッシュの保存域を割り当て

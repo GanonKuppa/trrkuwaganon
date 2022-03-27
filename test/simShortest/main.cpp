@@ -40,10 +40,11 @@ int main() {
 
     sim::initSimConnection();
     sim::setReload();
+    hal::waitmsec(1000);
     sim::setRobotPos(0.045f, 0.045f, 90.0f, 0.0f);
     
     Maze maze;
-    maze_archive::setMaze(maze, maze_archive::EMazeName::AllJapan2008Final_HF);
+    maze_archive::setMaze(maze, maze_archive::EMazeName::AllJapan2021Final_HF);
     for(uint16_t i=0;i<32;i++){
         for(uint16_t j=0;j<32;j++) maze.writeReached(i, j, true);
     }
@@ -58,10 +59,10 @@ int main() {
     float wall2mouse_center_dist = pm.wall2mouse_center_dist;
     trajCommander.reset(0.045f, 0.045f - wall2mouse_center_dist, 90.0f * DEG2RAD);
     
-    ETurnParamSet tp = ETurnParamSet(7);
+    ETurnParamSet tp = ETurnParamSet(6);
     std::vector<Path> path_vec;        
 
-    makeFastestDiagonalPath(500, tp, maze.goal_x, maze.goal_y, maze, path_vec);
+    makeFastestDiagonalPath(5000, tp, maze.goal_x, maze.goal_y, maze, path_vec);
     PRINTF_ASYNC("--- makeMinStepPath ----\n");
     printPath(path_vec);
 
@@ -73,6 +74,7 @@ int main() {
     PRINTF_ASYNC("=========== shortest run ============\n");
     while(setp_msg.traj_type != ETrajType::NONE){                
         trajCommander.update0();
+        trajCommander.update1();
         copyMsg(msg_id::CTRL_SETPOINT, &setp_msg);
         real_time += delta_t;
         hal::waitmsec(1);
@@ -80,7 +82,7 @@ int main() {
             sim::setRobotPos(setp_msg.x, setp_msg.y, setp_msg.yaw*RAD2DEG, setp_msg.v_xy_body);
             sim::addPointRobotContrail(setp_msg.x, setp_msg.y, setp_msg.yaw*RAD2DEG, setp_msg.v_xy_body);
         }
-        //PRINTF_ASYNC("%f, %f, %d, %d\n", setp_msg.x, setp_msg.y, (uint8_t)setp_msg.traj_type, (uint8_t)setp_msg.turn_type);
+    //PRINTF_ASYNC("%f, %f, %d, %d\n", setp_msg.x, setp_msg.y, (uint8_t)setp_msg.traj_type, (uint8_t)setp_msg.turn_type);
         tick_count++;        
     }
     PRINTF_ASYNC("shortest run end time:%f\n", real_time);
