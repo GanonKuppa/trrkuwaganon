@@ -10,7 +10,7 @@ message(STATUS  "======== trrkuwaganon test_trajSetpoint ========")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_FLAGS "-O2 -Wall -DSILS")
+set(CMAKE_CXX_FLAGS "-O2 -Wall -fdiagnostics-color -DSILS")
 
 # cpp c
 file(GLOB_RECURSE APP_CPP ../../src/ApplicationLayer/*.cpp)

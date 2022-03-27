@@ -9,7 +9,8 @@ project(test_traj)
 message(STATUS  "======== trrkuwaganon test_traj ========")                     
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "-O2 -Wall -DSILS")
+set(CMAKE_CXX_FLAGS "-O2 -Wall -fdiagnostics-color -DSILS")
+
 
 message(STATUS ${APP_CPP})
 message(STATUS ${APP_C})
